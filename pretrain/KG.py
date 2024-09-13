@@ -2,6 +2,8 @@ import json
 import re
 import requests
 
+from pretrain.schema import PL_KEYWORD, IDENTIFIER, TYPE_OF, CONCEPT, RELATED_CONCEPT
+
 
 class MethodKG:
     def __init__(self, code, language, sr_method=None):
@@ -19,14 +21,8 @@ class MethodKG:
             "ruby":"override class print ruby and then defined module in return redo if BEGIN retry end for self when next until do begin unless END rescue else break undef not super class case require yield alias while ensure elsif or include attr_reader attr_writer attr_accessor",
             "dart":"dispose Key required Curves BuildContext duration late State initState createState build Widget StatefulWidget StatelessWidget BuildContext return override class print dart int abstract as assert async await break case catch class const continue covariant default deferred do dynamic else enum export extends extension external factory false final finally for Function get hide if implements import in inferface is library mixin new null on operator part rethrow return set show static super switch sync this throw true try typedef var void while with yield",
         }
-
-        self.tokens = []
-        self.identifiers = []
         self.nodes = []
         self.edges = []
-        self.type_of_edge = []
-        self.related_concepts_edge =[]
-        self.concepts = []
         self.language_identifiers = self.language_keywords[self.language].split(" ")
 
     def contains_digit(self, s):
@@ -48,9 +44,15 @@ class MethodKG:
                     predict_var = pre_line_token_l[1]
                     predict_identifier = pre_line_token_l[0]
                     if predict_var not in self.language_identifiers and predict_identifier in self.language_identifiers:
-                        self.type_of_edge.append([predict_var, predict_identifier])
-                        self.tokens.append(predict_var)
-                        self.identifiers.append(predict_identifier)
+                        predict_var_node = self.get_or_create_node(name=predict_var, label=PL_KEYWORD)
+                        predict_identifier = self.get_or_create_node(name=predict_identifier, label=IDENTIFIER)
+                        predict_type_of_edge = self.get_or_create_edge(label=TYPE_OF, source=predict_identifier.id, target=predict_var_node.id)
+
+                        # self.type_of_edge.append([predict_var, predict_identifier])
+                        # self.edges.append(Edge())
+                        #
+                        # self.tokens.append(predict_var)
+                        # self.identifiers.append(predict_identifier)
             line_token_l = self.tokenize_code(line)
             for token in line_token_l:
 
@@ -71,20 +73,11 @@ class MethodKG:
                 #     continue
 
                 if token in self.language_identifiers:
-                    self.identifiers.append(token)
+                    self.get_or_create_node(name=token, label=IDENTIFIER)
                 else:
-                    self.tokens.append(token)
-        self.tokens = list(set(self.tokens))
-        self.identifiers = list(set(self.identifiers))
-        # print(self.tokens)
+                    self.get_or_create_node(name=token, label=PL_KEYWORD)
 
-    def split_variable_name(self, name):
-        if '_' in name:
-            # 处理 snake_case
-            return name.split('_')
-        else:
-            # 处理 CamelCase
-            return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
+        # print(self.tokens)
 
     def parse_control_dependence(self):
         pass
@@ -114,4 +107,52 @@ class MethodKG:
 
         return tokens
 
-    def parse_concepts(self):
+    def parse_concept_nodes(self):
+        for node in self.nodes:
+            if node.label == PL_KEYWORD:
+                concepts = self.parse_concepts(node.name)
+                for concept in concepts:
+                    concept_node = self.get_or_create_node(name=concept, label=CONCEPT)
+                    related_concept_edge = self.get_or_create_edge(label=RELATED_CONCEPT, source=node.id, target=concept_node.id)
+    def parse_concepts(self, token):
+        words = self.split_variable_name(token)
+        return words
+
+    def split_variable_name(self, name):
+        if '_' in name:
+            # 处理 snake_case
+            return name.split('_')
+        else:
+            # 处理 CamelCase
+            return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
+
+    def get_or_create_node(self, name, label):
+        for node in self.nodes:
+            if node.name == name and node.label == label:
+                return node
+        new_node = Node(name, label, len(self.nodes))
+        self.nodes.append(new_node)
+        return new_node
+
+    def get_or_create_edge(self, label, source, target):
+        for edge in self.edges:
+            if edge.label == label and edge.source == source and edge.target == target:
+                return edge
+
+        new_edge = Edge(label, source, target, len(self.edges))
+        self.edges.append(new_edge)
+        return new_edge
+
+class Node:
+    def __init__(self, name, label, id):
+        self.name = name
+        self.label = label
+        self.id = id
+
+
+class Edge:
+    def __init__(self, label, source, target, id):
+        self.label = label
+        self.source = source
+        self.target = target
+        self.id = id

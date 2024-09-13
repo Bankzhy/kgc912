@@ -1,6 +1,6 @@
 from datasets import load_dataset
 
-from kg.KG import MethodKG
+from pretrain.KG import MethodKG
 
 
 def run():
@@ -12,6 +12,7 @@ def run():
             language=data['language'],
         )
         mkg.parse_tokens()
-        print(mkg.tokens)
+        mkg.parse_concept_nodes()
+        print(mkg.nodes)
 if __name__ == '__main__':
     run()
