@@ -175,10 +175,15 @@ class ASTParse:
         new_sr_for_statement.end_line = (root_node.end_point[0] + 1)
         new_sr_for_statement.end_condition = []
         word_list = self.statement_node_to_word_list(root_node)
+        local_word_list = []
         for node in root_node.children:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
+
+            if node.type != self.BLOCK:
+                result = self.statement_node_to_word_list(node)
+                local_word_list.extend(result)
 
             if node.type == self.TYPE_IDENTIFIER or node.type == self.IDENTIFIER or node.type == ":":
                 new_sr_for_statement.end_condition.append(node.text.decode())
@@ -195,6 +200,7 @@ class ASTParse:
                 new_sr_for_statement.child_statement_list = child_statement_list
 
         new_sr_for_statement.word_list = word_list
+        new_sr_for_statement.local_word_list = local_word_list
         return new_sr_for_statement
 
     def parse_for_statement(self, root_node):
@@ -204,10 +210,14 @@ class ASTParse:
         new_sr_for_statement.start_line = (root_node.start_point[0] + 1)
         new_sr_for_statement.end_line = (root_node.end_point[0] + 1)
         word_list = self.statement_node_to_word_list(root_node)
+        local_word_list = []
         for node in root_node.children:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
+            if node.type != self.BLOCK:
+                result = self.statement_node_to_word_list(node)
+                local_word_list.extend(result)
 
             if node.type == self.LOCAL_VARIABLE_DECLARATION or node.type == self.ASSIGNMENT_EXPRESSION:
                 # new_sr_for_statement.init = list(map(lambda n: n.text.decode(), node.children))
@@ -232,6 +242,7 @@ class ASTParse:
                 new_sr_for_statement.child_statement_list = child_statement_list
 
         new_sr_for_statement.word_list = word_list
+        new_sr_for_statement.local_word_list = local_word_list
         return new_sr_for_statement
     def parse_catch_block(self, root_node):
         new_catch_block = CatchBlock()
@@ -285,14 +296,18 @@ class ASTParse:
         )
         new_sr_if_statement.start_line = (root_node.start_point[0] + 1)
         new_sr_if_statement.end_line = (root_node.end_point[0] + 1)
-        word_list = []
         word_list = self.statement_node_to_word_list(root_node)
+        local_word_list = []
         new_sr_if_statement.word_list = word_list
         for index, node in enumerate(root_node.children):
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
             # new_sr_if_statement.word_list.append(node.text.decode())
+            if node.type != self.BLOCK:
+                result = self.statement_node_to_word_list(node)
+                local_word_list.extend(result)
+
             if node.type == self.PARENTHESIZED_EXPRESSION:
                 new_sr_if_statement.condition = self.statement_node_to_word_list(node)
                 # new_sr_if_statement.word_list.append("if")
@@ -340,6 +355,7 @@ class ASTParse:
                 new_sr_statement.start_line = (node.start_point[0] + 1)
                 new_sr_statement.end_line = (node.end_point[0] + 1)
                 new_sr_if_statement.pos_statement_list = [new_sr_statement]
+        new_sr_if_statement.local_word_list = local_word_list
         return new_sr_if_statement
 
 
@@ -353,10 +369,12 @@ class ASTParse:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
+
             if node.type == self.SWITCH_LABEL:
                 new_sr_switch_case.condition = self.statement_node_to_word_list(node)
         new_sr_switch_case.statement_list = []
         new_sr_switch_case.statement_list = self.parse_block(root_node)
+
         return new_sr_switch_case
 
 
@@ -377,14 +395,20 @@ class ASTParse:
         new_sr_switch_statement.start_line = (root_node.start_point[0] + 1)
         new_sr_switch_statement.end_line = (root_node.end_point[0] + 1)
         word_list = self.statement_node_to_word_list(root_node)
+        local_word_list = []
         for node in root_node.children:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
+            if node.type != self.BLOCK:
+                result = self.statement_node_to_word_list(node)
+                local_word_list.extend(result)
             if node.type == self.PARENTHESIZED_EXPRESSION:
                 new_sr_switch_statement.condition = self.statement_node_to_word_list(node)
             elif node.type == self.SWITCH_BLOCK:
                 new_sr_switch_statement.switch_case_list = self.parse_switch_block(node)
+        new_sr_switch_statement.local_word_list=local_word_list
+        new_sr_switch_statement.word_list = word_list
         return new_sr_switch_statement
 
 
@@ -395,10 +419,16 @@ class ASTParse:
         new_sr_while_statement.start_line = (root_node.start_point[0] + 1)
         new_sr_while_statement.end_line = (root_node.end_point[0] + 1)
         word_list = self.statement_node_to_word_list(root_node)
+        local_word_list = []
         for node in root_node.children:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
+
+            if node.type != self.BLOCK:
+                result = self.statement_node_to_word_list(node)
+                local_word_list.extend(result)
+
             if node.type == self.PARENTHESIZED_EXPRESSION:
                 # new_sr_while_statement.end_condition = list(map(lambda n: n.text.decode(), node.children))
                 new_sr_while_statement.end_condition = self.statement_node_to_word_list(node)
@@ -415,6 +445,7 @@ class ASTParse:
                 new_sr_while_statement.child_statement_list = child_statement_list
 
         new_sr_while_statement.word_list = word_list
+        new_sr_while_statement.local_word_list = local_word_list
         return new_sr_while_statement
 
     def parse_labeled_statement(self, root_node):
@@ -480,6 +511,8 @@ class ASTParse:
                     result_list.extend(self.statement_node_to_word_list(node))
                 else:
                     result_list.append(node.text.decode())
+        else:
+            result_list.append(root_node.text.decode())
         return result_list
 
 

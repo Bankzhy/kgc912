@@ -5,8 +5,9 @@ from reflect.sr_core import SRCore
 import re
 
 class SRStatement(SRCore):
-    def __init__(self, id, word_list=[], type=None, ):
+    def __init__(self, id, word_list=[], type=None, local_word_list=[]):
         self.word_list = word_list
+        self.local_word_list = local_word_list
         self.id = id
         self.type = type
         self.block_depth = -1

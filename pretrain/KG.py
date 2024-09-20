@@ -119,7 +119,7 @@ class MethodKG:
         for statement in self.sr_method.statement_list:
             if type(statement) is SRFORStatement or type(statement) is SRWhileStatement:
                 for_identifiers = []
-                for token in statement.word_list:
+                for token in statement.local_word_list:
                     fetch_result = self.fetch_identifier(token)
                     if fetch_result is not None:
                         if fetch_result.label == IDENTIFIER:
