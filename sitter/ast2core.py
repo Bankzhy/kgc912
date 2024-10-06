@@ -10,7 +10,7 @@ from reflect.sr_method import SRMethod, SRParam, SRConstructor
 from reflect.sr_program import SRProgram
 from reflect.sr_project import SRProject
 from reflect.sr_statement import SRStatement, SRFORStatement, SRIFStatement, SRWhileStatement, SRTRYStatement, \
-    CatchBlock, SRSwitchStatement, SRSwitchCase
+    CatchBlock, SRSwitchStatement, SRSwitchCase, MethodInvoke
 
 from reflect.sr_class import SRClass
 
@@ -61,6 +61,12 @@ class ASTParse:
         self.SWITCH_BLOCK_STATEMENT_GROUP = "switch_block_statement_group"
         self.SWITCH_LABEL = "switch_label"
         self.LABELED_STATEMENT = "labeled_statement"
+        self.LOCAL_VARIABLE_DECLARATION = "local_variable_declaration"
+        self.EXPRESSION_STATEMENT = "expression_statement"
+        self.IDENTIFIER = "identifier"
+        self.METHOD_INVOCATION = "method_invocation"
+        self.ARGUMENT_LIST = "argument_list"
+        self.symbol = ["[","]","<",">","{","}",",","(",")"]
 
         self.language = language
         self.JAVA_LANGUAGE = None
@@ -498,10 +504,57 @@ class ASTParse:
                             type=node.type,
                             word_list=word_list
                         )
+                        self.parse_statement(new_sr_statement, node)
+
                         new_sr_statement.start_line = (node.start_point[0] + 1)
                         new_sr_statement.end_line = (node.end_point[0] + 1)
                         statement_list.append(new_sr_statement)
         return statement_list
+
+    def parse_statement(self, statement, statement_node):
+        if statement_node.type == self.LOCAL_VARIABLE_DECLARATION:
+            statement.datatype = self.fetch_data_type(statement_node.children[0])
+            statement.var, statement.value = self.fetch_var(statement_node.children[1], statement)
+            statement.type = self.LOCAL_VARIABLE_DECLARATION
+
+    def fetch_data_type(self, node):
+        data_type = []
+        for child in node.children:
+            if len(child.children) > 0:
+                for sub_child in child.children:
+                    sub_child_text = sub_child.text.decode()
+                    if sub_child_text not in self.symbol:
+                        data_type.append(sub_child_text)
+            else:
+                data_type.append(child.text.decode())
+
+        return data_type
+
+    def fetch_var(self, node, statement):
+        var = []
+        value = []
+        for index, child in enumerate(node.children):
+            if child.type == "=":
+                if node.children[index+1].type==self.METHOD_INVOCATION:
+                    self.parse_method_invocation(node.children[index+1], statement)
+                else:
+                    value.append(node.children[index+1].text.decode())
+            if child.type == self.IDENTIFIER:
+                var.append(child.text.decode())
+        return var, value
+
+
+    def parse_method_invocation(self, statement_node, statement):
+        mi = MethodInvoke()
+        for index, node in enumerate(statement_node.children):
+            if node.type == ".":
+                mi.method_name = statement_node.children[index+1].text.decode()
+                mi.parent = statement_node.children[index - 1].text.decode()
+            if node.type == self.ARGUMENT_LIST:
+                for sub_node in node.children:
+                    if sub_node.type == self.IDENTIFIER:
+                        mi.param.append(sub_node.text.decode())
+        statement.method.append(mi)
 
     def statement_node_to_word_list(self, root_node):
         result_list = []
@@ -712,12 +765,12 @@ class ASTParse:
             project_name=self.project_path
         )
 
-        try:
-            tree = self.parse.parse(content.encode())
-            program = self.parse_program_node(tree.root_node, "")
-            program_list.append(program)
-        except Exception as e:
-            print(e)
+        # try:
+        tree = self.parse.parse(content.encode())
+        program = self.parse_program_node(tree.root_node, "")
+        program_list.append(program)
+        # except Exception as e:
+        #     print(e)
 
         new_sr_project.program_list = program_list
         return new_sr_project

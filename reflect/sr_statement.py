@@ -13,6 +13,10 @@ class SRStatement(SRCore):
         self.block_depth = -1
         self.sid = 0
         self.sn = 0
+        self.datatype=[]
+        self.var=[]
+        self.value=[]
+        self.method=[]
 
     def get_loc_var_list(self):
         loc_var_list = []
@@ -654,3 +658,10 @@ class CatchBlock(SRStatement):
             neg_statement_list=[],
             condition=self.catch_param)
         return new_st
+
+
+class MethodInvoke:
+    def __init__(self):
+        self.method_name = ""
+        self.param = []
+        self.parent = ""

@@ -30,5 +30,23 @@ def run():
         mkg.parse_concept_nodes()
         mkg.parse_control_dependence()
         print(mkg.nodes)
+
+def run_sample():
+    sample_path = r"sample.java"
+    with open(sample_path, 'r') as f:
+        ast = ASTParse("", "java")
+        ast.setup()
+        sample = f.read()
+        code_content = "public class Test {\n"
+        code_content += sample
+        code_content += "}"
+        sr_project = ast.do_parse_content(code_content)
+        sr_method = None
+
+        for program in sr_project.program_list:
+            for cls in program.class_list:
+                sr_method = cls.method_list[0]
+
 if __name__ == '__main__':
-    run()
+    # run()
+    run_sample()
