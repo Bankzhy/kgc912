@@ -480,13 +480,25 @@ class ASTParse:
             # print(node.text.decode())
             if node.type != self.BLOCK_START and node.type != self.BLOCK_END:
                 if node.type == self.FOR_STATEMENT:
-                    statement_list.append(self.parse_for_statement(node))
+                    new_sr_statement = self.parse_for_statement(node)
+                    for sub_node in node.children:
+                        self.parse_statement(new_sr_statement, sub_node)
+                    statement_list.append(new_sr_statement)
                 elif node.type == self.ENHANCED_FOR_STATEMENT:
-                    statement_list.append(self.parse_enhanced_for_statement(node))
+                    new_sr_statement = self.parse_enhanced_for_statement(node)
+                    for sub_node in node.children:
+                        self.parse_statement(new_sr_statement, sub_node)
+                    statement_list.append(new_sr_statement)
                 elif node.type == self.IF_STATEMENT:
-                    statement_list.append(self.parse_if_statement(node))
+                    new_sr_statement = self.parse_if_statement(node)
+                    for sub_node in node.children:
+                        self.parse_statement(new_sr_statement, sub_node)
+                    statement_list.append(new_sr_statement)
                 elif node.type == self.WHILE_STATEMENT:
-                    statement_list.append(self.parse_while_statement(node))
+                    new_sr_statement = self.parse_while_statement(node)
+                    for sub_node in node.children:
+                        self.parse_statement(new_sr_statement, sub_node)
+                    statement_list.append(new_sr_statement)
                 elif node.type == self.TRY_STATEMENT:
                     statement_list.append(self.parse_try_statement(node))
                 elif node.type == self.SWITCH_EXPRESSION:
@@ -516,6 +528,11 @@ class ASTParse:
             statement.datatype = self.fetch_data_type(statement_node.children[0])
             statement.var, statement.value = self.fetch_var(statement_node.children[1], statement)
             statement.type = self.LOCAL_VARIABLE_DECLARATION
+        elif statement_node.type == self.EXPRESSION_STATEMENT:
+            if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION:
+                statement.var, statement.value = self.fetch_var(statement_node.children[0], statement)
+            elif statement_node.children[0].type == self.METHOD_INVOCATION:
+                self.parse_method_invocation(statement_node.children[0], statement)
 
     def fetch_data_type(self, node):
         data_type = []

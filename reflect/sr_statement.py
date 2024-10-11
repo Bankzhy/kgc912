@@ -159,6 +159,10 @@ class SRIFStatement(SRStatement):
         self.id = id
         self.block_depth = -1
         self.sid = 0
+        self.datatype = []
+        self.var = []
+        self.value = []
+        self.method = []
 
     def replace_param(self, new_param, old_param):
         super(SRIFStatement, self).replace_param(new_param=new_param, old_param=old_param)
@@ -260,6 +264,10 @@ class SRFORStatement(SRStatement):
         self.id = id
         self.sid = 0
         self.block_depth = -1
+        self.datatype=[]
+        self.var=[]
+        self.value=[]
+        self.method=[]
 
     def replace_param(self, new_param, old_param):
         super(SRFORStatement, self).replace_param(new_param=new_param, old_param=old_param)
@@ -364,6 +372,10 @@ class SRWhileStatement(SRStatement):
         self.id = id
         self.sid = 0
         self.block_depth = -1
+        self.datatype = []
+        self.var = []
+        self.value = []
+        self.method = []
 
     def replace_param(self, new_param, old_param):
         super(SRWhileStatement, self).replace_param(new_param=new_param, old_param=old_param)
@@ -446,6 +458,10 @@ class SRSwitchStatement(SRStatement):
         self.sid = 0
         self.block_depth = -1
         self.switch_case_list = switch_case_list
+        self.datatype = []
+        self.var = []
+        self.value = []
+        self.method = []
 
     def replace_method_with_var(self, method_name, var_name):
         start_index = 0

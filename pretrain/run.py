@@ -46,6 +46,7 @@ def run_sample():
         for program in sr_project.program_list:
             for cls in program.class_list:
                 sr_method = cls.method_list[0]
+                print(sr_method)
 
 if __name__ == '__main__':
     # run()
