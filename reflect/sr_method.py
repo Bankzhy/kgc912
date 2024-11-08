@@ -19,6 +19,7 @@ class SRMethod(SRCore):
         self.throws = throws
         self.comment = ""
         self.text = text
+        self.mkg = None
 
     def get_method_string(self):
         method_text = " ".join(self.word_list)

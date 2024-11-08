@@ -2,7 +2,7 @@ import json
 import re
 import requests
 
-from pretrain.schema import IDENTIFIER, DATATYPE, TYPE_OF, CONCEPT, RELATED_CONCEPT
+from pretrain.schema import DATATYPE, TYPE_OF, CONCEPT, RELATED_CONCEPT
 from reflect.sr_statement import SRFORStatement, SRWhileStatement
 
 

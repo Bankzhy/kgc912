@@ -2,6 +2,7 @@ from datasets import load_dataset
 
 from pretrain.KG import MethodKG
 from sitter.ast2core import ASTParse
+from sitter.kast2core import KASTParse
 
 
 def run():
@@ -34,7 +35,7 @@ def run():
 def run_sample():
     sample_path = r"sample.java"
     with open(sample_path, 'r') as f:
-        ast = ASTParse("", "java")
+        ast = KASTParse("", "java")
         ast.setup()
         sample = f.read()
         code_content = "public class Test {\n"
@@ -46,6 +47,7 @@ def run_sample():
         for program in sr_project.program_list:
             for cls in program.class_list:
                 sr_method = cls.method_list[0]
+                sr_method.mkg.parse_concept()
                 print(sr_method)
 
 if __name__ == '__main__':
