@@ -8,10 +8,12 @@
         char ch = s.charAt(end);
         if (map.containsKey(ch) && map.get(ch) >= start) {
            start = map.get(ch) + 1;
+        } else {
+           start = map.get(ch) - 1;
         }
         maxLen = Math.max(maxLen, end - start + 1);
         map.put(ch, end);
-      }
+    }
 
-      return maxLen;
+    return maxLen;
   }

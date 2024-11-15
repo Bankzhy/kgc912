@@ -1,5 +1,6 @@
 # Node
 VAR_IDENTIFIER = "var"
+VAR_ASSIGNMENT = "var_assignment"
 METHOD_IDENTIFIER = "method"
 DATATYPE = "datatype"
 CONCEPT = "concept"
@@ -11,4 +12,4 @@ CONTROL_DEPENDENCY = "control_dependency"
 DATA_DEPENDENCY = "data_dependency"
 HAS_METHOD = "has_method"
 HAS_PROPERTY = "has_property"
-REDEFINITION = "redefinition"
+ASSIGNMENT = "assignment"

@@ -5,7 +5,8 @@ import uuid
 
 from tree_sitter_languages import get_parser
 
-from pretrain.schema import METHOD_IDENTIFIER, DATATYPE, VAR_IDENTIFIER, TYPE_OF, HAS_METHOD
+from pretrain.schema import METHOD_IDENTIFIER, DATATYPE, VAR_IDENTIFIER, TYPE_OF, HAS_METHOD, DATA_DEPENDENCY, \
+    VAR_ASSIGNMENT, ASSIGNMENT
 from reflect.sr_field import SRField
 from reflect.sr_method import SRMethod, SRParam, SRConstructor
 from reflect.sr_program import SRProgram
@@ -327,7 +328,7 @@ class KASTParse:
             pos_block_node = root_node.children[else_index-1]
             neg_block_node = root_node.children[else_index+1]
             if pos_block_node.type == self.BLOCK:
-                new_sr_if_statement.pos_statement_list = self.parse_block(pos_block_node)
+                new_sr_if_statement.pos_statement_list = self.parse_block(pos_block_node, mkg)
             else:
                 new_sr_statement = SRStatement(
                     id=self.get_uuid(),
@@ -339,7 +340,7 @@ class KASTParse:
                 new_sr_if_statement.pos_statement_list = [new_sr_statement]
 
             if neg_block_node.type == self.BLOCK:
-                new_sr_if_statement.neg_statement_list = self.parse_block(neg_block_node)
+                new_sr_if_statement.neg_statement_list = self.parse_block(neg_block_node, mkg)
             elif neg_block_node.type == self.IF_STATEMENT:
                 new_sr_if_statement.neg_statement_list = [self.parse_if_statement(neg_block_node, mkg)]
             else:
@@ -534,6 +535,11 @@ class KASTParse:
             statement.var, statement.value = self.fetch_var(statement_node.children[1], statement, mkg)
             new_data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
 
+            new_var_assignment_label = statement.var[0]+"_"+"0"
+            new_var_assignment, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
+            new_assignment_edge = mkg.get_or_create_edge(new_var_assignment, new_data_var, ASSIGNMENT)
+
+
             for data_type in new_data_type_l:
                 new_data_type_n, created = mkg.get_or_create_node(data_type, DATATYPE)
                 new_data_edge = mkg.get_or_create_edge(new_data_type_n, new_data_var, TYPE_OF)
@@ -542,6 +548,30 @@ class KASTParse:
         elif statement_node.type == self.EXPRESSION_STATEMENT:
             if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION:
                 statement.var, statement.value = self.fetch_var(statement_node.children[0], statement, mkg)
+                data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
+                max_assignment_var, max_num = mkg.get_max_assignment_var_node(statement.var[0])
+                if max_assignment_var is not None:
+                    new_var_assignment_label = statement.var[0] + "_" + str(max_num+1)
+                    new_assignment_var, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
+                    new_assignment_edge = mkg.get_or_create_edge(new_assignment_var, data_var, ASSIGNMENT)
+
+                    for v in statement.value:
+                        if v.isdigit():
+                            continue
+                        if v == statement.var[0]:
+                            max_assignment_label = statement.var[0] + "_" + str(max_num)
+                            max_assignment_v = mkg.get_node(max_assignment_label, VAR_ASSIGNMENT)
+                        else:
+                            max_assignment_v, max_v_num = mkg.get_max_assignment_var_node(v)
+                        if max_assignment_v is not None:
+                            new_dd_edge = mkg.get_or_create_edge(new_assignment_var, max_assignment_v, DATA_DEPENDENCY)
+
+                # var_node = mkg.get_node(statement.var[0], VAR_IDENTIFIER)
+                # for v in statement.value:
+                #     v_node = mkg.get_node(v, VAR_IDENTIFIER)
+                #     if var_node is not None and v_node is not None:
+                #         new_dd_edge = mkg.get_or_create_edge(var_node, v_node, DATA_DEPENDENCY)
+
             elif statement_node.children[0].type == self.METHOD_INVOCATION:
                 self.parse_method_invocation(statement_node.children[0], statement, mkg)
 
@@ -565,8 +595,9 @@ class KASTParse:
             if child.type == "=":
                 if node.children[index+1].type==self.METHOD_INVOCATION:
                     self.parse_method_invocation(node.children[index+1], statement, mkg)
-                else:
-                    value.append(node.children[index+1].text.decode())
+                # else:
+                #     value.append(node.children[index+1].text.decode())
+                value.extend(self.statement_node_to_word_list(node.children[index+1]))
             if child.type == self.IDENTIFIER:
                 var.append(child.text.decode())
         return var, value

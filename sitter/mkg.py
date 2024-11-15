@@ -1,6 +1,6 @@
 import re
 
-from pretrain.schema import VAR_IDENTIFIER, METHOD_IDENTIFIER, CONCEPT, RELATED_CONCEPT
+from pretrain.schema import VAR_IDENTIFIER, METHOD_IDENTIFIER, CONCEPT, RELATED_CONCEPT, VAR_ASSIGNMENT
 
 
 class MKG:
@@ -15,6 +15,36 @@ class MKG:
         new_node = Node(name, type)
         self.nodes.append(new_node)
         return new_node, True
+
+    def get_node(self, name, type):
+        for node in self.nodes:
+            if node.label == name and node.type == type:
+                return node
+        return None
+
+
+    def check_assignment_var(self, name, node_label):
+        var_name = "".join(node_label.rsplit("_", 1)[0])
+        if var_name == name:
+            return True
+        else:
+            return False
+
+    def get_max_assignment_var_node(self, name):
+        max_num = 0
+        max_node = None
+        for node in self.nodes:
+            if node.type == VAR_ASSIGNMENT:
+                if self.check_assignment_var(name, node.label):
+                    naml = node.label.split("_")
+                    if len(naml) > 1:
+                        index = int(naml[len(naml)-1])
+                        if index >= max_num:
+                            max_num = index
+                            max_node = node
+                    else:
+                        return None, 0
+        return max_node,max_num
 
     def get_or_create_edge(self, source, target, type):
         for edge in self.edges:
