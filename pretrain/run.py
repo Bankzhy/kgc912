@@ -48,6 +48,7 @@ def run_sample():
             for cls in program.class_list:
                 sr_method = cls.method_list[0]
                 sr_method.mkg.parse_concept()
+                sr_method.rebuild_mkg()
                 print(sr_method)
 
 if __name__ == '__main__':

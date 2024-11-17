@@ -1,6 +1,6 @@
 import re
 
-from pretrain.schema import VAR_IDENTIFIER, METHOD_IDENTIFIER, CONCEPT, RELATED_CONCEPT, VAR_ASSIGNMENT
+from pretrain.schema import VAR_IDENTIFIER, METHOD_IDENTIFIER, CONCEPT, RELATED_CONCEPT, VAR_ASSIGNMENT, DATA_DEPENDENCY
 
 
 class MKG:
@@ -72,6 +72,18 @@ class MKG:
                         new_concept_node = self.get_or_create_node(lower_concept, CONCEPT)
                         new_concept_edge = self.get_or_create_edge(node, new_concept_node, RELATED_CONCEPT)
                 print(concept_l)
+
+    def get_start_assignment_node(self, end_node):
+        for edge in self.edges:
+            if edge.type == DATA_DEPENDENCY:
+                if edge.target.label == end_node.label:
+                    return edge.source
+
+    def find_edge(self, node1, node2):
+        for edge in self.edges:
+            if edge.source.label == node1 and edge.target.label == node2:
+                return edge
+        return None
 
 class Node:
     def __init__(self, label, type):

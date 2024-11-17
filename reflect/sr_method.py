@@ -1,6 +1,8 @@
 import copy
 import json
 
+
+from pretrain.schema import ASSIGNMENT, DATA_DEPENDENCY
 from reflect.sr_core import SRCore
 from reflect.sr_statement import SRIFStatement, SRFORStatement, SRWhileStatement, SRTRYStatement, SRStatement, \
     SRSwitchStatement
@@ -830,6 +832,57 @@ class SRMethod(SRCore):
         info["modifiers"] = " ".join(self.modifiers)
         return info
 
+
+    def rebuild_mkg(self):
+        self._rebuild_mkg(self.statement_list)
+
+    def _rebuild_mkg(self, statement_list):
+        for statement in statement_list:
+            if type(statement) == SRIFStatement:
+                self._rebuild_mkg(statement.pos_statement_list)
+                self._rebuild_mkg(statement.neg_statement_list)
+                self.fetch_common_assignment_var(statement.pos_statement_list, statement.neg_statement_list)
+            elif type(statement) == SRFORStatement:
+                self._rebuild_mkg(statement.child_statement_list)
+            elif type(statement) == SRWhileStatement:
+                self._rebuild_mkg(statement.child_statement_list)
+            elif type(statement) == SRTRYStatement:
+                self._rebuild_mkg(statement.try_statement_list)
+
+    def fetch_common_assignment_var(self, stl1, stl2):
+        stl1_var =[]
+        stl1_ass_var = []
+        stl2_var = []
+        stl2_ass_var = []
+        for st in stl1:
+            stl1_var.extend(st.var)
+            stl1_ass_var.extend(st.assignment_var)
+
+        for st in stl2:
+            stl2_var.extend(st.var)
+            stl2_ass_var.extend(st.assignment_var)
+
+        stl1_ass_var.reverse()
+        stl2_ass_var.reverse()
+
+        for v in stl2_var:
+            if v in stl1_var:
+                for asv2 in stl2_ass_var:
+                    edge = self.mkg.find_edge(asv2.label, v)
+                    if edge is not None:
+                        if edge.type == ASSIGNMENT:
+                            asv1 = self.get_latest_assignment_var(stl1_ass_var, v)
+                            for edge in self.mkg.edges:
+                                if edge.type == DATA_DEPENDENCY:
+                                    if edge.target == asv2:
+                                        new_dd_edge = self.mkg.get_or_create_edge(edge.source, asv1, DATA_DEPENDENCY)
+
+    def get_latest_assignment_var(self, asv_l, v):
+        for asv in asv_l:
+            edge = self.mkg.find_edge(asv.label, v)
+            if edge is not None:
+                if edge.type == ASSIGNMENT:
+                    return edge.source
 
 class SRConstructor(SRCore):
     def __init__(self, word_list=[], id="-1", param_list=[], name="", modifiers="", statement_list=[]):

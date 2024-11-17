@@ -6,7 +6,7 @@ import uuid
 from tree_sitter_languages import get_parser
 
 from pretrain.schema import METHOD_IDENTIFIER, DATATYPE, VAR_IDENTIFIER, TYPE_OF, HAS_METHOD, DATA_DEPENDENCY, \
-    VAR_ASSIGNMENT, ASSIGNMENT
+    VAR_ASSIGNMENT, ASSIGNMENT, CONTROL_DEPENDENCY
 from reflect.sr_field import SRField
 from reflect.sr_method import SRMethod, SRParam, SRConstructor
 from reflect.sr_program import SRProgram
@@ -135,6 +135,21 @@ class KASTParse:
             else:
                 self.fileList.append(dirPath + '\\无效文件')
 
+
+    def fetch_mkg_var_name(self, word_list, mkg):
+        assignment_l = []
+        var_l = []
+        for word in word_list:
+            var = mkg.get_node(word, VAR_IDENTIFIER)
+            if var is not None:
+                var_l.append(var.label)
+        var_l = list(set(var_l))
+        for v in var_l:
+            ass, mx = mkg.get_max_assignment_var_node(v)
+            if ass is not None:
+                assignment_l.append(ass)
+        return assignment_l
+
     def parse_field_node(self, root_node):
         new_sr_field = SRField(
             id=self.get_uuid()
@@ -177,7 +192,7 @@ class KASTParse:
                 param_list.append(new_sr_param)
         return param_list
 
-    def parse_enhanced_for_statement(self, root_node):
+    def parse_enhanced_for_statement(self, root_node, mkg, dominate_vars=[]):
         new_sr_for_statement = SRFORStatement(
             id=self.get_uuid()
         )
@@ -198,7 +213,9 @@ class KASTParse:
             if node.type == self.TYPE_IDENTIFIER or node.type == self.IDENTIFIER or node.type == ":":
                 new_sr_for_statement.end_condition.append(node.text.decode())
             elif node.type == self.BLOCK:
-                child_statement_list = self.parse_block(node)
+                var_labels = self.fetch_mkg_var_name(word_list, mkg)
+                if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
+                child_statement_list = self.parse_block(node, mkg, dominate_vars=var_labels)
 
                 new_sr_for_statement.child_statement_list = child_statement_list
             else:
@@ -206,14 +223,16 @@ class KASTParse:
                 fake_node = FakeNode(
                     children=children
                 )
-                child_statement_list = self.parse_block(fake_node)
+                var_labels = self.fetch_mkg_var_name(word_list, mkg)
+                if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
+                child_statement_list = self.parse_block(fake_node, mkg, dominate_vars=var_labels)
                 new_sr_for_statement.child_statement_list = child_statement_list
 
         new_sr_for_statement.word_list = word_list
         new_sr_for_statement.local_word_list = local_word_list
         return new_sr_for_statement
 
-    def parse_for_statement(self, root_node, mkg):
+    def parse_for_statement(self, root_node, mkg, dominate_vars=[]):
         new_sr_for_statement = SRFORStatement(
             id=self.get_uuid()
         )
@@ -240,15 +259,18 @@ class KASTParse:
                 new_sr_for_statement.update = self.statement_node_to_word_list(node)
 
             elif node.type == self.BLOCK:
-                child_statement_list = self.parse_block(node, mkg)
-
+                var_labels = self.fetch_mkg_var_name(word_list, mkg)
+                if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
+                child_statement_list = self.parse_block(node, mkg, dominate_vars=var_labels)
                 new_sr_for_statement.child_statement_list = child_statement_list
             else:
+                var_labels = self.fetch_mkg_var_name(word_list, mkg)
+                if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
                 children = [node]
                 fake_node = FakeNode(
                     children=children
                 )
-                child_statement_list = self.parse_block(fake_node, mkg)
+                child_statement_list = self.parse_block(fake_node, mkg, dominate_vars=var_labels)
                 new_sr_for_statement.child_statement_list = child_statement_list
 
         new_sr_for_statement.word_list = word_list
@@ -274,7 +296,7 @@ class KASTParse:
                 statement_list = self.parse_block(node)
         return statement_list
 
-    def parse_try_statement(self, root_node):
+    def parse_try_statement(self, root_node, mkg, dominate_vars):
         new_sr_try_statement = SRTRYStatement(
             id=self.get_uuid(),
         )
@@ -287,7 +309,7 @@ class KASTParse:
             # print(node.type)
             # print(node.text.decode())
             if node.type == self.BLOCK:
-                new_sr_try_statement.try_statement_list = self.parse_block(node)
+                new_sr_try_statement.try_statement_list = self.parse_block(node, mkg, dominate_vars)
             elif node.type == self.CATCH_CLAUSE:
                 new_catch_block = self.parse_catch_block(node)
                 new_catch_block_list.append(new_catch_block)
@@ -299,7 +321,7 @@ class KASTParse:
         new_sr_try_statement.word_list = word_list
         return new_sr_try_statement
 
-    def parse_if_statement(self, root_node, mkg):
+    def parse_if_statement(self, root_node, mkg, dominate_vars):
         else_index = -1
         new_sr_if_statement = SRIFStatement(
             id=self.get_uuid()
@@ -309,6 +331,8 @@ class KASTParse:
         word_list = self.statement_node_to_word_list(root_node)
         local_word_list = []
         new_sr_if_statement.word_list = word_list
+        var_labels = self.fetch_mkg_var_name(word_list, mkg)
+        if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
         for index, node in enumerate(root_node.children):
             # print("======================")
             # print(node.type)
@@ -328,7 +352,7 @@ class KASTParse:
             pos_block_node = root_node.children[else_index-1]
             neg_block_node = root_node.children[else_index+1]
             if pos_block_node.type == self.BLOCK:
-                new_sr_if_statement.pos_statement_list = self.parse_block(pos_block_node, mkg)
+                new_sr_if_statement.pos_statement_list = self.parse_block(pos_block_node, mkg, dominate_vars=var_labels)
             else:
                 new_sr_statement = SRStatement(
                     id=self.get_uuid(),
@@ -340,9 +364,9 @@ class KASTParse:
                 new_sr_if_statement.pos_statement_list = [new_sr_statement]
 
             if neg_block_node.type == self.BLOCK:
-                new_sr_if_statement.neg_statement_list = self.parse_block(neg_block_node, mkg)
+                new_sr_if_statement.neg_statement_list = self.parse_block(neg_block_node, mkg, dominate_vars=var_labels)
             elif neg_block_node.type == self.IF_STATEMENT:
-                new_sr_if_statement.neg_statement_list = [self.parse_if_statement(neg_block_node, mkg)]
+                new_sr_if_statement.neg_statement_list = [self.parse_if_statement(neg_block_node, mkg, dominate_vars=var_labels)]
             else:
                 new_sr_statement = SRStatement(
                     id=self.get_uuid(),
@@ -355,7 +379,7 @@ class KASTParse:
         else:
             pos_block_node = root_node.children[root_node.child_count -1]
             if pos_block_node.type == self.BLOCK:
-                new_sr_if_statement.pos_statement_list = self.parse_block(pos_block_node, mkg)
+                new_sr_if_statement.pos_statement_list = self.parse_block(pos_block_node, mkg, dominate_vars=var_labels)
             else:
                 new_sr_statement = SRStatement(
                     id=self.get_uuid(),
@@ -369,7 +393,7 @@ class KASTParse:
         return new_sr_if_statement
 
 
-    def parse_switch_block_group(self, root_node):
+    def parse_switch_block_group(self, root_node, mkg, dominate_vars):
         new_sr_switch_case = SRSwitchCase(
             id=self.get_uuid()
         )
@@ -383,7 +407,7 @@ class KASTParse:
             if node.type == self.SWITCH_LABEL:
                 new_sr_switch_case.condition = self.statement_node_to_word_list(node)
         new_sr_switch_case.statement_list = []
-        new_sr_switch_case.statement_list = self.parse_block(root_node)
+        new_sr_switch_case.statement_list = self.parse_block(root_node, mkg, dominate_vars)
 
         return new_sr_switch_case
 
@@ -398,7 +422,7 @@ class KASTParse:
                new_switch_case_list.append(self.parse_switch_block_group(node))
         return new_switch_case_list
 
-    def parse_switch_statement(self, root_node):
+    def parse_switch_statement(self, root_node, mkg, dominate_vars):
         new_sr_switch_statement = SRSwitchStatement(
             id=self.get_uuid()
         )
@@ -422,7 +446,7 @@ class KASTParse:
         return new_sr_switch_statement
 
 
-    def parse_while_statement(self, root_node):
+    def parse_while_statement(self, root_node, mkg, dominate_vars):
         new_sr_while_statement = SRWhileStatement(
             id=self.get_uuid()
         )
@@ -445,13 +469,17 @@ class KASTParse:
                 # new_sr_while_statement.word_list.append("while")
                 # new_sr_while_statement.word_list.extend(new_sr_while_statement.end_condition)
             elif node.type == self.BLOCK:
-                new_sr_while_statement.child_statement_list = self.parse_block(node)
+                var_labels = self.fetch_mkg_var_name(word_list, mkg)
+                if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
+                new_sr_while_statement.child_statement_list = self.parse_block(node, mkg, dominate_vars)
             else:
                 children = [node]
                 fake_node = FakeNode(
                     children=children
                 )
-                child_statement_list = self.parse_block(fake_node)
+                var_labels = self.fetch_mkg_var_name(word_list, mkg)
+                if dominate_vars is not None: var_labels = var_labels.extend(dominate_vars)
+                child_statement_list = self.parse_block(fake_node, mkg, dominate_vars)
                 new_sr_while_statement.child_statement_list = child_statement_list
 
         new_sr_while_statement.word_list = word_list
@@ -476,7 +504,7 @@ class KASTParse:
         new_sr_statement.end_line = (node.end_point[0] + 1)
         return new_sr_statement
 
-    def parse_block(self, root_node, mkg):
+    def parse_block(self, root_node, mkg, dominate_vars=[]):
         statement_list = []
         for node in root_node.children:
             # print("======================")
@@ -484,29 +512,29 @@ class KASTParse:
             # print(node.text.decode())
             if node.type != self.BLOCK_START and node.type != self.BLOCK_END:
                 if node.type == self.FOR_STATEMENT:
-                    new_sr_statement = self.parse_for_statement(node, mkg)
+                    new_sr_statement = self.parse_for_statement(node, mkg, dominate_vars)
                     for sub_node in node.children:
-                        self.parse_statement(new_sr_statement, sub_node, mkg)
+                        self.parse_statement(new_sr_statement, sub_node, mkg, dominate_vars)
                     statement_list.append(new_sr_statement)
                 elif node.type == self.ENHANCED_FOR_STATEMENT:
-                    new_sr_statement = self.parse_enhanced_for_statement(node)
+                    new_sr_statement = self.parse_enhanced_for_statement(node, mkg, dominate_vars)
                     for sub_node in node.children:
-                        self.parse_statement(new_sr_statement, sub_node, mkg)
+                        self.parse_statement(new_sr_statement, sub_node, mkg, dominate_vars)
                     statement_list.append(new_sr_statement)
                 elif node.type == self.IF_STATEMENT:
-                    new_sr_statement = self.parse_if_statement(node, mkg)
+                    new_sr_statement = self.parse_if_statement(node, mkg, dominate_vars)
                     for sub_node in node.children:
-                        self.parse_statement(new_sr_statement, sub_node, mkg)
+                        self.parse_statement(new_sr_statement, sub_node, mkg, dominate_vars)
                     statement_list.append(new_sr_statement)
                 elif node.type == self.WHILE_STATEMENT:
-                    new_sr_statement = self.parse_while_statement(node)
+                    new_sr_statement = self.parse_while_statement(node, mkg, dominate_vars)
                     for sub_node in node.children:
-                        self.parse_statement(new_sr_statement, sub_node, mkg)
+                        self.parse_statement(new_sr_statement, sub_node, mkg, dominate_vars)
                     statement_list.append(new_sr_statement)
                 elif node.type == self.TRY_STATEMENT:
-                    statement_list.append(self.parse_try_statement(node))
+                    statement_list.append(self.parse_try_statement(node, mkg, dominate_vars))
                 elif node.type == self.SWITCH_EXPRESSION:
-                    statement_list.append(self.parse_switch_statement(node))
+                    statement_list.append(self.parse_switch_statement(node, mkg, dominate_vars))
                 elif node.type == self.SWITCH_LABEL:
                     continue
                 elif node.type == self.LABELED_STATEMENT:
@@ -520,14 +548,14 @@ class KASTParse:
                             type=node.type,
                             word_list=word_list
                         )
-                        self.parse_statement(new_sr_statement, node, mkg)
+                        self.parse_statement(new_sr_statement, node, mkg, dominate_vars)
 
                         new_sr_statement.start_line = (node.start_point[0] + 1)
                         new_sr_statement.end_line = (node.end_point[0] + 1)
                         statement_list.append(new_sr_statement)
         return statement_list
 
-    def parse_statement(self, statement, statement_node, mkg):
+    def parse_statement(self, statement, statement_node, mkg, dominate_vars=[]):
         if statement_node.type == self.LOCAL_VARIABLE_DECLARATION:
             statement.datatype = self.fetch_data_type(statement_node.children[0])
 
@@ -538,11 +566,17 @@ class KASTParse:
             new_var_assignment_label = statement.var[0]+"_"+"0"
             new_var_assignment, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
             new_assignment_edge = mkg.get_or_create_edge(new_var_assignment, new_data_var, ASSIGNMENT)
-
+            statement.assignment_var.append(new_var_assignment)
 
             for data_type in new_data_type_l:
                 new_data_type_n, created = mkg.get_or_create_node(data_type, DATATYPE)
                 new_data_edge = mkg.get_or_create_edge(new_data_type_n, new_data_var, TYPE_OF)
+            if dominate_vars is not None:
+                if len(dominate_vars) > 0:
+                    for dr in dominate_vars:
+                        # dr_node, max_num = mkg.get_max_assignment_var_node(dr)
+                        # dr_node = mkg.get_node(dr, VAR_ASSIGNMENT)
+                        new_cd_edge = mkg.get_or_create_edge(new_var_assignment, dr, CONTROL_DEPENDENCY)
 
             statement.type = self.LOCAL_VARIABLE_DECLARATION
         elif statement_node.type == self.EXPRESSION_STATEMENT:
@@ -554,7 +588,7 @@ class KASTParse:
                     new_var_assignment_label = statement.var[0] + "_" + str(max_num+1)
                     new_assignment_var, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
                     new_assignment_edge = mkg.get_or_create_edge(new_assignment_var, data_var, ASSIGNMENT)
-
+                    statement.assignment_var.append(new_assignment_var)
                     for v in statement.value:
                         if v.isdigit():
                             continue
@@ -566,11 +600,16 @@ class KASTParse:
                         if max_assignment_v is not None:
                             new_dd_edge = mkg.get_or_create_edge(new_assignment_var, max_assignment_v, DATA_DEPENDENCY)
 
-                # var_node = mkg.get_node(statement.var[0], VAR_IDENTIFIER)
-                # for v in statement.value:
-                #     v_node = mkg.get_node(v, VAR_IDENTIFIER)
-                #     if var_node is not None and v_node is not None:
-                #         new_dd_edge = mkg.get_or_create_edge(var_node, v_node, DATA_DEPENDENCY)
+                    if dominate_vars is not None:
+                        if len(dominate_vars) > 0:
+                            for dr in dominate_vars:
+                                # if dr == statement.var[0]:
+                                #     dr_node_label = statement.var[0] + "_" + str(max_num)
+                                #     dr_node = mkg.get_node(dr_node_label, VAR_ASSIGNMENT)
+                                # else:
+                                #     dr_node, max_num = mkg.get_max_assignment_var_node(dr)
+                                # dr_node = mkg.get_node(dr, VAR_ASSIGNMENT)
+                                new_cd_edge = mkg.get_or_create_edge(new_assignment_var, dr, CONTROL_DEPENDENCY)
 
             elif statement_node.children[0].type == self.METHOD_INVOCATION:
                 self.parse_method_invocation(statement_node.children[0], statement, mkg)
@@ -672,7 +711,7 @@ class KASTParse:
         new_sr_method.mkg = new_mkg
         return new_sr_method
 
-    def parse_constructor(self, root_node):
+    def parse_constructor(self, root_node, mkg, dominate_vars):
         new_sr_constructor = SRConstructor(
             id=self.get_uuid()
         )
@@ -691,7 +730,7 @@ class KASTParse:
             elif node.type == self.FORMAL_PARAMETERS:
                 new_sr_constructor.param_list = self.parse_param(node)
             elif node.type == self.CONSTRUCTOR_BODY:
-                new_sr_constructor.statement_list = self.parse_block(node)
+                new_sr_constructor.statement_list = self.parse_block(node, mkg, dominate_vars)
         new_sr_constructor.word_list = word_list
         return new_sr_constructor
 

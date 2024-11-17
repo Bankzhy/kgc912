@@ -17,6 +17,7 @@ class SRStatement(SRCore):
         self.var=[]
         self.value=[]
         self.method=[]
+        self.assignment_var = []
 
     def get_loc_var_list(self):
         loc_var_list = []
@@ -163,6 +164,7 @@ class SRIFStatement(SRStatement):
         self.var = []
         self.value = []
         self.method = []
+        self.assignment_var = []
 
     def replace_param(self, new_param, old_param):
         super(SRIFStatement, self).replace_param(new_param=new_param, old_param=old_param)
@@ -268,6 +270,7 @@ class SRFORStatement(SRStatement):
         self.var=[]
         self.value=[]
         self.method=[]
+        self.assignment_var = []
 
     def replace_param(self, new_param, old_param):
         super(SRFORStatement, self).replace_param(new_param=new_param, old_param=old_param)
@@ -376,6 +379,7 @@ class SRWhileStatement(SRStatement):
         self.var = []
         self.value = []
         self.method = []
+        self.assignment_var = []
 
     def replace_param(self, new_param, old_param):
         super(SRWhileStatement, self).replace_param(new_param=new_param, old_param=old_param)
@@ -462,6 +466,7 @@ class SRSwitchStatement(SRStatement):
         self.var = []
         self.value = []
         self.method = []
+        self.assignment_var = []
 
     def replace_method_with_var(self, method_name, var_name):
         start_index = 0
@@ -536,6 +541,7 @@ class SRSwitchCase(SRStatement):
         self.sid = 0
         self.block_depth = -1
         self.statement_list = statement_list
+        self.assignment_var = []
 
     def to_string(self, space=1):
         result = ""
@@ -575,6 +581,7 @@ class SRTRYStatement(SRStatement):
         self.catch_block_list = catch_block_list,
         self.final_block_statement_list = final_block_statement_list
         self.block_depth = -1
+        self.assignment_var = []
 
     def to_string(self, space=1):
         result = ""
@@ -674,7 +681,6 @@ class CatchBlock(SRStatement):
             neg_statement_list=[],
             condition=self.catch_param)
         return new_st
-
 
 class MethodInvoke:
     def __init__(self):
