@@ -581,6 +581,9 @@ class SRTRYStatement(SRStatement):
         self.catch_block_list = catch_block_list,
         self.final_block_statement_list = final_block_statement_list
         self.block_depth = -1
+        self.var = []
+        self.value = []
+        self.method = []
         self.assignment_var = []
 
     def to_string(self, space=1):

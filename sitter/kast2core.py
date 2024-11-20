@@ -70,6 +70,8 @@ class KASTParse:
         self.IDENTIFIER = "identifier"
         self.METHOD_INVOCATION = "method_invocation"
         self.ARGUMENT_LIST = "argument_list"
+        self.FIELD_ACCESS = "field_access"
+        self.ARRAY_ACCESS = "array_access"
         self.symbol = ["[","]","<",">","{","}",",","(",")"]
 
         self.language = language
@@ -276,24 +278,24 @@ class KASTParse:
         new_sr_for_statement.word_list = word_list
         new_sr_for_statement.local_word_list = local_word_list
         return new_sr_for_statement
-    def parse_catch_block(self, root_node):
+    def parse_catch_block(self, root_node, mkg):
         new_catch_block = CatchBlock()
         for node in root_node.children:
             if node.type == self.CATCH_FORMAL_PARAMETER:
                 new_catch_block.catch_param = node.text.decode()
                 new_catch_block.word_list = self.statement_node_to_word_list(node)
             elif node.type == self.BLOCK:
-                new_catch_block.child_statement_list = self.parse_block(node)
+                new_catch_block.child_statement_list = self.parse_block(node, mkg)
         return new_catch_block
 
-    def parse_final_block(self, root_node):
+    def parse_final_block(self, root_node, mkg):
         statement_list = []
         for node in root_node.children:
                 # print("======================")
                 # print(node.type)
                 # print(node.text)
             if node.type == self.BLOCK:
-                statement_list = self.parse_block(node)
+                statement_list = self.parse_block(node, mkg)
         return statement_list
 
     def parse_try_statement(self, root_node, mkg, dominate_vars):
@@ -311,10 +313,10 @@ class KASTParse:
             if node.type == self.BLOCK:
                 new_sr_try_statement.try_statement_list = self.parse_block(node, mkg, dominate_vars)
             elif node.type == self.CATCH_CLAUSE:
-                new_catch_block = self.parse_catch_block(node)
+                new_catch_block = self.parse_catch_block(node, mkg)
                 new_catch_block_list.append(new_catch_block)
             elif node.type == self.FINALLY_CLAUSE:
-                new_sr_try_statement.final_block_statement_list = self.parse_final_block(node)
+                new_sr_try_statement.final_block_statement_list = self.parse_final_block(node, mkg)
 
         new_sr_try_statement.catch_block_list = new_catch_block_list
         word_list.append("try-catch: hasError?")
@@ -393,7 +395,7 @@ class KASTParse:
         return new_sr_if_statement
 
 
-    def parse_switch_block_group(self, root_node, mkg, dominate_vars):
+    def parse_switch_block_group(self, root_node, mkg, dominate_vars=[]):
         new_sr_switch_case = SRSwitchCase(
             id=self.get_uuid()
         )
@@ -412,14 +414,14 @@ class KASTParse:
         return new_sr_switch_case
 
 
-    def parse_switch_block(self, root_node):
+    def parse_switch_block(self, root_node, mkg):
         new_switch_case_list = []
         for node in root_node.children:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
             if node.type == self.SWITCH_BLOCK_STATEMENT_GROUP:
-               new_switch_case_list.append(self.parse_switch_block_group(node))
+               new_switch_case_list.append(self.parse_switch_block_group(node, mkg))
         return new_switch_case_list
 
     def parse_switch_statement(self, root_node, mkg, dominate_vars):
@@ -440,7 +442,7 @@ class KASTParse:
             if node.type == self.PARENTHESIZED_EXPRESSION:
                 new_sr_switch_statement.condition = self.statement_node_to_word_list(node)
             elif node.type == self.SWITCH_BLOCK:
-                new_sr_switch_statement.switch_case_list = self.parse_switch_block(node)
+                new_sr_switch_statement.switch_case_list = self.parse_switch_block(node, mkg)
         new_sr_switch_statement.local_word_list=local_word_list
         new_sr_switch_statement.word_list = word_list
         return new_sr_switch_statement
@@ -486,13 +488,13 @@ class KASTParse:
         new_sr_while_statement.local_word_list = local_word_list
         return new_sr_while_statement
 
-    def parse_labeled_statement(self, root_node):
+    def parse_labeled_statement(self, root_node, mkg, dominate_vars):
         for node in root_node.children:
             # print("======================")
             # print(node.type)
             # print(node.text.decode())
             if node.type == self.FOR_STATEMENT:
-                return self.parse_for_statement(node)
+                return self.parse_for_statement(node, mkg, dominate_vars)
         word_list = ["// "]
         word_list.extend(self.statement_node_to_word_list(node))
         new_sr_statement = SRStatement(
@@ -538,7 +540,7 @@ class KASTParse:
                 elif node.type == self.SWITCH_LABEL:
                     continue
                 elif node.type == self.LABELED_STATEMENT:
-                    statement_list.append(self.parse_labeled_statement(node))
+                    statement_list.append(self.parse_labeled_statement(node, mkg, dominate_vars))
                 else:
                     # word_list = list(map(lambda n: n.text.decode(), node.children))
                     if node.type != self.LINE_COMMENT:
@@ -559,57 +561,59 @@ class KASTParse:
         if statement_node.type == self.LOCAL_VARIABLE_DECLARATION:
             statement.datatype = self.fetch_data_type(statement_node.children[0])
 
-            new_data_type_l = self.fetch_data_type(statement_node.children[0])
-            statement.var, statement.value = self.fetch_var(statement_node.children[1], statement, mkg)
-            new_data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
+            for child in statement_node.children:
+                new_data_type_l = []
+                if child.type == self.TYPE_IDENTIFIER:
+                    new_data_type_l = self.fetch_data_type(child)
+                if child.type == self.VARIABLE_DECLARATOR:
+                    statement.var, statement.value = self.fetch_var(child, statement, mkg)
+                    new_data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
 
-            new_var_assignment_label = statement.var[0]+"_"+"0"
-            new_var_assignment, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
-            new_assignment_edge = mkg.get_or_create_edge(new_var_assignment, new_data_var, ASSIGNMENT)
-            statement.assignment_var.append(new_var_assignment)
+                    new_var_assignment_label = statement.var[0]+"_"+"0"
+                    new_var_assignment, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
+                    new_assignment_edge = mkg.get_or_create_edge(new_var_assignment, new_data_var, ASSIGNMENT)
+                    statement.assignment_var.append(new_var_assignment)
 
-            for data_type in new_data_type_l:
-                new_data_type_n, created = mkg.get_or_create_node(data_type, DATATYPE)
-                new_data_edge = mkg.get_or_create_edge(new_data_type_n, new_data_var, TYPE_OF)
-            if dominate_vars is not None:
-                if len(dominate_vars) > 0:
-                    for dr in dominate_vars:
-                        # dr_node, max_num = mkg.get_max_assignment_var_node(dr)
-                        # dr_node = mkg.get_node(dr, VAR_ASSIGNMENT)
-                        new_cd_edge = mkg.get_or_create_edge(new_var_assignment, dr, CONTROL_DEPENDENCY)
-
-            statement.type = self.LOCAL_VARIABLE_DECLARATION
-        elif statement_node.type == self.EXPRESSION_STATEMENT:
-            if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION:
-                statement.var, statement.value = self.fetch_var(statement_node.children[0], statement, mkg)
-                data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
-                max_assignment_var, max_num = mkg.get_max_assignment_var_node(statement.var[0])
-                if max_assignment_var is not None:
-                    new_var_assignment_label = statement.var[0] + "_" + str(max_num+1)
-                    new_assignment_var, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
-                    new_assignment_edge = mkg.get_or_create_edge(new_assignment_var, data_var, ASSIGNMENT)
-                    statement.assignment_var.append(new_assignment_var)
-                    for v in statement.value:
-                        if v.isdigit():
-                            continue
-                        if v == statement.var[0]:
-                            max_assignment_label = statement.var[0] + "_" + str(max_num)
-                            max_assignment_v = mkg.get_node(max_assignment_label, VAR_ASSIGNMENT)
-                        else:
-                            max_assignment_v, max_v_num = mkg.get_max_assignment_var_node(v)
-                        if max_assignment_v is not None:
-                            new_dd_edge = mkg.get_or_create_edge(new_assignment_var, max_assignment_v, DATA_DEPENDENCY)
-
+                    for data_type in new_data_type_l:
+                        new_data_type_n, created = mkg.get_or_create_node(data_type, DATATYPE)
+                        new_data_edge = mkg.get_or_create_edge(new_data_type_n, new_data_var, TYPE_OF)
                     if dominate_vars is not None:
                         if len(dominate_vars) > 0:
                             for dr in dominate_vars:
-                                # if dr == statement.var[0]:
-                                #     dr_node_label = statement.var[0] + "_" + str(max_num)
-                                #     dr_node = mkg.get_node(dr_node_label, VAR_ASSIGNMENT)
-                                # else:
-                                #     dr_node, max_num = mkg.get_max_assignment_var_node(dr)
+                                # dr_node, max_num = mkg.get_max_assignment_var_node(dr)
                                 # dr_node = mkg.get_node(dr, VAR_ASSIGNMENT)
-                                new_cd_edge = mkg.get_or_create_edge(new_assignment_var, dr, CONTROL_DEPENDENCY)
+                                new_cd_edge = mkg.get_or_create_edge(new_var_assignment, dr, CONTROL_DEPENDENCY)
+
+                    statement.type = self.LOCAL_VARIABLE_DECLARATION
+        elif statement_node.type == self.EXPRESSION_STATEMENT:
+            if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION:
+                statement.var, statement.value = self.fetch_var(statement_node.children[0], statement, mkg)
+                print(statement.word_list)
+                data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
+                max_assignment_var, max_num = mkg.get_max_assignment_var_node(statement.var[0])
+
+                if max_assignment_var is not None:
+                    new_var_assignment_label = statement.var[0] + "_" + str(max_num+1)
+                else:
+                    new_var_assignment_label = statement.var[0] + "_" + str(max_num)
+                new_assignment_var, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
+                new_assignment_edge = mkg.get_or_create_edge(new_assignment_var, data_var, ASSIGNMENT)
+                statement.assignment_var.append(new_assignment_var)
+                for v in statement.value:
+                    if v.isdigit():
+                        continue
+                    if v == statement.var[0]:
+                        max_assignment_label = statement.var[0] + "_" + str(max_num)
+                        max_assignment_v = mkg.get_node(max_assignment_label, VAR_ASSIGNMENT)
+                    else:
+                        max_assignment_v, max_v_num = mkg.get_max_assignment_var_node(v)
+                    if max_assignment_v is not None:
+                        new_dd_edge = mkg.get_or_create_edge(new_assignment_var, max_assignment_v, DATA_DEPENDENCY)
+
+                if dominate_vars is not None:
+                    if len(dominate_vars) > 0:
+                        for dr in dominate_vars:
+                            new_cd_edge = mkg.get_or_create_edge(new_assignment_var, dr, CONTROL_DEPENDENCY)
 
             elif statement_node.children[0].type == self.METHOD_INVOCATION:
                 self.parse_method_invocation(statement_node.children[0], statement, mkg)
@@ -639,8 +643,24 @@ class KASTParse:
                 value.extend(self.statement_node_to_word_list(node.children[index+1]))
             if child.type == self.IDENTIFIER:
                 var.append(child.text.decode())
+
+            if child.type == self.FIELD_ACCESS or child.type == self.ARRAY_ACCESS:
+                # for fc in child.children:
+                #     if fc.type == self.IDENTIFIER:
+                #         var.append(fc.text.decode())
+                var.extend(self.iterate_fetch_var_l(child))
+
         return var, value
 
+
+    def iterate_fetch_var_l(self, node):
+        var = []
+        for child in node.children:
+            if child.type == self.FIELD_ACCESS or child.type == self.ARRAY_ACCESS or child.type == self.METHOD_INVOCATION:
+                var.extend(self.iterate_fetch_var_l(child))
+            if child.type == self.IDENTIFIER:
+                var.append(child.text.decode())
+        return var
 
     def parse_method_invocation(self, statement_node, statement, mkg):
         mi = MethodInvoke()

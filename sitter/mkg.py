@@ -1,5 +1,5 @@
 import re
-
+import pymysql
 from pretrain.schema import VAR_IDENTIFIER, METHOD_IDENTIFIER, CONCEPT, RELATED_CONCEPT, VAR_ASSIGNMENT, DATA_DEPENDENCY
 
 
@@ -7,6 +7,16 @@ class MKG:
     def __init__(self):
         self.nodes = []
         self.edges = []
+        # Connect to the MySQL database
+        self.conn = pymysql.connect(
+            host="47.113.220.80",
+            user="root",
+            password="Apple3328823%",
+            database="kgc",
+            charset="utf8mb4",  # Use utf8mb4 for full Unicode support,
+            connect_timeout=50
+        )
+        self.cursor = self.conn.cursor()
 
     def get_or_create_node(self, name, type):
         for node in self.nodes:
@@ -69,9 +79,28 @@ class MKG:
                 if len(concept_l) > 1:
                     for concept in concept_l:
                         lower_concept = concept.lower()
-                        new_concept_node = self.get_or_create_node(lower_concept, CONCEPT)
+                        new_concept_node, created = self.get_or_create_node(lower_concept, CONCEPT)
                         new_concept_edge = self.get_or_create_edge(node, new_concept_node, RELATED_CONCEPT)
-                print(concept_l)
+    def expand_concept(self):
+        concept_l = []
+        for node in self.nodes:
+            if node.type == CONCEPT:
+                concept_l.append(node)
+        if len(concept_l) > 2:
+            for i in range(len(concept_l)):
+                for j in range(i+1, len(concept_l)):
+                    row = self.fetch_concept(concept_l[i].label, concept_l[j].label)
+                    rel = row["rel"]
+
+    def fetch_concept(self, concept1, concept2):
+        query = "SELECT * FROM my_table WHERE arg1 = %s AND arg2 = %s"
+        self.cursor.execute(query, (concept1, concept2))
+        row = self.cursor.fetchone()  # Fetch a single row
+
+        if row:
+            return row  # Return the row if it exists
+        else:
+            return None  # Return None if no row is found
 
     def get_start_assignment_node(self, end_node):
         for edge in self.edges:
@@ -84,6 +113,25 @@ class MKG:
             if edge.source.label == node1 and edge.target.label == node2:
                 return edge
         return None
+
+    def to_dict(self):
+        result = []
+        for edge in self.edges:
+            source = {
+                "label": edge.source.label,
+                "type": edge.source.type,
+            }
+            target = {
+                "label": edge.target.label,
+                "type": edge.target.type,
+            }
+            edge = {
+                "source": source,
+                "target": target,
+                "type": edge.type,
+            }
+            result.append(edge)
+        return result
 
 class Node:
     def __init__(self, label, type):
