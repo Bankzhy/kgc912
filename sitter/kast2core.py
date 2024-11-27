@@ -2,9 +2,7 @@ from tree_sitter import Language, Parser
 import os
 import re
 import uuid
-
 from tree_sitter_languages import get_parser
-
 from pretrain.schema import METHOD_IDENTIFIER, DATATYPE, VAR_IDENTIFIER, TYPE_OF, HAS_METHOD, DATA_DEPENDENCY, \
     VAR_ASSIGNMENT, ASSIGNMENT, CONTROL_DEPENDENCY
 from reflect.sr_field import SRField

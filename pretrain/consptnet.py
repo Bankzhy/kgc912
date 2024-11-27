@@ -15,20 +15,52 @@ conn = pymysql.connect(
 )
 cursor = conn.cursor()
 
+required_rels = {
+    "IsA",
+    "PartOf",
+    "HasA",
+    "UsedFor",
+    "CapableOf",
+    "AtLocation",
+    "Causes",
+    "HasSubevent",
+    "HasFirstSubevent",
+    "HasLastSubevent",
+    "HasPrerequisite",
+    "HasProperty",
+    "MotivatedByGoal",
+    "ObstructedBy",
+    "SymbolOf",
+    "DefinedAs",
+    "MannerOf",
+    "LocatedNear",
+    "HasContext",
+    "SimilarTo",
+    "CausesDesire",
+    "MadeOf",
+    "ReceivesAction",
+}
+
 def run():
     ds = load_dataset("peandrew/conceptnet_en_simple")
     dst = ds["train"]
 
 
     # for index, data in enumerate(dst):
-    for index in range(462200, len(dst)):
+    for index in range(3399036, len(dst)):
         data = dst[index]
         arg1 = fetch_word(data["arg1"])
         arg2 = fetch_word(data["arg2"])
         rel = fetch_word(data["rel"])
+        if rel not in required_rels:
+            print("Exclude this rel", rel)
+            continue
+
+        if arg1 == arg2 or len(arg1)<=2 or len(arg2)<=2 or arg1.isdigit() or arg2.isdigit():
+            print("Exclude useless row:", data)
 
         row, created = get_or_create(arg1, arg2, rel)
-        print(row)
+        print(index, row)
 
 
 # Function to get or create a row

@@ -1,13 +1,9 @@
 import json
-
 from datasets import load_dataset
-
-from pretrain.KG import MethodKG
-from sitter.ast2core import ASTParse
 from sitter.kast2core import KASTParse
 
 
-def run():
+def run_preprocess():
     dataset = load_dataset('code-search-net/code_search_net', 'java', split='train')
     ast = KASTParse("", "java")
     ast.setup()
@@ -15,7 +11,7 @@ def run():
     count = 0
     print("Size:", len(dataset))
     # for i, data in enumerate(dataset):
-    for index in range(16500, len(dataset)):
+    for index in range(0, len(dataset)):
         data = dataset[index]
         print(index, data)
         code_content = "public class Test {\n"
@@ -27,8 +23,11 @@ def run():
         for program in sr_project.program_list:
             for cls in program.class_list:
                 sr_method=cls.method_list[0]
+                sr_method.mkg.parse_method_name(sr_method.method_name)
                 sr_method.mkg.parse_concept()
                 sr_method.rebuild_mkg()
+                sr_method.mkg.expand_concept_edge()
+                sr_method.mkg.expand_concept_node(sr_method.method_name)
                 kg = sr_method.mkg.to_dict()
         new_data = {
             "id": index,
@@ -66,8 +65,10 @@ def run_sample():
                 sr_method = cls.method_list[0]
                 sr_method.mkg.parse_concept()
                 sr_method.rebuild_mkg()
+                sr_method.mkg.expand_concept_edge()
+                sr_method.mkg.expand_concept_node(sr_method.method_name)
                 print(sr_method)
 
-if __name__ == '__main__':
-    run()
+# if __name__ == '__main__':
+#     run()
     # run_sample()

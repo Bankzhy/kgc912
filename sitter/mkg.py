@@ -7,6 +7,15 @@ class MKG:
     def __init__(self):
         self.nodes = []
         self.edges = []
+        self.schema_edges = [
+            'type_of',
+            "control_dependency",
+            "data_dependency",
+            "has_method",
+            "has_property",
+            "assignment",
+            "related_concept"
+        ]
         # Connect to the MySQL database
         self.conn = pymysql.connect(
             host="47.113.220.80",
@@ -17,6 +26,7 @@ class MKG:
             connect_timeout=50
         )
         self.cursor = self.conn.cursor()
+        self.max_node_expand_num = 10
 
     def get_or_create_node(self, name, type):
         for node in self.nodes:
@@ -72,6 +82,13 @@ class MKG:
             # 处理 CamelCase
             return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
 
+    def parse_method_name(self, method_name):
+        new_method, created = self.get_or_create_node(method_name, METHOD_IDENTIFIER)
+        method_name_l = self.split_variable_name(method_name)
+        for token in method_name_l:
+            new_token, created = self.get_or_create_node(token, CONCEPT)
+            new_edge = self.get_or_create_edge(new_method, new_token, RELATED_CONCEPT)
+
     def parse_concept(self):
         for node in self.nodes:
             if node.type == VAR_IDENTIFIER or node.type == METHOD_IDENTIFIER:
@@ -81,7 +98,7 @@ class MKG:
                         lower_concept = concept.lower()
                         new_concept_node, created = self.get_or_create_node(lower_concept, CONCEPT)
                         new_concept_edge = self.get_or_create_edge(node, new_concept_node, RELATED_CONCEPT)
-    def expand_concept(self):
+    def expand_concept_edge(self):
         concept_l = []
         for node in self.nodes:
             if node.type == CONCEPT:
@@ -89,11 +106,49 @@ class MKG:
         if len(concept_l) > 2:
             for i in range(len(concept_l)):
                 for j in range(i+1, len(concept_l)):
-                    row = self.fetch_concept(concept_l[i].label, concept_l[j].label)
-                    rel = row["rel"]
+                    row_0 = self.fetch_concept(concept_l[i].label, concept_l[j].label)
+                    row_1 = self.fetch_concept(concept_l[j].label, concept_l[i].label)
+                    if row_0 is None and row_1 is None:
+                        continue
+
+                    rel_0 = row_0[3]
+                    if rel_0 is not None:
+                        self.get_or_create_edge(concept_l[i], concept_l[j], rel_0)
+
+                    rel_1 = row_1[3]
+                    if rel_1 is not None:
+                        self.get_or_create_edge(concept_l[j], concept_l[i], rel_1)
+
+    def expand_concept_node(self, method_name):
+        method_name_l = self.split_variable_name(method_name)
+        for token in method_name_l:
+            token_node = self.get_node(token, CONCEPT)
+            concept_nodes = self.fetch_concept_node(token)
+            if concept_nodes is None:
+                return
+            print("expand node count: ", len(concept_nodes))
+            print(concept_nodes)
+            for cn in concept_nodes:
+                if cn[1] == token:
+                    new_concept_node, created = self.get_or_create_node(cn[2], CONCEPT)
+                    new_concept_edge = self.get_or_create_edge(token_node, new_concept_node, cn[3])
+
+                if cn[2] == token:
+                    new_concept_node, created = self.get_or_create_node(cn[1], CONCEPT)
+                    new_concept_edge = self.get_or_create_edge(token_node, new_concept_node, cn[3])
+
+    def fetch_concept_node(self, concept):
+        query = "SELECT * FROM conceptnet5 WHERE (arg1 = %s or arg2 = %s) and rel != 'DerivedFrom'"
+        self.cursor.execute(query, (concept, concept))
+        row = self.cursor.fetchall()  # Fetch a single row
+
+        if row:
+            return row  # Return the row if it exists
+        else:
+            return None  # Return None if no row is found
 
     def fetch_concept(self, concept1, concept2):
-        query = "SELECT * FROM my_table WHERE arg1 = %s AND arg2 = %s"
+        query = "SELECT * FROM conceptnet5 WHERE arg1 = %s AND arg2 = %s"
         self.cursor.execute(query, (concept1, concept2))
         row = self.cursor.fetchone()  # Fetch a single row
 
