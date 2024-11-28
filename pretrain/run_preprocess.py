@@ -11,7 +11,7 @@ def run_preprocess():
     count = 0
     print("Size:", len(dataset))
     # for i, data in enumerate(dataset):
-    for index in range(0, len(dataset)):
+    for index in range(100, len(dataset)):
         data = dataset[index]
         print(index, data)
         code_content = "public class Test {\n"

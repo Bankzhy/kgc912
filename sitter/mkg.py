@@ -1,7 +1,9 @@
 import re
 import pymysql
 from pretrain.schema import VAR_IDENTIFIER, METHOD_IDENTIFIER, CONCEPT, RELATED_CONCEPT, VAR_ASSIGNMENT, DATA_DEPENDENCY
-
+from sitter.common import Common
+from sentence_transformers import SentenceTransformer, util
+from sklearn.metrics.pairwise import cosine_similarity
 
 class MKG:
     def __init__(self):
@@ -27,6 +29,11 @@ class MKG:
         )
         self.cursor = self.conn.cursor()
         self.max_node_expand_num = 10
+        self.ignore_expand_concept_word = [
+            "is", "has", "can", "should", "get", "are", "does", "set", "add", "remove", "delete", "update", "save", "create", "fetch", "on", "before", "after", "to", "from", "with", "by", "of", "for", "in", "equals", "compare", "if", "and", "start", "stop", "load", "reload", "read", "update", "check", "render", "class", "method", "generate"
+        ]
+        self.model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
+
 
     def get_or_create_node(self, name, type):
         for node in self.nodes:
@@ -108,7 +115,7 @@ class MKG:
                 for j in range(i+1, len(concept_l)):
                     row_0 = self.fetch_concept(concept_l[i].label, concept_l[j].label)
                     row_1 = self.fetch_concept(concept_l[j].label, concept_l[i].label)
-                    if row_0 is None and row_1 is None:
+                    if row_0 is None or row_1 is None:
                         continue
 
                     rel_0 = row_0[3]
@@ -122,12 +129,23 @@ class MKG:
     def expand_concept_node(self, method_name):
         method_name_l = self.split_variable_name(method_name)
         for token in method_name_l:
+            if token in self.ignore_expand_concept_word:
+                continue
             token_node = self.get_node(token, CONCEPT)
-            concept_nodes = self.fetch_concept_node(token)
-            if concept_nodes is None:
-                return
-            print("expand node count: ", len(concept_nodes))
-            print(concept_nodes)
+            if token in Common.expand_node_map.keys():
+                concept_nodes = Common.expand_node_map[token]
+                print("exist node: ", concept_nodes)
+            else:
+                concept_nodes = self.fetch_concept_node(token)
+                if concept_nodes is None:
+                    return
+                if len(concept_nodes) > self.max_node_expand_num:
+                    concept_nodes = self.filter_concept_nodes(method_name_l, concept_nodes)
+                    print("sort node")
+                print("expand node count: ", len(concept_nodes))
+                print(concept_nodes)
+                Common.expand_node_map[token] = concept_nodes
+
             for cn in concept_nodes:
                 if cn[1] == token:
                     new_concept_node, created = self.get_or_create_node(cn[2], CONCEPT)
@@ -136,6 +154,30 @@ class MKG:
                 if cn[2] == token:
                     new_concept_node, created = self.get_or_create_node(cn[1], CONCEPT)
                     new_concept_edge = self.get_or_create_edge(token_node, new_concept_node, cn[3])
+
+    def filter_concept_nodes(self, method_name_l, concept_nodes):
+        mn = " ".join(method_name_l)
+
+        # Step 2: Convert each tuple into a single string by concatenating the elements of the tuple
+        sentences = []
+        for concept_node in concept_nodes:
+            cnt = concept_node[1]+" ".join(self.split_variable_name(concept_node[3]))+concept_node[2]
+            sentences.append(cnt)
+
+
+        # Step 3: Encode the method name and sentences into embeddings
+        method_embedding = self.model.encode([mn])
+        sentence_embeddings = self.model.encode(sentences)
+
+        # Step 4: Calculate cosine similarity between the method name and each sentence
+        similarities = cosine_similarity(method_embedding, sentence_embeddings).flatten()
+
+        # Step 5: Get the indices of the top 10 most similar sentences
+        top_indices = similarities.argsort()[-10:][::-1]
+
+        # Step 6: Retrieve the top 10 most similar sentences (in original tuple form)
+        top_sentences = [concept_nodes[i] for i in top_indices]
+        return top_sentences
 
     def fetch_concept_node(self, concept):
         query = "SELECT * FROM conceptnet5 WHERE (arg1 = %s or arg2 = %s) and rel != 'DerivedFrom'"
