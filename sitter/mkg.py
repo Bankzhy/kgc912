@@ -20,7 +20,7 @@ class MKG:
         ]
         # Connect to the MySQL database
         self.conn = pymysql.connect(
-            host="47.113.220.80",
+            host="localhost",
             user="root",
             password="Apple3328823%",
             database="kgc",
@@ -180,7 +180,7 @@ class MKG:
         return top_sentences
 
     def fetch_concept_node(self, concept):
-        query = "SELECT * FROM conceptnet5 WHERE (arg1 = %s or arg2 = %s) and rel != 'DerivedFrom'"
+        query = "SELECT * FROM conceptnet5_small WHERE (arg1 = %s or arg2 = %s) and rel != 'DerivedFrom'"
         self.cursor.execute(query, (concept, concept))
         row = self.cursor.fetchall()  # Fetch a single row
 
@@ -190,7 +190,7 @@ class MKG:
             return None  # Return None if no row is found
 
     def fetch_concept(self, concept1, concept2):
-        query = "SELECT * FROM conceptnet5 WHERE arg1 = %s AND arg2 = %s"
+        query = "SELECT * FROM conceptnet5_small WHERE arg1 = %s AND arg2 = %s"
         self.cursor.execute(query, (concept1, concept2))
         row = self.cursor.fetchone()  # Fetch a single row
 
