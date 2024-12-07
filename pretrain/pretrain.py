@@ -324,7 +324,7 @@ def pretrain(args):
 
     return model, (code_vocab, st_vocab, nl_vocab)
 
-def run():
+def run_pretrain():
     # --------------------------------------------------
     # load args
     # --------------------------------------------------
@@ -337,4 +337,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    run_pretrain()

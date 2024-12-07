@@ -167,8 +167,7 @@ def init_dataset(args, task=None, load_if_saved=True):
             logger.info(f'Dataset instance loaded from: {path}')
             print_paths(obj.paths)
             return obj
-    dataset = KGCodeDataset(args=args,
-                          task=task)
+    dataset = KGCodeDataset(args=args, task=task)
     dataset.save()
     return dataset
 

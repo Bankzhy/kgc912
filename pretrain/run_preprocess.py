@@ -1,6 +1,7 @@
 import csv
 import json
 import re
+from pathlib import Path
 
 import pymysql
 from datasets import load_dataset
@@ -136,10 +137,21 @@ def run_preprocess():
     ast = KASTParse("", "java")
     ast.setup()
     result = []
+    exist_id = []
     count = 0
     print("Size:", len(dataset))
+
+    with open("exist.txt", "r", encoding="utf8") as file:
+        lines = file.readlines()
+        for line in lines:
+            exist_id.append(int(line))
     # for i, data in enumerate(dataset):
-    for index in range(117500, len(dataset)):
+    for index in range(0, 50000):
+
+        if index in exist_id:
+            print("exist:", index)
+            continue
+
         try:
             data = dataset[index]
             print(index, data)
@@ -175,7 +187,7 @@ def run_preprocess():
 
         if count >=100:
             # Write the list of dictionaries to a JSON file
-            with open("datat_small_100000.json", "w") as json_file:
+            with open("datat1_small.json", "w") as json_file:
                 for js in result:
                     json_file.write(json.dumps(js))
                     json_file.write("\n")
@@ -203,6 +215,40 @@ def run_sample():
                 sr_method.mkg.expand_concept_edge()
                 sr_method.mkg.expand_concept_node(sr_method.method_name)
                 print(sr_method)
+
+
+def merge_dataset():
+    merged_data = []
+    json_files = list(Path(r"C:\worksapce\research\kgc912\dataset_small").glob("*.json"))
+    exist_id = []
+
+
+    for file in json_files:
+        print(file)
+        with open(file, 'r') as f:
+            lines = f.readlines()
+            for line in lines:
+                data = json.loads(line)
+                if data['id'] not in exist_id:
+                    merged_data.append(data)
+                    exist_id.append(data['id'])
+                    print("add:", data['id'])
+
+                    # if len(exist_id) >= 1000:
+                    #     break
+                else:
+                    continue
+
+    # Save the combined data into a single JSON file
+    with open(r"exist.txt", 'w') as json_file:
+        for js in merged_data:
+            json_file.write(str(js['id']))
+            # json_file.write(json.dumps(js))
+            json_file.write("\n")
+
+        json_file.close()
+    print(len(merged_data))
+
 
 # if __name__ == '__main__':
 #     run()
