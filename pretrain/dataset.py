@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class KGCodeDataset(Dataset):
+    spliter = ";"
 
     def __init__(self, args, task):
         self.args = args
@@ -33,6 +34,7 @@ class KGCodeDataset(Dataset):
         self.dataset_name = "KGCode"
         self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
 
+
     def __len__(self):
         return len(self.codes)
 
@@ -46,11 +48,17 @@ class KGCodeDataset(Dataset):
             return ' '.join(input_tokens), self.structures[index], self.nls[index], ' '.join(mask_tokens)
         elif self.task == "rlp":
              label_l = []
+             new_st_l = []
              structure = self.structures[index]
              st_l = structure.split(Vocab.KG_SEP_TOKEN)
-             label_l.append(st_l[1])
-             st_l[1] = Vocab.MSK_TOKEN
-             mask_st = Vocab.KG_SEP_TOKEN.join(st_l)
+             for st in st_l:
+                child_l = st.split(self.spliter)
+                if len(child_l) < 3:
+                    continue
+                label_l.append(child_l[1])
+                new_st = child_l[0] + self.spliter + Vocab.MSK_TOKEN + self.spliter + child_l[2]
+                new_st_l.append(new_st)
+             mask_st = Vocab.KG_SEP_TOKEN.join(new_st_l)
              label = ",".join(label_l)
              return self.codes[index], mask_st, self.nls[index], label
         elif self.task == "nlp":
@@ -87,16 +95,16 @@ class KGCodeDataset(Dataset):
         nl_l = []
         nl_map = {}
 
-        spliter = " "
+
         for edges in kg:
             if edges["type"] not in self.st_type and edges["type"] != "related_concept":
-                ntc = edges["source"]["label"] + spliter + edges["type"] + spliter + edges["target"]["label"]
+                ntc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
                 # exist_nl.append(edges["source"]["label"])
                 # exist_nl.append(edges["target"]["label"])
                 nl_l.append(ntc)
 
             if edges["type"] in self.st_type:
-                stc = edges["source"]["label"] + spliter + edges["type"] + spliter + edges["target"]["label"]
+                stc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
                 st_l.append(stc)
             else:
                 if edges["type"] == 'related_concept':
@@ -108,7 +116,7 @@ class KGCodeDataset(Dataset):
                         nl_map[edges["source"]["label"]] = [edges["target"]["label"]]
 
         for nlm in nl_map.keys():
-            nlm_token = spliter.join(nl_map[nlm])
+            nlm_token = self.spliter.join(nl_map[nlm])
             nl_l.append(nlm_token)
 
 

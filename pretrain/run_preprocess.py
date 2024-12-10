@@ -146,7 +146,7 @@ def run_preprocess():
         for line in lines:
             exist_id.append(int(line))
     # for i, data in enumerate(dataset):
-    for index in range(0, 50000):
+    for index in range(350000, 400000):
 
         if index in exist_id:
             print("exist:", index)
@@ -187,7 +187,7 @@ def run_preprocess():
 
         if count >=100:
             # Write the list of dictionaries to a JSON file
-            with open("datat1_small.json", "w") as json_file:
+            with open("datat1_small_350000.json", "w") as json_file:
                 for js in result:
                     json_file.write(json.dumps(js))
                     json_file.write("\n")
@@ -240,10 +240,10 @@ def merge_dataset():
                     continue
 
     # Save the combined data into a single JSON file
-    with open(r"exist.txt", 'w') as json_file:
+    with open(r"data_small.json", 'w') as json_file:
         for js in merged_data:
-            json_file.write(str(js['id']))
-            # json_file.write(json.dumps(js))
+            # json_file.write(str(js['id']))
+            json_file.write(json.dumps(js))
             json_file.write("\n")
 
         json_file.close()

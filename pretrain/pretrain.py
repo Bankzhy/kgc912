@@ -146,62 +146,63 @@ def pretrain(args):
             dataset.set_task(task)
 
         if task == enums.TASK_RLP:
-            pass
-            # # set model mode
-            # logger.info('-' * 100)
-            # model.set_model_mode(enums.MODEL_MODE_CLS)
-            # # --------------------------------------------------
-            # # trainer
-            # # --------------------------------------------------
-            # logger.info('-' * 100)
-            # logger.info('Initializing the running configurations')
-            # training_args = TrainingArguments(output_dir=os.path.join(args.pre_train_output_root, task),
-            #                                   overwrite_output_dir=True,
-            #                                   do_train=True,
-            #                                   per_device_train_batch_size=args.batch_size,
-            #                                   gradient_accumulation_steps=1,
-            #                                   learning_rate=args.learning_rate,
-            #                                   weight_decay=args.lr_decay_rate,
-            #                                   max_grad_norm=args.grad_clipping_norm,
-            #                                   num_train_epochs=10,
-            #                                   lr_scheduler_type=SchedulerType.LINEAR,
-            #                                   warmup_steps=args.warmup_steps,
-            #                                   logging_dir=os.path.join(args.tensor_board_root, task),
-            #                                   logging_strategy=IntervalStrategy.STEPS,
-            #                                   logging_steps=args.logging_steps,
-            #                                   save_strategy=IntervalStrategy.NO,
-            #                                   seed=args.random_seed,
-            #                                   fp16=args.fp16,
-            #                                   dataloader_drop_last=False,
-            #                                   run_name=args.model_name,
-            #                                   load_best_model_at_end=True,
-            #                                   ignore_data_skip=False,
-            #                                   label_smoothing_factor=args.label_smoothing,
-            #                                   report_to=['tensorboard'],
-            #                                   dataloader_pin_memory=True)
-            # trainer = CodeCLSTrainer(main_args=args,
-            #                          code_vocab=code_vocab,
-            #                          ast_vocab=st_vocab,
-            #                          nl_vocab=nl_vocab,
-            #                          task=task,
-            #                          model=model,
-            #                          args=training_args,
-            #                          data_collator=None,
-            #                          train_dataset=dataset,
-            #                          tokenizer=nl_vocab,
-            #                          model_init=None,
-            #                          compute_metrics=None,
-            #                          callbacks=[LogStateCallBack()])
-            # logger.info('Running configurations initialized successfully')
-            #
-            # # --------------------------------------------------
-            # # train
-            # # --------------------------------------------------
-            # logger.info('-' * 100)
-            # logger.info(f'Start pre-training task: {task}')
-            # cap_result = trainer.train()
-            # logger.info(f'Pre-training task {task} finished')
-            # trainer.save_model(os.path.join(args.model_root, task))
+            # set model mode
+            logger.info('-' * 100)
+            model.set_model_mode(enums.MODEL_MODE_GEN)
+            # --------------------------------------------------
+            # trainer
+            # --------------------------------------------------
+            logger.info('-' * 100)
+            logger.info('Initializing the running configurations')
+            training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.pre_train_output_root, task),
+                                                     overwrite_output_dir=True,
+                                                     do_train=True,
+                                                     per_device_train_batch_size=args.batch_size,
+                                                     gradient_accumulation_steps=1,
+                                                     learning_rate=args.learning_rate,
+                                                     weight_decay=args.lr_decay_rate,
+                                                     max_grad_norm=args.grad_clipping_norm,
+                                                     num_train_epochs=30,
+                                                     lr_scheduler_type=SchedulerType.LINEAR,
+                                                     warmup_steps=args.warmup_steps,
+                                                     logging_dir=os.path.join(args.tensor_board_root, task),
+                                                     logging_strategy=IntervalStrategy.STEPS,
+                                                     logging_steps=args.logging_steps,
+                                                     save_strategy=IntervalStrategy.NO,
+                                                     seed=args.random_seed,
+                                                     fp16=args.fp16,
+                                                     dataloader_drop_last=False,
+                                                     run_name=args.model_name,
+                                                     load_best_model_at_end=True,
+                                                     ignore_data_skip=False,
+                                                     label_smoothing_factor=args.label_smoothing,
+                                                     report_to=['tensorboard'],
+                                                     dataloader_pin_memory=True)
+            trainer = CodeTrainer(main_args=args,
+                                  code_vocab=code_vocab,
+                                  st_vocab=st_vocab,
+                                  nl_vocab=nl_vocab,
+                                  task=task,
+                                  model=model,
+                                  args=training_args,
+                                  data_collator=None,
+                                  train_dataset=dataset,
+                                  tokenizer=nl_vocab,
+                                  model_init=None,
+                                  compute_metrics=None,
+                                  callbacks=[LogStateCallBack()])
+            logger.info('Running configurations initialized successfully')
+
+            # --------------------------------------------------
+            # train
+            # --------------------------------------------------
+            logger.info('-' * 100)
+            logger.info(f'Start pre-training task: {task}')
+            # model device
+            logger.info('Device: {}'.format(next(model.parameters()).device))
+            mass_result = trainer.train()
+            logger.info(f'Pre-training task {task} finished')
+            trainer.save_model(os.path.join(args.model_root, task))
 
         elif task == enums.TASK_MASS:
             # set model mode
@@ -263,63 +264,63 @@ def pretrain(args):
             trainer.save_model(os.path.join(args.model_root, task))
 
         elif task == enums.TASK_NLP:
-            pass
-            # # set model mode
-            # logger.info('-' * 100)
-            # model.set_model_mode(enums.MODEL_MODE_GEN)
-            # # --------------------------------------------------
-            # # trainer
-            # # --------------------------------------------------
-            # logger.info('-' * 100)
-            # logger.info('Initializing the running configurations')
-            # training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.pre_train_output_root, task),
-            #                                          overwrite_output_dir=True,
-            #                                          do_train=True,
-            #                                          per_device_train_batch_size=args.batch_size,
-            #                                          gradient_accumulation_steps=1,
-            #                                          learning_rate=args.learning_rate,
-            #                                          weight_decay=args.lr_decay_rate,
-            #                                          max_grad_norm=args.grad_clipping_norm,
-            #                                          num_train_epochs=30,
-            #                                          lr_scheduler_type=SchedulerType.LINEAR,
-            #                                          warmup_steps=args.warmup_steps,
-            #                                          logging_dir=os.path.join(args.tensor_board_root, task),
-            #                                          logging_strategy=IntervalStrategy.STEPS,
-            #                                          logging_steps=args.logging_steps,
-            #                                          save_strategy=IntervalStrategy.NO,
-            #                                          seed=args.random_seed,
-            #                                          fp16=args.fp16,
-            #                                          dataloader_drop_last=False,
-            #                                          run_name=args.model_name,
-            #                                          load_best_model_at_end=True,
-            #                                          ignore_data_skip=False,
-            #                                          label_smoothing_factor=args.label_smoothing,
-            #                                          report_to=['tensorboard'],
-            #                                          dataloader_pin_memory=True)
-            # trainer = CodeTrainer(main_args=args,
-            #                       code_vocab=code_vocab,
-            #                       ast_vocab=st_vocab,
-            #                       nl_vocab=nl_vocab,
-            #                       task=task,
-            #                       model=model,
-            #                       args=training_args,
-            #                       data_collator=None,
-            #                       train_dataset=dataset,
-            #                       tokenizer=nl_vocab,
-            #                       model_init=None,
-            #                       compute_metrics=None,
-            #                       callbacks=[LogStateCallBack()])
-            # logger.info('Running configurations initialized successfully')
-            #
-            # # --------------------------------------------------
-            # # train
-            # # --------------------------------------------------
-            # logger.info('-' * 100)
-            # logger.info(f'Start pre-training task: {task}')
-            # mnp_result = trainer.train()
-            # logger.info(f'Pre-training task {task} finished')
-            # trainer.save_model(os.path.join(args.model_root, task))
+            # set model mode
+            logger.info('-' * 100)
+            model.set_model_mode(enums.MODEL_MODE_GEN)
+            # --------------------------------------------------
+            # trainer
+            # --------------------------------------------------
+            logger.info('-' * 100)
+            logger.info('Initializing the running configurations')
+            training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.pre_train_output_root, task),
+                                                     overwrite_output_dir=True,
+                                                     do_train=True,
+                                                     per_device_train_batch_size=args.batch_size,
+                                                     gradient_accumulation_steps=1,
+                                                     learning_rate=args.learning_rate,
+                                                     weight_decay=args.lr_decay_rate,
+                                                     max_grad_norm=args.grad_clipping_norm,
+                                                     num_train_epochs=30,
+                                                     lr_scheduler_type=SchedulerType.LINEAR,
+                                                     warmup_steps=args.warmup_steps,
+                                                     logging_dir=os.path.join(args.tensor_board_root, task),
+                                                     logging_strategy=IntervalStrategy.STEPS,
+                                                     logging_steps=args.logging_steps,
+                                                     save_strategy=IntervalStrategy.NO,
+                                                     seed=args.random_seed,
+                                                     fp16=args.fp16,
+                                                     dataloader_drop_last=False,
+                                                     run_name=args.model_name,
+                                                     load_best_model_at_end=True,
+                                                     ignore_data_skip=False,
+                                                     label_smoothing_factor=args.label_smoothing,
+                                                     report_to=['tensorboard'],
+                                                     dataloader_pin_memory=True)
+            trainer = CodeTrainer(main_args=args,
+                                  code_vocab=code_vocab,
+                                  st_vocab=st_vocab,
+                                  nl_vocab=nl_vocab,
+                                  task=task,
+                                  model=model,
+                                  args=training_args,
+                                  data_collator=None,
+                                  train_dataset=dataset,
+                                  tokenizer=nl_vocab,
+                                  model_init=None,
+                                  compute_metrics=None,
+                                  callbacks=[LogStateCallBack()])
+            logger.info('Running configurations initialized successfully')
 
+            # --------------------------------------------------
+            # train
+            # --------------------------------------------------
+            logger.info('-' * 100)
+            logger.info(f'Start pre-training task: {task}')
+            # model device
+            logger.info('Device: {}'.format(next(model.parameters()).device))
+            mass_result = trainer.train()
+            logger.info(f'Pre-training task {task} finished')
+            trainer.save_model(os.path.join(args.model_root, task))
     logger.info('Pre-training finished')
 
     return model, (code_vocab, st_vocab, nl_vocab)

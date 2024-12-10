@@ -25,7 +25,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default='kg_data',
+        default='kg_datat',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
@@ -73,6 +73,11 @@ class RuntimeArguments:
 
     pre_train_output_root: str = field(
         default='output/pretrain',
+        metadata={'help': 'pretrain model output '}
+    )
+
+    model_root: str = field(
+        default='output/pretrain/models',
         metadata={'help': 'pretrain model output '}
     )
 

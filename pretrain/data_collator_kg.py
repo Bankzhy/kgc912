@@ -23,23 +23,32 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
     # rlp
 
     if task == "rlp":
-        pass
-        # code_raw, ast_raw, name_raw, is_ast = map(list, zip(*batch))
-        #
-        # model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(
-        #     code_raw=code_raw,
-        #     code_vocab=code_vocab,
-        #     max_code_len=args.max_code_len,
-        #     ast_raw=ast_raw,
-        #     ast_vocab=ast_vocab,
-        #     max_ast_len=args.max_ast_len,
-        #     nl_raw=name_raw,
-        #     nl_vocab=nl_vocab,
-        #     max_nl_len=args.max_nl_len,
-        #     no_ast=args.no_ast,
-        #     no_nl=args.no_nl
-        # )
-        # model_inputs['labels'] = torch.tensor(is_ast, dtype=torch.long)
+        # pass
+        code_raw, ast_raw, name_raw, target_raw = map(list, zip(*batch))
+
+        model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(
+            code_raw=code_raw,
+            code_vocab=code_vocab,
+            max_code_len=args.max_code_len,
+            ast_raw=ast_raw,
+            ast_vocab=ast_vocab,
+            max_ast_len=args.max_ast_len,
+            nl_raw=name_raw,
+            nl_vocab=nl_vocab,
+            max_nl_len=args.max_nl_len,
+            no_ast=args.no_ast,
+            no_nl=args.no_nl
+        )
+        model_inputs['decoder_input_ids'], model_inputs['decoder_attention_mask'] = get_batch_inputs(
+            batch=target_raw,
+            vocab=code_vocab,
+            processor=Vocab.sos_processor,
+            max_len=int(args.mass_mask_ratio * args.max_code_len)
+        )
+        model_inputs['labels'], _ = get_batch_inputs(batch=target_raw,
+                                                     vocab=code_vocab,
+                                                     processor=Vocab.eos_processor,
+                                                     max_len=int(args.mass_mask_ratio * args.max_code_len))
     # mass
     elif task == "mass":
 
@@ -70,33 +79,32 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
                                                      max_len=int(args.mass_mask_ratio * args.max_code_len))
     # nlp
     elif task == "nlp":
-        pass
-        # code_raw, ast_raw, nl_raw, name_raw = map(list, zip(*batch))
-        #
-        # model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(
-        #     code_raw=code_raw,
-        #     code_vocab=code_vocab,
-        #     max_code_len=args.max_code_len,
-        #     ast_raw=ast_raw,
-        #     ast_vocab=ast_vocab,
-        #     max_ast_len=args.max_ast_len,
-        #     nl_raw=nl_raw,
-        #     nl_vocab=nl_vocab,
-        #     max_nl_len=args.max_nl_len,
-        #     no_ast=args.no_ast,
-        #     no_nl=args.no_nl
-        # )
-        #
-        # model_inputs['decoder_input_ids'], model_inputs['decoder_attention_mask'] = get_batch_inputs(
-        #     batch=name_raw,
-        #     vocab=nl_vocab,
-        #     processor=Vocab.sos_processor,
-        #     max_len=args.max_nl_len
-        # )
-        # model_inputs['labels'], _ = get_batch_inputs(batch=name_raw,
-        #                                              vocab=nl_vocab,
-        #                                              processor=Vocab.eos_processor,
-        #                                              max_len=args.max_nl_len)
+        code_raw, ast_raw, nl_raw, name_raw = map(list, zip(*batch))
+
+        model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(
+            code_raw=code_raw,
+            code_vocab=code_vocab,
+            max_code_len=args.max_code_len,
+            ast_raw=ast_raw,
+            ast_vocab=ast_vocab,
+            max_ast_len=args.max_ast_len,
+            nl_raw=nl_raw,
+            nl_vocab=nl_vocab,
+            max_nl_len=args.max_nl_len,
+            no_ast=args.no_ast,
+            no_nl=args.no_nl
+        )
+
+        model_inputs['decoder_input_ids'], model_inputs['decoder_attention_mask'] = get_batch_inputs(
+            batch=name_raw,
+            vocab=nl_vocab,
+            processor=Vocab.sos_processor,
+            max_len=args.max_nl_len
+        )
+        model_inputs['labels'], _ = get_batch_inputs(batch=name_raw,
+                                                     vocab=nl_vocab,
+                                                     processor=Vocab.eos_processor,
+                                                     max_len=args.max_nl_len)
     return model_inputs
 
 def get_batch_inputs(batch: List[str], vocab: Vocab, processor=None, max_len=None):
