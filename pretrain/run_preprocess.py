@@ -1,5 +1,6 @@
 import csv
 import json
+import os
 import re
 from pathlib import Path
 
@@ -132,8 +133,36 @@ def create_mini_conceptnet():
             if row[1] in exist_tokens and row[2] in exist_tokens:
                 row, created = get_or_create(row[1], row[2], row[3], cursor, conn)
 
+
+def fetch_tl(split):
+    dataset = []
+    path = r"C:\worksapce\research\kgc912\tl"
+    for file in os.listdir(path):
+        spath = os.path.join(path, file)
+        if spath.endswith(split+".json"):
+
+            with open(spath, encoding='ISO-8859-1') as f:
+                lines = f.readlines()
+                print("loading dataset:", split)
+                for line in lines:
+                    data = json.loads(line.strip())
+                    new_data = {
+                        "func_documentation_string":data["comment"],
+                        "func_code_string":data["code"]
+                    }
+                    dataset.append(new_data)
+
+    return dataset
+
+
 def run_preprocess():
-    dataset = load_dataset('code-search-net/code_search_net', 'java', split='train')
+
+    # load code search net
+    # dataset = load_dataset('code-search-net/code_search_net', 'java', split='train')
+    # load tl
+    dataset = fetch_tl("train")
+
+
     ast = KASTParse("", "java")
     ast.setup()
     result = []
@@ -146,7 +175,7 @@ def run_preprocess():
         for line in lines:
             exist_id.append(int(line))
     # for i, data in enumerate(dataset):
-    for index in range(350000, 400000):
+    for index in range(0, len(dataset)):
 
         if index in exist_id:
             print("exist:", index)
@@ -187,7 +216,7 @@ def run_preprocess():
 
         if count >=100:
             # Write the list of dictionaries to a JSON file
-            with open("datat1_small_350000.json", "w") as json_file:
+            with open("tl_datat_small.json", "w") as json_file:
                 for js in result:
                     json_file.write(json.dumps(js))
                     json_file.write("\n")

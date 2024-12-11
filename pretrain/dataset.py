@@ -16,10 +16,11 @@ logger = logging.getLogger(__name__)
 class KGCodeDataset(Dataset):
     spliter = ";"
 
-    def __init__(self, args, task):
+    def __init__(self, args, task, split=None):
         self.args = args
         self.task = task
         self.dataset_dir = os.path.join(args.dataset_root)
+        self.split = split
         self.codes = []
         self.structures = []
         self.nls = []
@@ -85,10 +86,14 @@ class KGCodeDataset(Dataset):
         nls = []
         docs = []
 
-        for file in os.listdir(dataset_dir):
-            path = os.path.join(dataset_dir, file)
-            if path.endswith(".json"):
-                codes, structures, nls, docs = self.parse_json_file(path)
+        if self.task == "summarization":
+            path = os.path.join(dataset_dir, (self.split+".json"))
+            codes, structures, nls, docs = self.parse_json_file(path)
+        else:
+            for file in os.listdir(dataset_dir):
+                path = os.path.join(dataset_dir, file)
+                if path.endswith(".json"):
+                    codes, structures, nls, docs = self.parse_json_file(path)
 
         return codes, structures, nls, docs
 
@@ -167,7 +172,7 @@ class KGCodeDataset(Dataset):
         return codes, structures, nls, docs
 
 
-def init_dataset(args, task=None, load_if_saved=True):
+def init_dataset(args, task=None, split=None, load_if_saved=True):
     name = "kgcode.pretrain.codesearchnet.java"
     if load_if_saved:
         path = os.path.join(args.dataset_save_dir, f'{name}.pk')
