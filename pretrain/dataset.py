@@ -148,6 +148,7 @@ class KGCodeDataset(Dataset):
         docs = []
 
         with open(file, encoding='ISO-8859-1') as f:
+            print(file)
             for line in f.readlines():
                 print(line)
                 data = json.loads(line.strip())
