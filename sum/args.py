@@ -4,12 +4,12 @@ from dataclasses import dataclass, field
 @dataclass
 class RuntimeArguments:
     trained_vocab: str = field(
-        default='vocabs',
+        default='../pretrain/vocabs',
         metadata={'help': 'Directory of trained vocabs'}
     )
 
     vocab_root: str = field(
-        default='vocabs',
+        default='../pretrain/vocabs',
         metadata={'help': 'Directory to save and load vocab pickle instance'}
     )
 
@@ -76,6 +76,11 @@ class RuntimeArguments:
         metadata={'help': 'pretrain model output '}
     )
 
+    output_root: str = field(
+        default='output',
+        metadata={'help': 'pretrain model output '}
+    )
+
     checkpoint_root: str = field(
         default='output/checkpoints',
         metadata={'help': 'pretrain model output '}
@@ -132,7 +137,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=50,
+        default=3,
         metadata={'help': 'Number of data iterations for training'}
     )
 

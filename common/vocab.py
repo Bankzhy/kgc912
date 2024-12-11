@@ -1,6 +1,7 @@
 import os
 import pickle
 import logging
+import sys
 from typing import List, Union
 from tokenizers import Tokenizer
 from tokenizers.models import BPE, WordLevel
@@ -363,6 +364,8 @@ def load_vocab(vocab_root, name) -> Vocab:
         Vocab: Loaded vocab instance
 
     """
+    from common import vocab
+    sys.modules['vocab'] = vocab
     with open(os.path.join(vocab_root, name, '{}.pk'.format(name)), mode='rb') as f:
         obj = pickle.load(f)
     assert isinstance(obj, Vocab)

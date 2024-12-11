@@ -6,7 +6,7 @@ from transformers import BartConfig, IntervalStrategy, SchedulerType, Seq2SeqTra
 
 
 from common.bart import BartForClassificationAndGeneration
-from pretrain.callbacks import LogStateCallBack
+from common.callbacks import LogStateCallBack
 
 from common.dataset import init_dataset
 from common.general import human_format, count_params, layer_wise_parameters
