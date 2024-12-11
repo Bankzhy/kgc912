@@ -4,6 +4,7 @@ import pickle
 import random
 import logging
 from torch.utils.data.dataset import Dataset
+from tqdm import tqdm
 
 from vocab import Vocab
 
@@ -148,8 +149,10 @@ class KGCodeDataset(Dataset):
         docs = []
 
         with open(file, encoding='ISO-8859-1') as f:
-            for line in f.readlines():
-                print(line)
+            lines = f.readlines()
+            print("loading dataset:")
+            for line in tqdm(lines):
+                # print(line)
                 data = json.loads(line.strip())
                 code = data["code"]
                 doc = data["doc"]

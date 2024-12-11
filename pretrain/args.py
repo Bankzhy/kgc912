@@ -25,7 +25,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default='kg_datat',
+        default='kg_data',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
