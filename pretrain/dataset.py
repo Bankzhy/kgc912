@@ -87,7 +87,8 @@ class KGCodeDataset(Dataset):
 
         for file in os.listdir(dataset_dir):
             path = os.path.join(dataset_dir, file)
-            codes, structures, nls, docs = self.parse_json_file(path)
+            if path.endswith(".json"):
+                codes, structures, nls, docs = self.parse_json_file(path)
 
         return codes, structures, nls, docs
 
