@@ -179,6 +179,7 @@ def pretrain(args):
                                                      label_smoothing_factor=args.label_smoothing,
                                                      report_to=['tensorboard'],
                                                      dataloader_pin_memory=True)
+            print("Current batch size:", training_args.per_device_train_batch_size)
             trainer = CodeTrainer(main_args=args,
                                   code_vocab=code_vocab,
                                   st_vocab=st_vocab,
@@ -239,6 +240,7 @@ def pretrain(args):
                                                      label_smoothing_factor=args.label_smoothing,
                                                      report_to=['tensorboard'],
                                                      dataloader_pin_memory=True)
+            print("Current batch size:", training_args.per_device_train_batch_size)
             trainer = CodeTrainer(main_args=args,
                                   code_vocab=code_vocab,
                                   st_vocab=st_vocab,
@@ -299,6 +301,7 @@ def pretrain(args):
                                                      label_smoothing_factor=args.label_smoothing,
                                                      report_to=['tensorboard'],
                                                      dataloader_pin_memory=True)
+            print("Current batch size:", training_args.per_device_train_batch_size)
             trainer = CodeTrainer(main_args=args,
                                   code_vocab=code_vocab,
                                   st_vocab=st_vocab,
