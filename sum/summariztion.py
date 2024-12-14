@@ -23,7 +23,8 @@ from common import enums
 from sum.args import add_args
 from sum.eval import bleu, rouge_l
 from sum.eval.metrics import avg_ir_metrics, accuracy_for_sequence
-
+import warnings
+warnings.filterwarnings('ignore')
 logger = logging.getLogger(__name__)
 
 def run_summarization():
