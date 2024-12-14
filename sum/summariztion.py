@@ -178,6 +178,7 @@ def run_summarization():
         result.update(accuracy_for_sequence(references=refs, candidates=cans))
         return result
 
+    # 尽量不要用IntervalStrategy.EPOCH， 太过频繁影响训练效果，还会曾家训练时间
     training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),
                                              overwrite_output_dir=True,
                                              do_train=True,
@@ -197,7 +198,7 @@ def run_summarization():
                                              warmup_steps=args.warmup_steps,
                                              logging_dir=os.path.join(args.tensor_board_root, enums.TASK_SUMMARIZATION),
                                              logging_strategy=IntervalStrategy.STEPS,
-                                             logging_steps=args.logging_steps,
+                                             logging_steps=2500,
                                              save_strategy=IntervalStrategy.STEPS,
                                              save_steps=2500,
                                              save_total_limit=5,
