@@ -137,17 +137,17 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=3,
+        default=5,
         metadata={'help': 'Number of data iterations for training'}
     )
 
     batch_size: int = field(
-        default=16,
+        default=64,
         metadata={'help': 'Batch size for training on each device'}
     )
 
     eval_batch_size: int = field(
-        default=16,
+        default=64,
         metadata={'help': 'Batch size for evaluation on each device'}
     )
 
@@ -224,7 +224,7 @@ class RuntimeArguments:
     )
 
     max_ast_len: int = field(
-        default=32,
+        default=64,
         metadata={'help': 'Maximum length of ast sequence'}
     )
 
