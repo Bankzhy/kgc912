@@ -198,7 +198,7 @@ def run_summarization():
                                              logging_dir=os.path.join(args.tensor_board_root, enums.TASK_SUMMARIZATION),
                                              logging_strategy=IntervalStrategy.STEPS,
                                              logging_steps=args.logging_steps,
-                                             save_strategy=IntervalStrategy.EPOCH,
+                                             save_strategy=IntervalStrategy.STEPS,
                                              save_total_limit=5,
                                              seed=args.random_seed,
                                              fp16=args.fp16,
