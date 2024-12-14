@@ -87,7 +87,7 @@ class RuntimeArguments:
     )
 
     model_root: str = field(
-        default='output/pretrain/models',
+        default='output/sum/models',
         metadata={'help': 'pretrain model output '}
     )
 
@@ -137,7 +137,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=5,
+        default=20,
         metadata={'help': 'Number of data iterations for training'}
     )
 
