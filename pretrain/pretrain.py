@@ -2,6 +2,9 @@ import os
 import torch
 import logging
 import argparse
+
+from transformers.trainer_utils import get_last_checkpoint
+
 import enums
 from args import add_args
 from dataset import init_dataset
@@ -202,7 +205,11 @@ def pretrain(args):
             logger.info(f'Start pre-training task: {task}')
             # model device
             logger.info('Device: {}'.format(next(model.parameters()).device))
-            mass_result = trainer.train()
+            # mass_result = trainer.train()
+
+            last_checkpoint = get_last_checkpoint(os.path.join(args.pre_train_output_root, task))
+            mass_result = trainer.train(resume_from_checkpoint=last_checkpoint)
+
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
 
