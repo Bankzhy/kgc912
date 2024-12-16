@@ -129,7 +129,11 @@ def pretrain(args):
                         min_length=1,
                         num_beams=args.beam_width,
                         num_labels=2)
-    model = BartForClassificationAndGeneration(config)
+
+    # model = BartForClassificationAndGeneration(config)
+    config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
+    model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
+
     # log model statistic
     logger.info('Model trainable parameters: {}'.format(human_format(count_params(model))))
     table = layer_wise_parameters(model)
@@ -172,7 +176,8 @@ def pretrain(args):
                                                      logging_dir=os.path.join(args.tensor_board_root, task),
                                                      logging_strategy=IntervalStrategy.STEPS,
                                                      logging_steps=args.logging_steps,
-                                                     save_strategy=IntervalStrategy.NO,
+                                                     save_strategy=IntervalStrategy.EPOCH,
+                                                     save_total_limit=3,
                                                      seed=args.random_seed,
                                                      fp16=args.fp16,
                                                      dataloader_drop_last=False,
@@ -205,10 +210,7 @@ def pretrain(args):
             logger.info(f'Start pre-training task: {task}')
             # model device
             logger.info('Device: {}'.format(next(model.parameters()).device))
-            # mass_result = trainer.train()
-
-            last_checkpoint = get_last_checkpoint(os.path.join(args.pre_train_output_root, task))
-            mass_result = trainer.train(resume_from_checkpoint=last_checkpoint)
+            mass_result = trainer.train()
 
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
