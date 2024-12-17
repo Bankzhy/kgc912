@@ -9,7 +9,7 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='rlp,nlp',
+        default='rlp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
