@@ -176,7 +176,7 @@ def pretrain(args):
                                                      logging_dir=os.path.join(args.tensor_board_root, task),
                                                      logging_strategy=IntervalStrategy.STEPS,
                                                      logging_steps=args.logging_steps,
-                                                     save_strategy=IntervalStrategy.EPOCH,
+                                                     save_strategy=IntervalStrategy.NO,
                                                      save_total_limit=3,
                                                      seed=args.random_seed,
                                                      fp16=args.fp16,
