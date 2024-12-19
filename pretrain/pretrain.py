@@ -139,7 +139,8 @@ def pretrain(args):
     table = layer_wise_parameters(model)
     logger.debug('Layer-wised trainable parameters:\n{}'.format(table))
     logger.info('Model built successfully')
-
+    logger.info('Tasks:')
+    print(tasks)
     # --------------------------------------------------
     # pre-train
     # --------------------------------------------------
