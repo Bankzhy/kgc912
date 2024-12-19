@@ -65,6 +65,15 @@ class KGCodeDataset(Dataset):
              return self.codes[index], mask_st, self.nls[index], label
         elif self.task == "nlp":
             return self.codes[index], self.structures[index], self.nls[index], self.docs[index]
+        elif self.task == "cgp":
+            is_graph = random.random() < 0.5
+            if is_graph:
+                return self.codes[index], self.structures[index], self.nls[index], 1
+            else:
+                other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
+                while other_graph == self.structures[index]:
+                    other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
+                return self.codes[index], other_graph, self.nls[index], 0
 
     def set_task(self, task):
         self.task = task
