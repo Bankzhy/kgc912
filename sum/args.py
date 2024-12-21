@@ -20,7 +20,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default='../pretrain/output2/pretrain/models/nlp',
+        default='../pretrain/output3/pretrain/models/nlp',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -72,27 +72,27 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output3/pretrain',
+        default='output4/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     output_root: str = field(
-        default='output3',
+        default='output4',
         metadata={'help': 'pretrain model output '}
     )
 
     checkpoint_root: str = field(
-        default='output3/checkpoints',
+        default='output4/checkpoints',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output3/sum/models',
+        default='output4/sum/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output3/runs',
+        default='output4/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
@@ -137,7 +137,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=50,
+        default=25,
         metadata={'help': 'Number of data iterations for training'}
     )
 
