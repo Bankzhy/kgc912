@@ -9,13 +9,13 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='rlp,nlp',
+        default='cgp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
 
     trained_model: str = field(
-        default='output2/pretrain/models/nlp',
+        default='output3/pretrain/models/nlp',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -72,17 +72,17 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output3/pretrain',
+        default='output4/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output3/pretrain/models',
+        default='output4/pretrain/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output3/runs',
+        default='output4/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
