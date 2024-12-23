@@ -4,12 +4,12 @@ from sum.summariztion import run_summarization
 
 
 def run():
-    # run_preprocess()
+    run_preprocess()
     # merge_dataset()
     # run_mini()
     # create_mini_conceptnet()
     # run_pretrain()
-    run_summarization()
+    # run_summarization()
 
 if __name__ == '__main__':
     run()

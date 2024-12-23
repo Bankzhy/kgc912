@@ -155,12 +155,34 @@ def fetch_tl(split):
     return dataset
 
 
+def fetch_big_clone(split):
+    dataset = []
+    path = r"C:\worksapce\example\kgc\downstream\clone\dataset\small10"
+    for file in os.listdir(path):
+        spath = os.path.join(path, file)
+        if spath.endswith(".jsonl"):
+            with open(spath, encoding='ISO-8859-1') as f:
+                lines = f.readlines()
+                print("loading dataset:", split)
+                for line in lines:
+                    data = json.loads(line.strip())
+
+                    new_data = {
+                        "func_documentation_string": "",
+                        "func_code_string": data["func"],
+                        "idx": data["idx"]
+                    }
+                    dataset.append(new_data)
+
+    return dataset
+
+
 def run_preprocess():
 
     # load code search net
     # dataset = load_dataset('code-search-net/code_search_net', 'java', split='train')
     # load tl
-    dataset = fetch_tl("train")
+    dataset = fetch_big_clone("train")
 
 
     ast = KASTParse("", "java")
@@ -200,7 +222,8 @@ def run_preprocess():
                     sr_method.mkg.expand_concept_node(sr_method.method_name)
                     kg = sr_method.mkg.to_dict()
             new_data = {
-                "id": index,
+                # "id": index,
+                "idx": data["idx"],
                 "code": data['func_code_string'],
                 "doc": data['func_documentation_string'],
                 "kg":kg
@@ -216,7 +239,7 @@ def run_preprocess():
 
         if count >=100:
             # Write the list of dictionaries to a JSON file
-            with open("tl_datat_small.json", "w") as json_file:
+            with open("bc_data.json", "w") as json_file:
                 for js in result:
                     json_file.write(json.dumps(js))
                     json_file.write("\n")
