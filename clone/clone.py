@@ -239,7 +239,7 @@ def run_clone():
                                              greater_is_better=True,
                                              ignore_data_skip=False,
                                              label_smoothing_factor=args.label_smoothing,
-                                             eval_accumulation_steps=2,
+                                             eval_accumulation_steps=32,
                                              report_to=['tensorboard'],
                                              dataloader_pin_memory=True,
                                              predict_with_generate=True)
