@@ -235,7 +235,7 @@ def run_clone():
                                              dataloader_drop_last=False,
                                              run_name=args.model_name,
                                              load_best_model_at_end=True,
-                                             metric_for_best_model='bleu',
+                                             # metric_for_best_model='bleu',
                                              greater_is_better=True,
                                              ignore_data_skip=False,
                                              label_smoothing_factor=args.label_smoothing,
