@@ -67,11 +67,11 @@ class CodeTrainer(Seq2SeqTrainer):
 
 class CodeCLSTrainer(Trainer):
 
-    def __init__(self, main_args: argparse.Namespace, code_vocab, ast_vocab, nl_vocab, task, **kwargs):
+    def __init__(self, main_args: argparse.Namespace, code_vocab, st_vocab, nl_vocab, task, **kwargs):
         super(CodeCLSTrainer, self).__init__(**kwargs)
         self.main_args = main_args
         self.code_vocab = code_vocab
-        self.ast_vocab = ast_vocab
+        self.ast_vocab = st_vocab
         self.nl_vocab = nl_vocab
         self.task = task
 

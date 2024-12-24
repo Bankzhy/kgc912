@@ -34,10 +34,14 @@ class KGCodeDataset(Dataset):
             "assignment"
         ]
         self.dataset_name = "KGCode"
-        self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
-
+        if self.task == "clone":
+            self.codes1, self.sts1, self.docs1, self.codes2, self.sts2, self.docs2, self.labels = self.load_clone_dataset()
+        else:
+            self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
 
     def __len__(self):
+        if self.task == "clone":
+            return len(self.codes1)
         return len(self.codes)
 
     def __getitem__(self, index):
@@ -67,6 +71,8 @@ class KGCodeDataset(Dataset):
             return self.codes[index], self.structures[index], self.nls[index], self.docs[index]
         elif self.task == "summarization":
             return self.codes[index], self.structures[index], self.nls[index], self.docs[index]
+        elif self.task == "clone":
+            return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], self.docs2[index], self.labels[index]
 
     def set_task(self, task):
         self.task = task
@@ -98,6 +104,11 @@ class KGCodeDataset(Dataset):
                     codes, structures, nls, docs = self.parse_json_file(path)
 
         return codes, structures, nls, docs
+
+
+    def load_clone_dataset(self):
+        codes1, sts1, docs1, codes2, sts2, docs2, labels = self.parse_clone_file()
+        return codes1, sts1, docs1, codes2, sts2, docs2, labels
 
     def parse_kg(self, kg):
         st_l = []
@@ -172,6 +183,65 @@ class KGCodeDataset(Dataset):
                 docs.append(doc)
 
         return codes, structures, nls, docs
+
+    def parse_clone_file(self):
+        json_file = os.path.join(self.dataset_dir, "data.json")
+        file = os.path.join(self.dataset_dir, (self.split + ".txt"))
+
+        codes_1 = []
+        codes_2 = []
+        sts_1 = []
+        sts_2 = []
+        docs_1 = []
+        docs_2 = []
+        labels = []
+
+        json_data = {}
+
+        with open(json_file, encoding='ISO-8859-1') as jf:
+            lines = jf.readlines()
+            print("loading dataset:")
+            for line in tqdm(lines):
+                # print(line)
+                data = json.loads(line.strip())
+                st, nl = self.parse_kg(data["kg"])
+                json_data[data["idx"]] = {
+                    "code" : data["code"],
+                    "st" : st,
+                    "nl" : nl,
+                }
+
+        with open(file, encoding='ISO-8859-1') as f:
+            lines = f.readlines()
+            for line in tqdm(lines):
+                try:
+                    ll = line.split("\t")
+                    if ll[0] not in json_data.keys() or ll[1] not in json_data.keys():
+                        continue
+                    code1 = json_data[ll[0]]["code"]
+                    codes_1.append(code1)
+                    code2 = json_data[ll[1]]["code"]
+                    codes_2.append(code2)
+
+                    st1 = json_data[ll[0]]["st"]
+                    sts_1.append(st1)
+                    st2 = json_data[ll[1]]["st"]
+                    sts_2.append(st2)
+
+                    doc1 = json_data[ll[0]]["nl"]
+                    docs_1.append(doc1)
+                    doc2 = json_data[ll[1]]["nl"]
+                    docs_2.append(doc2)
+
+                    label = ll[2].replace("\n", "")
+                    labels.append(label)
+                except Exception as e:
+                    # print(e)
+                    continue
+                # codes_1.append(ll[0])
+                # codes_2.append(ll[1])
+                # labels.append(ll[2])
+        return codes_1, sts_1, docs_1, codes_2, sts_2, docs_2, labels
 
 
 def init_dataset(args, task=None, split=None, load_if_saved=True):

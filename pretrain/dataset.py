@@ -25,6 +25,11 @@ class KGCodeDataset(Dataset):
         self.structures = []
         self.nls = []
         self.docs = []
+
+        self.codes_1 = []
+        self.codes_2 = []
+        self.labels = []
+
         self.st_type = [
             'type_of',
             "control_dependency",
@@ -98,6 +103,9 @@ class KGCodeDataset(Dataset):
         if self.task == "summarization":
             path = os.path.join(dataset_dir, (self.split+".json"))
             codes, structures, nls, docs = self.parse_json_file(path)
+        elif self.task == "clone":
+            # path = os.path.join(dataset_dir, (self.split + ".txt"))
+            codes, structures, nls, docs = self.parse_clone_file(self.split)
         else:
             for file in os.listdir(dataset_dir):
                 path = os.path.join(dataset_dir, file)
@@ -179,6 +187,32 @@ class KGCodeDataset(Dataset):
                 docs.append(doc)
 
         return codes, structures, nls, docs
+
+    def parse_clone_file(self):
+        json_file = os.path.join(self.dataset_dir, "data.json")
+        file = os.path.join(self.dataset_dir, (self.split + ".txt"))
+
+        codes_1 = []
+        codes_2 = []
+        labels = []
+
+        json_data = {}
+
+        with open(json_file, encoding='ISO-8859-1') as jf:
+            lines = jf.readlines()
+            print("loading dataset:")
+            for line in tqdm(lines):
+                # print(line)
+                data = json.loads(line.strip())
+                json_data[data["idx"]] = data["func"]
+
+        with open(file, encoding='ISO-8859-1') as f:
+            lines = f.readlines()
+            for line in tqdm(lines):
+                ll = line.split(" ")
+                codes_1.append(ll[0])
+                codes_2.append(ll[1])
+                labels.append(ll[2])
 
 
 def init_dataset(args, task=None, split=None, load_if_saved=True):
