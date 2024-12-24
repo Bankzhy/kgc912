@@ -142,7 +142,7 @@ def run_clone():
                             num_beams=args.beam_width,
                             num_labels=2)
         model = BartForClassificationAndGeneration(config)
-    model.set_model_mode(enums.MODEL_MODE_GEN)
+    model.set_model_mode(enums.MODEL_MODE_CLS)
     # log model statistics
     logger.info('Trainable parameters: {}'.format(human_format(count_params(model))))
     table = layer_wise_parameters(model)

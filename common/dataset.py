@@ -234,7 +234,7 @@ class KGCodeDataset(Dataset):
                     docs_2.append(doc2)
 
                     label = ll[2].replace("\n", "")
-                    labels.append(label)
+                    labels.append(int(label))
                 except Exception as e:
                     # print(e)
                     continue
