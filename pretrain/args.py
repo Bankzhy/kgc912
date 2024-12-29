@@ -9,7 +9,7 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='cgp',
+        default='mass,rl,nlp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
@@ -72,17 +72,17 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output4/pretrain',
+        default='output/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output4/pretrain/models',
+        default='output/pretrain/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output4/runs',
+        default='output/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
@@ -127,7 +127,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=10,
+        default=30,
         metadata={'help': 'Number of data iterations for training'}
     )
 
