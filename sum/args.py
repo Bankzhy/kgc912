@@ -72,12 +72,12 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output5/pretrain',
+        default='output6/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     output_root: str = field(
-        default='output5',
+        default='output6',
         metadata={'help': 'pretrain model output '}
     )
 
