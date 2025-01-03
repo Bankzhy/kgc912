@@ -22,12 +22,12 @@ def pretrain(args):
     if tasks is None:
         logger.warning("Was specified for pre-training, but got pre-training tasks to None, "
                        "will default to ('mass', 'rlp', 'nlp')")
-        tasks = ['mass', 'rlp', 'nlp', 'cgp']
+        tasks = ['mass', 'rlp', 'nlp', 'rrlp']
     else:
         supported_tasks = []
         for task in tasks.split(','):
             task = task.strip().lower()
-            if task in ['mass', 'rlp', 'nlp', 'cgp']:
+            if task in ['mass', 'rlp', 'nlp', 'rrlp']:
                 supported_tasks.append(task)
             else:
                 logger.warning(f'Pre-training task {task} is not supported and will be ignored.')
@@ -107,32 +107,32 @@ def pretrain(args):
     # --------------------------------------------------
     logger.info('-' * 100)
     logger.info('Building model')
-    config = BartConfig(vocab_size=len(code_vocab) + len(st_vocab) + len(nl_vocab),
-                        max_position_embeddings=512,
-                        encoder_layers=args.n_layer,
-                        encoder_ffn_dim=args.d_ff,
-                        encoder_attention_heads=args.n_head,
-                        decoder_layers=args.n_layer,
-                        decoder_ffn_dim=args.d_ff,
-                        decoder_attention_heads=args.n_head,
-                        activation_function='gelu',
-                        d_model=args.d_model,
-                        dropout=args.dropout,
-                        use_cache=True,
-                        pad_token_id=Vocab.START_VOCAB.index(Vocab.PAD_TOKEN),
-                        bos_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
-                        eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
-                        is_encoder_decoder=True,
-                        decoder_start_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
-                        forced_eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
-                        max_length=100,
-                        min_length=1,
-                        num_beams=args.beam_width,
-                        num_labels=2)
-
-    model = BartForClassificationAndGeneration(config)
-    # config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
-    # model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
+    # config = BartConfig(vocab_size=len(code_vocab) + len(st_vocab) + len(nl_vocab),
+    #                     max_position_embeddings=512,
+    #                     encoder_layers=args.n_layer,
+    #                     encoder_ffn_dim=args.d_ff,
+    #                     encoder_attention_heads=args.n_head,
+    #                     decoder_layers=args.n_layer,
+    #                     decoder_ffn_dim=args.d_ff,
+    #                     decoder_attention_heads=args.n_head,
+    #                     activation_function='gelu',
+    #                     d_model=args.d_model,
+    #                     dropout=args.dropout,
+    #                     use_cache=True,
+    #                     pad_token_id=Vocab.START_VOCAB.index(Vocab.PAD_TOKEN),
+    #                     bos_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
+    #                     eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
+    #                     is_encoder_decoder=True,
+    #                     decoder_start_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
+    #                     forced_eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
+    #                     max_length=100,
+    #                     min_length=1,
+    #                     num_beams=args.beam_width,
+    #                     num_labels=2)
+    #
+    # model = BartForClassificationAndGeneration(config)
+    config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
+    model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
 
     # log model statistic
     logger.info('Model trainable parameters: {}'.format(human_format(count_params(model))))
@@ -392,6 +392,69 @@ def pretrain(args):
             logger.info('-' * 100)
             logger.info(f'Start pre-training task: {task}')
             cap_result = trainer.train()
+            logger.info(f'Pre-training task {task} finished')
+            trainer.save_model(os.path.join(args.model_root, task))
+
+        elif task == enums.TASK_RRLP:
+            # set model mode
+            logger.info('-' * 100)
+            model.set_model_mode(enums.MODEL_MODE_GEN)
+            # --------------------------------------------------
+            # trainer
+            # --------------------------------------------------
+            logger.info('-' * 100)
+            logger.info('Initializing the running configurations')
+            training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.pre_train_output_root, task),
+                                                     overwrite_output_dir=True,
+                                                     do_train=True,
+                                                     # auto_find_batch_size=True,
+                                                     per_device_train_batch_size=args.batch_size,
+                                                     gradient_accumulation_steps=1,
+                                                     learning_rate=args.learning_rate,
+                                                     weight_decay=args.lr_decay_rate,
+                                                     max_grad_norm=args.grad_clipping_norm,
+                                                     num_train_epochs=args.n_epoch,
+                                                     lr_scheduler_type=SchedulerType.LINEAR,
+                                                     warmup_steps=args.warmup_steps,
+                                                     logging_dir=os.path.join(args.tensor_board_root, task),
+                                                     logging_strategy=IntervalStrategy.STEPS,
+                                                     logging_steps=args.logging_steps,
+                                                     save_strategy=IntervalStrategy.NO,
+                                                     save_total_limit=3,
+                                                     seed=args.random_seed,
+                                                     fp16=args.fp16,
+                                                     dataloader_drop_last=False,
+                                                     run_name=args.model_name,
+                                                     load_best_model_at_end=True,
+                                                     ignore_data_skip=False,
+                                                     label_smoothing_factor=args.label_smoothing,
+                                                     report_to=['tensorboard'],
+                                                     dataloader_pin_memory=True)
+            print("Current batch size:", training_args.per_device_train_batch_size)
+            trainer = CodeTrainer(main_args=args,
+                                  code_vocab=code_vocab,
+                                  st_vocab=st_vocab,
+                                  nl_vocab=nl_vocab,
+                                  task=task,
+                                  model=model,
+                                  args=training_args,
+                                  data_collator=None,
+                                  train_dataset=dataset,
+                                  tokenizer=nl_vocab,
+                                  model_init=None,
+                                  compute_metrics=None,
+                                  callbacks=[LogStateCallBack()])
+            logger.info('Running configurations initialized successfully')
+
+            # --------------------------------------------------
+            # train
+            # --------------------------------------------------
+            logger.info('-' * 100)
+            logger.info(f'Start pre-training task: {task}')
+            # model device
+            logger.info('Device: {}'.format(next(model.parameters()).device))
+            mass_result = trainer.train()
+
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
 

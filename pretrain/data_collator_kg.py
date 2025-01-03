@@ -22,7 +22,7 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
     model_inputs = {}
     # rlp
 
-    if task == "rlp":
+    if task == "rlp" or task == "rrlp":
         # pass
         code_raw, ast_raw, name_raw, target_raw = map(list, zip(*batch))
 

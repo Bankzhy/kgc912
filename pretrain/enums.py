@@ -8,6 +8,7 @@ TASK_MASS = "mass"
 TASK_RLP = "rlp"
 TASK_NLP = "nlp"
 TASK_CGP = "cgp"
+TASK_RRLP = "rrlp"
 
 TRAINING_MODE_FINE_TUNE = 'fine_tune'
 TASK_SUMMARIZATION = 'summarization'
