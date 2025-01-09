@@ -148,7 +148,8 @@ def fetch_tl(split):
                     data = json.loads(line.strip())
                     new_data = {
                         "func_documentation_string":data["comment"],
-                        "func_code_string":data["code"]
+                        "func_code_string":data["code"],
+                        "idx": data["id"]
                     }
                     dataset.append(new_data)
 
@@ -182,7 +183,10 @@ def run_preprocess():
     # load code search net
     # dataset = load_dataset('code-search-net/code_search_net', 'java', split='train')
     # load tl
-    dataset = fetch_big_clone("train")
+    dataset = fetch_tl("train")
+
+    # load bcb
+    # dataset = fetch_big_clone("train")
 
 
     ast = KASTParse("", "java")
@@ -190,6 +194,7 @@ def run_preprocess():
     result = []
     exist_id = []
     count = 0
+    error = []
     print("Size:", len(dataset))
 
     with open("exist.txt", "r", encoding="utf8") as file:
@@ -203,7 +208,7 @@ def run_preprocess():
             print("exist:", index)
             continue
 
-        try:
+        # try:
             data = dataset[index]
             print(index, data)
             code_content = "public class Test {\n"
@@ -217,7 +222,10 @@ def run_preprocess():
                     sr_method=cls.method_list[0]
                     sr_method.mkg.parse_method_name(sr_method.method_name)
                     sr_method.mkg.parse_concept()
-                    sr_method.rebuild_mkg()
+                    try:
+                        sr_method.rebuild_mkg()
+                    except Exception as e:
+                        continue
                     sr_method.mkg.expand_concept_edge()
                     sr_method.mkg.expand_concept_node(sr_method.method_name)
                     kg = sr_method.mkg.to_dict()
@@ -230,12 +238,12 @@ def run_preprocess():
             }
             result.append(new_data)
             count += 1
-        except Exception as e:
-            print(e)
-            with open("error.txt", "w") as file:
-                file.write(str(index))
-                file.write("\n")
-            continue
+        # except Exception as e:
+        #     print(e)
+        #     with open("error.txt", "w") as file:
+        #         file.write(str(index))
+        #         file.write("\n")
+        #     continue
 
         if count >=100:
             # Write the list of dictionaries to a JSON file
