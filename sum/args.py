@@ -72,27 +72,27 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output7/pretrain',
+        default='output8/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     output_root: str = field(
-        default='output',
+        default='output8',
         metadata={'help': 'pretrain model output '}
     )
 
     checkpoint_root: str = field(
-        default='output/checkpoints',
+        default='output8/checkpoints',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output/sum/models',
+        default='output8/sum/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output/runs',
+        default='output8/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
