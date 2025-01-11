@@ -6,6 +6,7 @@ import logging
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
+from common.data_utils import remove_comments_and_docstrings, replace_string_literal
 from vocab import Vocab
 
 # from pretrain.vocab.vocab import Vocab
@@ -200,7 +201,11 @@ class KGCodeDataset(Dataset):
                 doc = data["doc"]
                 st, nl = self.parse_kg(data["kg"])
 
-                codes.append(code)
+                source = data['code'].strip()
+                source = remove_comments_and_docstrings(source, "java")
+                source = replace_string_literal(source)
+
+                codes.append(source)
                 structures.append(st)
                 nls.append(nl)
                 docs.append(doc)

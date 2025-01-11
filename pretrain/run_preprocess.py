@@ -197,47 +197,67 @@ def run_preprocess():
     error = []
     print("Size:", len(dataset))
 
-    with open("exist.txt", "r", encoding="utf8") as file:
+    with open("sum/tl_data/train.json", "r", encoding="utf8") as file:
         lines = file.readlines()
         for line in lines:
-            exist_id.append(int(line))
+            data = json.loads(line.strip())
+            id = data["id"]
+            exist_id.append(id)
+
+    # with open(r"C:\worksapce\research\kgc912\tl_data_train11.json", "r", encoding="utf8") as file:
+    #     lines = file.readlines()
+    #     for line in lines:
+    #         data = json.loads(line.strip())
+    #         id = data["id"]
+    #         exist_id.append(id)
+
     # for i, data in enumerate(dataset):
     for index in range(0, len(dataset)):
-
         if index in exist_id:
             print("exist:", index)
             continue
 
         # try:
-            data = dataset[index]
-            print(index, data)
-            code_content = "public class Test {\n"
-            code_content += data['func_code_string']
-            code_content += "}"
-            sr_project = ast.do_parse_content(code_content)
-            sr_method = None
+        data = dataset[index]
+        print(index, data)
+        code_content = "public class Test {\n"
+        code_content += data['func_code_string']
+        code_content += "}"
+        sr_project = ast.do_parse_content(code_content)
+        sr_method = None
 
-            for program in sr_project.program_list:
-                for cls in program.class_list:
+        for program in sr_project.program_list:
+            for cls in program.class_list:
+                if len(cls.method_list) > 0:
                     sr_method=cls.method_list[0]
-                    sr_method.mkg.parse_method_name(sr_method.method_name)
-                    sr_method.mkg.parse_concept()
-                    try:
-                        sr_method.rebuild_mkg()
-                    except Exception as e:
-                        continue
-                    sr_method.mkg.expand_concept_edge()
-                    sr_method.mkg.expand_concept_node(sr_method.method_name)
-                    kg = sr_method.mkg.to_dict()
-            new_data = {
-                # "id": index,
-                "idx": data["idx"],
-                "code": data['func_code_string'],
-                "doc": data['func_documentation_string'],
-                "kg":kg
-            }
-            result.append(new_data)
-            count += 1
+                elif len(cls.constructor_list) == 1:
+                    sr_method=cls.constructor_list[0]
+                else:
+                    print("class error")
+                    continue
+                sr_method.mkg.parse_method_name(sr_method.method_name)
+                sr_method.mkg.parse_concept()
+                try:
+                    sr_method.rebuild_mkg()
+                except Exception as e:
+                    continue
+                sr_method.mkg.expand_concept_edge()
+                sr_method.mkg.expand_concept_node(sr_method.method_name)
+                kg = sr_method.mkg.to_dict()
+
+        if sr_method is None:
+            continue
+
+        new_data = {
+            "id": index,
+            # "idx": data["idx"],
+            "code": data['func_code_string'],
+            "doc": data['func_documentation_string'],
+            # "code_token": data["func_code_token"],
+            "kg": kg
+        }
+        result.append(new_data)
+        count += 1
         # except Exception as e:
         #     print(e)
         #     with open("error.txt", "w") as file:
@@ -245,18 +265,18 @@ def run_preprocess():
         #         file.write("\n")
         #     continue
 
-        if count >=100:
+        # if count >=100:
             # Write the list of dictionaries to a JSON file
-            with open("bc_data.json", "w") as json_file:
-                for js in result:
-                    json_file.write(json.dumps(js))
-                    json_file.write("\n")
-                json_file.close()
-                count = 0
+        with open("tl_data_train.json", "w") as json_file:
+            for js in result:
+                json_file.write(json.dumps(js))
+                json_file.write("\n")
+            json_file.close()
+                # count = 0
 
 
 def run_sample():
-    sample_path = r"sample.java"
+    sample_path = r"C:\worksapce\research\kgc912\pretrain\sample.java"
     with open(sample_path, 'r', encoding="utf8") as f:
         ast = KASTParse("", "java")
         ast.setup()
@@ -269,12 +289,14 @@ def run_sample():
 
         for program in sr_project.program_list:
             for cls in program.class_list:
-                sr_method = cls.method_list[0]
+                if len(cls.method_list) > 0:
+                    sr_method = cls.method_list[0]
+                elif len(cls.constructor_list) == 1:
+                    sr_method = cls.constructor_list[0]
+                else:
+                    print("class error")
+                sr_method.mkg.parse_method_name(sr_method.method_name)
                 sr_method.mkg.parse_concept()
-                sr_method.rebuild_mkg()
-                sr_method.mkg.expand_concept_edge()
-                sr_method.mkg.expand_concept_node(sr_method.method_name)
-                print(sr_method)
 
 
 def merge_dataset():
@@ -311,5 +333,5 @@ def merge_dataset():
 
 
 # if __name__ == '__main__':
-#     run()
+#     # run()
 #     run_sample()

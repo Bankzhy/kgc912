@@ -886,12 +886,17 @@ class SRMethod(SRCore):
 
 class SRConstructor(SRCore):
     def __init__(self, word_list=[], id="-1", param_list=[], name="", modifiers="", statement_list=[]):
-        self.id = id
         self.word_list = word_list
-        self.param_list = param_list
-        self.name = name
-        self.modifiers = modifiers
+        # self.method_name = method_name
         self.statement_list = statement_list
+        self.param_list = param_list
+
+        self.id = id
+        self.modifiers = modifiers
+
+        self.comment = ""
+
+        self.mkg = None
 
     def to_string(self, space=1):
         return " ".join(self.word_list)

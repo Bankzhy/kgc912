@@ -214,20 +214,24 @@ class MKG:
     def to_dict(self):
         result = []
         for edge in self.edges:
-            source = {
-                "label": edge.source.label,
-                "type": edge.source.type,
-            }
-            target = {
-                "label": edge.target.label,
-                "type": edge.target.type,
-            }
-            edge = {
-                "source": source,
-                "target": target,
-                "type": edge.type,
-            }
-            result.append(edge)
+            try:
+                source = {
+                    "label": edge.source.label,
+                    "type": edge.source.type,
+                }
+                target = {
+                    "label": edge.target.label,
+                    "type": edge.target.type,
+                }
+                edge = {
+                    "source": source,
+                    "target": target,
+                    "type": edge.type,
+                }
+                result.append(edge)
+            except Exception as e:
+                print(e)
+                continue
         return result
 
 class Node:

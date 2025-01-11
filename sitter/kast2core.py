@@ -586,32 +586,32 @@ class KASTParse:
         elif statement_node.type == self.EXPRESSION_STATEMENT:
             if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION:
                 statement.var, statement.value = self.fetch_var(statement_node.children[0], statement, mkg)
-                print(statement.word_list)
-                data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
-                max_assignment_var, max_num = mkg.get_max_assignment_var_node(statement.var[0])
+                if len(statement.var)>0:
+                    data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
+                    max_assignment_var, max_num = mkg.get_max_assignment_var_node(statement.var[0])
 
-                if max_assignment_var is not None:
-                    new_var_assignment_label = statement.var[0] + "_" + str(max_num+1)
-                else:
-                    new_var_assignment_label = statement.var[0] + "_" + str(max_num)
-                new_assignment_var, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
-                new_assignment_edge = mkg.get_or_create_edge(new_assignment_var, data_var, ASSIGNMENT)
-                statement.assignment_var.append(new_assignment_var)
-                for v in statement.value:
-                    if v.isdigit():
-                        continue
-                    if v == statement.var[0]:
-                        max_assignment_label = statement.var[0] + "_" + str(max_num)
-                        max_assignment_v = mkg.get_node(max_assignment_label, VAR_ASSIGNMENT)
+                    if max_assignment_var is not None:
+                        new_var_assignment_label = statement.var[0] + "_" + str(max_num+1)
                     else:
-                        max_assignment_v, max_v_num = mkg.get_max_assignment_var_node(v)
-                    if max_assignment_v is not None:
-                        new_dd_edge = mkg.get_or_create_edge(new_assignment_var, max_assignment_v, DATA_DEPENDENCY)
+                        new_var_assignment_label = statement.var[0] + "_" + str(max_num)
+                    new_assignment_var, created = mkg.get_or_create_node(new_var_assignment_label, VAR_ASSIGNMENT)
+                    new_assignment_edge = mkg.get_or_create_edge(new_assignment_var, data_var, ASSIGNMENT)
+                    statement.assignment_var.append(new_assignment_var)
+                    for v in statement.value:
+                        if v.isdigit():
+                            continue
+                        if v == statement.var[0]:
+                            max_assignment_label = statement.var[0] + "_" + str(max_num)
+                            max_assignment_v = mkg.get_node(max_assignment_label, VAR_ASSIGNMENT)
+                        else:
+                            max_assignment_v, max_v_num = mkg.get_max_assignment_var_node(v)
+                        if max_assignment_v is not None:
+                            new_dd_edge = mkg.get_or_create_edge(new_assignment_var, max_assignment_v, DATA_DEPENDENCY)
 
-                if dominate_vars is not None:
-                    if len(dominate_vars) > 0:
-                        for dr in dominate_vars:
-                            new_cd_edge = mkg.get_or_create_edge(new_assignment_var, dr, CONTROL_DEPENDENCY)
+                    if dominate_vars is not None:
+                        if len(dominate_vars) > 0:
+                            for dr in dominate_vars:
+                                new_cd_edge = mkg.get_or_create_edge(new_assignment_var, dr, CONTROL_DEPENDENCY)
 
             elif statement_node.children[0].type == self.METHOD_INVOCATION:
                 self.parse_method_invocation(statement_node.children[0], statement, mkg)
@@ -670,6 +670,7 @@ class KASTParse:
                 for sub_node in node.children:
                     if sub_node.type == self.IDENTIFIER:
                         mi.param.append(sub_node.text.decode())
+
         if mi.parent.istitle():
             parent_node, created = mkg.get_or_create_node(mi.parent, DATATYPE)
         else:
@@ -729,7 +730,8 @@ class KASTParse:
         new_sr_method.mkg = new_mkg
         return new_sr_method
 
-    def parse_constructor(self, root_node, mkg, dominate_vars):
+    def parse_constructor(self, root_node):
+        new_mkg = MKG()
         new_sr_constructor = SRConstructor(
             id=self.get_uuid()
         )
@@ -748,7 +750,7 @@ class KASTParse:
             elif node.type == self.FORMAL_PARAMETERS:
                 new_sr_constructor.param_list = self.parse_param(node)
             elif node.type == self.CONSTRUCTOR_BODY:
-                new_sr_constructor.statement_list = self.parse_block(node, mkg, dominate_vars)
+                new_sr_constructor.statement_list = self.parse_block(node, new_mkg)
         new_sr_constructor.word_list = word_list
         return new_sr_constructor
 
@@ -770,7 +772,12 @@ class KASTParse:
                         new_sr_method.comment = root_node.children[index - 1].text.decode()
                 method_list.append(new_sr_method)
             elif node.type == self.CONSTRUCTOR_DECLARATION:
-                constructor_list.append(self.parse_constructor(node))
+                # constructor_list.append(self.parse_constructor(node))
+                new_sr_method = self.parse_method_node(node)
+                if index != 0:
+                    if "comment" in root_node.children[index - 1].type:
+                        new_sr_method.comment = root_node.children[index - 1].text.decode()
+                method_list.append(new_sr_method)
             elif node.type == self.FUNCTION_DEFINITION:
                 new_sr_method = self.parse_method_node(node)
                 if index != 0:
