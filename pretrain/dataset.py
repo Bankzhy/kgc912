@@ -3,10 +3,13 @@ import json
 import pickle
 import random
 import logging
+import re
+
+import torch
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
-from common.data_utils import remove_comments_and_docstrings, replace_string_literal
+from data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
 from vocab import Vocab
 
 # from pretrain.vocab.vocab import Vocab
@@ -15,8 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class KGCodeDataset(Dataset):
-    spliter = ";"
-
+    spliter = " "
+    KG_SEP_TOKEN = " "+ Vocab.KG_SEP_TOKEN + " "
+    
     def __init__(self, args, task, split=None):
         self.args = args
         self.task = task
@@ -42,9 +46,31 @@ class KGCodeDataset(Dataset):
         self.dataset_name = "KGCode"
         self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
 
+        self.size = len(self.codes)
+
+    def split_edge_name(self, name):
+            # 处理 CamelCase
+        return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
 
     def __len__(self):
         return len(self.codes)
+
+    def subset(self, ratio):
+        """
+        Return a subset of self.
+
+        Args:
+            ratio (float): The ratio of size, must greater than 0 and less than/equal to 1
+
+        Returns:
+            Dataset: the subset
+
+        """
+        assert 0 < ratio <= 1, f'The subset ratio supposed to be 0 < ratio <= 1, but got ratio={ratio}'
+        if ratio == 1:
+            return self
+        indices = random.sample(range(self.size), int(self.size * ratio))
+        return torch.utils.data.Subset(self, indices)
 
     def __getitem__(self, index):
         if self.task == "mass":
@@ -58,7 +84,7 @@ class KGCodeDataset(Dataset):
              label_l = []
              new_st_l = []
              structure = self.structures[index]
-             st_l = structure.split(Vocab.KG_SEP_TOKEN)
+             st_l = structure.split(self.KG_SEP_TOKEN)
              for st in st_l:
                 child_l = st.split(self.spliter)
                 if len(child_l) < 3:
@@ -66,7 +92,7 @@ class KGCodeDataset(Dataset):
                 label_l.append(child_l[1])
                 new_st = child_l[0] + self.spliter + Vocab.MSK_TOKEN + self.spliter + child_l[2]
                 new_st_l.append(new_st)
-             mask_st = Vocab.KG_SEP_TOKEN.join(new_st_l)
+             mask_st = self.KG_SEP_TOKEN.join(new_st_l)
              label = ",".join(label_l)
              return self.codes[index], mask_st, self.nls[index], label
         elif self.task == "nlp":
@@ -84,7 +110,7 @@ class KGCodeDataset(Dataset):
             label_l = []
             new_st_l = []
             structure = self.structures[index]
-            st_l = structure.split(Vocab.KG_SEP_TOKEN)
+            st_l = structure.split(self.KG_SEP_TOKEN)
             for st in st_l:
                 child_l = st.split(self.spliter)
                 if len(child_l) < 3:
@@ -96,10 +122,29 @@ class KGCodeDataset(Dataset):
                 else:
                     new_st = child_l[0] + self.spliter + child_l[1] + self.spliter + child_l[2]
                 new_st_l.append(new_st)
-            mask_st = Vocab.KG_SEP_TOKEN.join(new_st_l)
+            mask_st = self.KG_SEP_TOKEN.join(new_st_l)
             label = ",".join(label_l)
             return self.codes[index], mask_st, self.nls[index], label
+        elif self.task == "cpp":
+            label_l = []
+            new_nls_l = []
+            concept = self.nls[index]
+            nls_l = concept.split(",")
+            for nls in nls_l:
+                child_l = nls.split(self.spliter)
+                if len(child_l) < 3:
+                    label_l.extend(child_l)
+                    new_nls_l.append(nls)
+                else:
+                    edge_l = self.split_edge_name(child_l[1])
+                    edge_str = self.spliter.join(edge_l).lower()
 
+                    new_label = child_l[0] + self.spliter + edge_str + self.spliter + child_l[2]
+                    label_l.append(new_label)
+
+            label = ",".join(label_l)
+            new_nls = ",".join(new_nls_l)
+            return self.codes[index], self.structures[index], new_nls, label
     def set_task(self, task):
         self.task = task
 
@@ -145,7 +190,11 @@ class KGCodeDataset(Dataset):
                 ntc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
                 # exist_nl.append(edges["source"]["label"])
                 # exist_nl.append(edges["target"]["label"])
-                nl_l.append(ntc)
+                # ntc = remove_comments_and_docstrings(ntc, "java")
+                ntc = replace_string_literal(ntc)
+                ntc = self.remove_punctuation_and_replace_dot(ntc)
+                if ntc.lower() not in nl_l:
+                    nl_l.append(ntc.lower())
 
             if edges["type"] in self.st_type:
                 stc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
@@ -155,18 +204,29 @@ class KGCodeDataset(Dataset):
                     # if edges["target"]["label"] not in exist_nl:
                     #     nl_l.append(edges["target"]["label"])
                     if edges["source"]["label"] in nl_map.keys():
-                        nl_map[edges["source"]["label"]].append(edges["target"]["label"])
+                        if edges["target"]["label"].lower() not in nl_map[edges["source"]["label"]]:
+                            nl_map[edges["source"]["label"]].append(edges["target"]["label"].lower())
                     else:
                         nl_map[edges["source"]["label"]] = [edges["target"]["label"]]
 
         for nlm in nl_map.keys():
             nlm_token = self.spliter.join(nl_map[nlm])
+            # nlm_token = remove_comments_and_docstrings(nlm_token, "java")
+            nlm_token = self.remove_punctuation_and_replace_dot(nlm_token)
+            nlm_token = replace_string_literal(nlm_token)
             nl_l.append(nlm_token)
 
 
-        st_token = Vocab.KG_SEP_TOKEN.join(st_l)
-        nl_token = Vocab.KG_SEP_TOKEN.join(nl_l)
+        st_token = self.KG_SEP_TOKEN.join(st_l)
+        nl_token = ",".join(nl_l)
         return st_token, nl_token
+
+    def remove_punctuation_and_replace_dot(self, text):
+        # 使用正则表达式去掉所有标点符号
+        text = re.sub(r'[^\w\s.]', '', text)
+        # 将 "." 替换为空格
+        text = text.replace('.', ' ')
+        return text
 
     def parse_json_file(self, file):
         """
@@ -204,8 +264,9 @@ class KGCodeDataset(Dataset):
                 source = data['code'].strip()
                 source = remove_comments_and_docstrings(source, "java")
                 source = replace_string_literal(source)
+                code = tokenize_source(source=source, lang="java")
 
-                codes.append(source)
+                codes.append(code)
                 structures.append(st)
                 nls.append(nl)
                 docs.append(doc)
@@ -239,8 +300,8 @@ class KGCodeDataset(Dataset):
                 labels.append(ll[2])
 
 
-def init_dataset(args, task=None, split=None, load_if_saved=True):
-    name = "kgcode.pretrain.codesearchnet.java"
+def init_dataset(args, task=None, split=None, load_if_saved=True, mode="pretrain", language="java"):
+    name = '.'.join([sub_name for sub_name in [mode, task, language, split] if sub_name is not None])
     if load_if_saved:
         path = os.path.join(args.dataset_save_dir, f'{name}.pk')
         if os.path.exists(path) and os.path.isfile(path):

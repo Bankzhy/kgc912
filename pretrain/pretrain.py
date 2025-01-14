@@ -2,7 +2,12 @@ import os
 import torch
 import logging
 import argparse
-
+import sys
+curPath = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
+sys.path.append(curPath)
+sys.path.append('../..')
+print("当前的工作目录：",os.getcwd())
+print("python搜索模块的路径集合",sys.path)
 from transformers.trainer_utils import get_last_checkpoint
 
 import enums
@@ -22,12 +27,12 @@ def pretrain(args):
     if tasks is None:
         logger.warning("Was specified for pre-training, but got pre-training tasks to None, "
                        "will default to ('mass', 'rlp', 'nlp')")
-        tasks = ['mass', 'rlp', 'nlp', 'rrlp']
+        tasks = ['mass', 'rlp', 'cpp']
     else:
         supported_tasks = []
         for task in tasks.split(','):
             task = task.strip().lower()
-            if task in ['mass', 'rlp', 'nlp', 'rrlp']:
+            if task in ['mass', 'rlp', 'cpp']:
                 supported_tasks.append(task)
             else:
                 logger.warning(f'Pre-training task {task} is not supported and will be ignored.')
@@ -61,6 +66,7 @@ def pretrain(args):
                     f'train_subset_ratio={args.pre_train_subset_ratio}')
         logger.info('The size of trimmed pre-train set: {}'.format(len(dataset)))
     logger.info('Datasets loaded and parsed successfully')
+    # dataset = dataset.subset(0.0001)
 
     # --------------------------------------------------
     # vocabs
@@ -277,7 +283,7 @@ def pretrain(args):
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
 
-        elif task == enums.TASK_NLP:
+        elif task == enums.TASK_NLP or task == enums.TASK_CPP:
             # set model mode
             logger.info('-' * 100)
             model.set_model_mode(enums.MODEL_MODE_GEN)

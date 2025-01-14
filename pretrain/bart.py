@@ -12,7 +12,7 @@ import numpy as np
 import logging
 
 import enums
-from common import inputs_to_cuda
+from commons import inputs_to_cuda
 
 logger = logging.getLogger(__name__)
 
