@@ -116,13 +116,16 @@ class KGCodeDataset(Dataset):
         nl_l = []
         nl_map = {}
 
-
         for edges in kg:
             if edges["type"] not in self.st_type and edges["type"] != "related_concept":
                 ntc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
                 # exist_nl.append(edges["source"]["label"])
                 # exist_nl.append(edges["target"]["label"])
-                nl_l.append(ntc)
+                # ntc = remove_comments_and_docstrings(ntc, "java")
+                ntc = replace_string_literal(ntc)
+                ntc = self.remove_punctuation_and_replace_dot(ntc)
+                if ntc.lower() not in nl_l:
+                    nl_l.append(ntc.lower())
 
             if edges["type"] in self.st_type:
                 stc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
@@ -132,17 +135,20 @@ class KGCodeDataset(Dataset):
                     # if edges["target"]["label"] not in exist_nl:
                     #     nl_l.append(edges["target"]["label"])
                     if edges["source"]["label"] in nl_map.keys():
-                        nl_map[edges["source"]["label"]].append(edges["target"]["label"])
+                        if edges["target"]["label"].lower() not in nl_map[edges["source"]["label"]]:
+                            nl_map[edges["source"]["label"]].append(edges["target"]["label"].lower())
                     else:
                         nl_map[edges["source"]["label"]] = [edges["target"]["label"]]
 
         for nlm in nl_map.keys():
             nlm_token = self.spliter.join(nl_map[nlm])
+            # nlm_token = remove_comments_and_docstrings(nlm_token, "java")
+            nlm_token = self.remove_punctuation_and_replace_dot(nlm_token)
+            nlm_token = replace_string_literal(nlm_token)
             nl_l.append(nlm_token)
 
-
-        st_token = Vocab.KG_SEP_TOKEN.join(st_l)
-        nl_token = Vocab.KG_SEP_TOKEN.join(nl_l)
+        st_token = self.KG_SEP_TOKEN.join(st_l)
+        nl_token = ",".join(nl_l)
         return st_token, nl_token
 
     def parse_json_file(self, file):
@@ -175,6 +181,8 @@ class KGCodeDataset(Dataset):
                 # print(line)
                 data = json.loads(line.strip())
                 code = data["code"]
+                code = remove_comments_and_docstrings(code, "java")
+                code = replace_string_literal(code)
                 code = tokenize_source(code, lang='java')
                 doc = data["doc"]
                 st, nl = self.parse_kg(data["kg"])
