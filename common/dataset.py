@@ -17,7 +17,8 @@ logger = logging.getLogger(__name__)
 
 
 class KGCodeDataset(Dataset):
-    spliter = ";"
+    spliter = " "
+    KG_SEP_TOKEN = " " + Vocab.KG_SEP_TOKEN + " "
 
     def __init__(self, args, task, split=None):
         self.args = args
