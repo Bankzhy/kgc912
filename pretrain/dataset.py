@@ -304,6 +304,7 @@ def init_dataset(args, task=None, split=None, load_if_saved=True, mode="pretrain
     name = '.'.join([sub_name for sub_name in [mode, task, language, split] if sub_name is not None])
     if load_if_saved:
         path = os.path.join(args.dataset_save_dir, f'{name}.pk')
+        print(path)
         if os.path.exists(path) and os.path.isfile(path):
             logger.info(f'Trying to load saved binary pickle file from: {path}')
             with open(path, mode='rb') as f:
@@ -311,7 +312,7 @@ def init_dataset(args, task=None, split=None, load_if_saved=True, mode="pretrain
             assert isinstance(obj, KGCodeDataset)
             obj.args = args
             logger.info(f'Dataset instance loaded from: {path}')
-            print_paths(obj.paths)
+            # print_paths(obj.paths)
             return obj
     dataset = KGCodeDataset(args=args, task=task)
     dataset.save()
