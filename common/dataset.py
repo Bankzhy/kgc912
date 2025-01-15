@@ -6,7 +6,7 @@ import logging
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
-from common.data_utils import tokenize_source
+from common.data_utils import tokenize_source, remove_comments_and_docstrings, replace_string_literal
 from common.vocab import Vocab
 
 # from pretrain.vocab.vocab import Vocab
@@ -178,7 +178,6 @@ class KGCodeDataset(Dataset):
                 code = tokenize_source(code, lang='java')
                 doc = data["doc"]
                 st, nl = self.parse_kg(data["kg"])
-
 
                 codes.append(code)
                 structures.append(st)
