@@ -24,7 +24,7 @@ class Vocab(object):
     KG_SEP_TOKEN = '[KSP]'
 
     # default special symbols, if need additional symbols, use init parameter 'additional_special_symbols'
-    START_VOCAB = [PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, UNK_TOKEN, MSK_TOKEN, SEP_TOKEN]
+    START_VOCAB = [PAD_TOKEN, SOS_TOKEN, EOS_TOKEN, UNK_TOKEN, MSK_TOKEN, SEP_TOKEN, KG_SEP_TOKEN]
 
     # post-processors
     # bert processor: add SOS at the beginning and SEP at the end of sequence
@@ -39,6 +39,9 @@ class Vocab(object):
     # sep processor: add SEP at the end of sequence
     sep_processor = TemplateProcessing(single=f'$ {SEP_TOKEN}', pair=f'$A $B {SEP_TOKEN}',
                                        special_tokens=[(SEP_TOKEN, START_VOCAB.index(SEP_TOKEN))])
+
+    kg_sep_processor = TemplateProcessing(single=f'$ {KG_SEP_TOKEN}', pair=f'$A $B {KG_SEP_TOKEN}',
+                                       special_tokens=[(KG_SEP_TOKEN, START_VOCAB.index(KG_SEP_TOKEN))])
 
     def __init__(
             self,
