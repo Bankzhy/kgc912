@@ -264,9 +264,9 @@ class KGCodeDataset(Dataset):
                 source = data['code'].strip()
                 source = remove_comments_and_docstrings(source, "java")
                 source = replace_string_literal(source)
-                code = tokenize_source(source=source, lang="java")
+                # code = tokenize_source(source=source, lang="java")
 
-                codes.append(code)
+                codes.append(source)
                 structures.append(st)
                 nls.append(nl)
                 docs.append(doc)

@@ -60,7 +60,7 @@ class KGCodeDataset(Dataset):
              label_l = []
              new_st_l = []
              structure = self.structures[index]
-             st_l = structure.split(Vocab.KG_SEP_TOKEN)
+             st_l = structure.split(self.KG_SEP_TOKEN)
              for st in st_l:
                 child_l = st.split(self.spliter)
                 if len(child_l) < 3:
@@ -68,7 +68,7 @@ class KGCodeDataset(Dataset):
                 label_l.append(child_l[1])
                 new_st = child_l[0] + self.spliter + Vocab.MSK_TOKEN + self.spliter + child_l[2]
                 new_st_l.append(new_st)
-             mask_st = Vocab.KG_SEP_TOKEN.join(new_st_l)
+             mask_st = self.KG_SEP_TOKEN.join(new_st_l)
              label = ",".join(label_l)
              return self.codes[index], mask_st, self.nls[index], label
         elif self.task == "nlp":
