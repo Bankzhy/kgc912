@@ -3,6 +3,8 @@ import json
 import pickle
 import random
 import logging
+import re
+
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
@@ -106,6 +108,12 @@ class KGCodeDataset(Dataset):
 
         return codes, structures, nls, docs
 
+    def remove_punctuation_and_replace_dot(self, text):
+        # 使用正则表达式去掉所有标点符号
+        text = re.sub(r'[^\w\s.]', '', text)
+        # 将 "." 替换为空格
+        text = text.replace('.', ' ')
+        return text
 
     def load_clone_dataset(self):
         codes1, sts1, docs1, codes2, sts2, docs2, labels = self.parse_clone_file()
