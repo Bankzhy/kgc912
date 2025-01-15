@@ -261,12 +261,12 @@ class KGCodeDataset(Dataset):
                 doc = data["doc"]
                 st, nl = self.parse_kg(data["kg"])
 
-                source = data['code'].strip()
-                source = remove_comments_and_docstrings(source, "java")
-                source = replace_string_literal(source)
+                # source = data['code'].strip()
+                # source = remove_comments_and_docstrings(source, "java")
+                # source = replace_string_literal(source)
                 # code = tokenize_source(source=source, lang="java")
 
-                codes.append(source)
+                codes.append(code)
                 structures.append(st)
                 nls.append(nl)
                 docs.append(doc)
