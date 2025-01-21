@@ -1,10 +1,10 @@
 # from pretrain.pretrain import run_pretrain
-from pretrain.run_preprocess import run_preprocess, run_sample
+from pretrain.run_preprocess import run_preprocess, run_sample, report_dataset
 from sum.summariztion import run_summarization
 
 
 def run():
-    run_preprocess()
+    report_dataset()
     # merge_dataset()
     # run_mini()
     # create_mini_conceptnet()

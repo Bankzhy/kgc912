@@ -6,6 +6,9 @@ from pathlib import Path
 
 import pymysql
 from datasets import load_dataset
+from tqdm import tqdm
+
+from pretrain.dataset import KGCodeDataset
 from sitter.kast2core import KASTParse
 from datetime import datetime
 
@@ -331,6 +334,83 @@ def merge_dataset():
         json_file.close()
     print(len(merged_data))
 
+
+def report_dataset():
+    struct_type= [
+        "control_dependency",
+        "data_dependency",
+    ]
+
+    syntax_type = [
+        'type_of',
+        "has_method",
+        "has_property",
+        "assignment"
+    ]
+
+    basic_concept_type = [
+        "related_concept"
+    ]
+
+    expand_concept_type = [
+
+    ]
+
+    struct_num = 0
+    syntax_num = 0
+    basic_concept_num = 0
+    expand_concept_num = 0
+
+    # file = r"C:\worksapce\research\kgc912\pretrain\kg_data\data.json"
+    #
+    # with open(file, encoding='ISO-8859-1') as f:
+    #     lines = f.readlines()
+    #     print("loading dataset:")
+    #     for line in tqdm(lines):
+    #         # print(line)
+    #         data = json.loads(line.strip())
+    #         code = data["code"]
+    #         doc = data["doc"]
+    #         kg = data["kg"]
+    #
+    #         for edges in kg:
+    #             if edges["type"] in struct_type:
+    #                 struct_num += 1
+    #             elif edges["type"] in syntax_type:
+    #                 syntax_num += 1
+    #             elif edges["type"] in basic_concept_type:
+    #                 basic_concept_num += 1
+    #             else:
+    #                 expand_concept_num += 1
+
+    args = ""
+
+    dataset = KGCodeDataset(args=args, task="pretrain", split="train")
+
+    for rel in dataset.structures:
+        st_l = rel.split(dataset.KG_SEP_TOKEN)
+        for st in st_l:
+            child_l = st.split(dataset.spliter)
+            if len(child_l) < 3:
+                continue
+            if child_l[1] in struct_type:
+                struct_num += 1
+            elif child_l[1] in syntax_type:
+                syntax_num += 1
+
+    for rel in dataset.nls:
+        nls_l = rel.split(",")
+        for nls in nls_l:
+            child_l = nls.split(dataset.spliter)
+            if len(child_l) < 3:
+                basic_concept_num += 1
+            else:
+                expand_concept_num += 1
+
+    print("struct num:", str(struct_num))
+    print("syntax num:", str(syntax_num))
+    print("basic concept num:", str(basic_concept_num))
+    print("expand concept num:", str(expand_concept_num))
 
 # if __name__ == '__main__':
 #     # run()
