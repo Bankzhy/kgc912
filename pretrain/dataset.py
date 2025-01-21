@@ -145,6 +145,27 @@ class KGCodeDataset(Dataset):
             label = ",".join(label_l)
             new_nls = ",".join(new_nls_l)
             return self.codes[index], self.structures[index], new_nls, label
+        elif self.task == "nlmp":
+            concept = self.nls[index]
+            nls_l = concept.split(",")
+            new_nls_l = []
+            for nls in nls_l:
+                child_l = nls.split(self.spliter)
+                if len(child_l) >= 2:
+                    mask_num = len(child_l) // 2
+                    random_numbers = random.sample(range(0, len(child_l)), mask_num)
+                    for random_number in random_numbers:
+                        child_l[random_number] = Vocab.MSK_TOKEN
+                    new_child = self.spliter.join(child_l)
+                    new_nls_l.append(new_child)
+                else:
+                    new_nls_l.append(nls)
+            new_nls = ",".join(new_nls_l)
+            return self.codes[index], self.structures[index], new_nls, self.nls[index]
+
+
+
+
     def set_task(self, task):
         self.task = task
 

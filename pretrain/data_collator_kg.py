@@ -78,7 +78,7 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
                                                      processor=Vocab.eos_processor,
                                                      max_len=int(args.mass_mask_ratio * args.max_code_len))
     # nlp
-    elif task == "nlp" or task == "cpp":
+    elif task == "nlp" or task == "nlmp":
         code_raw, ast_raw, nl_raw, name_raw = map(list, zip(*batch))
 
         model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(

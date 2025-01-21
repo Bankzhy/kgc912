@@ -10,6 +10,7 @@ TASK_NLP = "nlp"
 TASK_CGP = "cgp"
 TASK_RRLP = "rrlp"
 TASK_CPP = "cpp"
+TASK_NLMP = "nlmp"
 
 TRAINING_MODE_FINE_TUNE = 'fine_tune'
 TASK_SUMMARIZATION = 'summarization'
