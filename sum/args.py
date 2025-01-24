@@ -20,7 +20,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default='../pretrain/output/pretrain/models/nlmp',
+        default='../pretrain/output2/pretrain/models/nlmp',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -72,27 +72,27 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output8/pretrain',
+        default='output2/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     output_root: str = field(
-        default='output',
+        default='output2',
         metadata={'help': 'pretrain model output '}
     )
 
     checkpoint_root: str = field(
-        default='output/checkpoints',
+        default='output2/checkpoints',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output/sum/models',
+        default='output2/sum/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output/runs',
+        default='output2/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
