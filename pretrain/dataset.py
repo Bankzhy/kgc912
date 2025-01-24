@@ -149,19 +149,22 @@ class KGCodeDataset(Dataset):
             concept = self.nls[index]
             nls_l = concept.split(",")
             new_nls_l = []
+            mask_l = []
             for nls in nls_l:
                 child_l = nls.split(self.spliter)
                 if len(child_l) >= 2:
                     mask_num = len(child_l) // 2
                     random_numbers = random.sample(range(0, len(child_l)), mask_num)
                     for random_number in random_numbers:
+                        mask_l.append(child_l[random_number])
                         child_l[random_number] = Vocab.MSK_TOKEN
                     new_child = self.spliter.join(child_l)
                     new_nls_l.append(new_child)
                 else:
                     new_nls_l.append(nls)
             new_nls = ",".join(new_nls_l)
-            return self.codes[index], self.structures[index], new_nls, self.nls[index]
+            label = " ".join(mask_l)
+            return self.codes[index], self.structures[index], new_nls, label
 
 
 
