@@ -66,7 +66,7 @@ def pretrain(args):
                     f'train_subset_ratio={args.pre_train_subset_ratio}')
         logger.info('The size of trimmed pre-train set: {}'.format(len(dataset)))
     logger.info('Datasets loaded and parsed successfully')
-    dataset = dataset.subset(0.0001)
+    # dataset = dataset.subset(0.0001)
 
     # --------------------------------------------------
     # vocabs
