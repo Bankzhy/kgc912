@@ -27,12 +27,12 @@ def pretrain(args):
     if tasks is None:
         logger.warning("Was specified for pre-training, but got pre-training tasks to None, "
                        "will default to ('mass', 'rlp', 'nlmp')")
-        tasks = ['mass', 'rlp', 'nlmp']
+        tasks = ['mass', 'rlp', 'nlmp', 'mnp']
     else:
         supported_tasks = []
         for task in tasks.split(','):
             task = task.strip().lower()
-            if task in ['mass', 'rlp', 'nlmp']:
+            if task in ['mass', 'rlp', 'nlmp', 'mnp']:
                 supported_tasks.append(task)
             else:
                 logger.warning(f'Pre-training task {task} is not supported and will be ignored.')
@@ -66,7 +66,7 @@ def pretrain(args):
                     f'train_subset_ratio={args.pre_train_subset_ratio}')
         logger.info('The size of trimmed pre-train set: {}'.format(len(dataset)))
     logger.info('Datasets loaded and parsed successfully')
-    # dataset = dataset.subset(0.0001)
+    dataset = dataset.subset(0.0001)
 
     # --------------------------------------------------
     # vocabs
@@ -283,7 +283,7 @@ def pretrain(args):
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
 
-        elif task == enums.TASK_NLP or task == enums.TASK_NLMP:
+        elif task == enums.TASK_NLP or task == enums.TASK_NLMP or task == enums.TASK_MNP:
             # set model mode
             logger.info('-' * 100)
             model.set_model_mode(enums.MODEL_MODE_GEN)

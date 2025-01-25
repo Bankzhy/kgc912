@@ -165,6 +165,24 @@ class KGCodeDataset(Dataset):
             new_nls = ",".join(new_nls_l)
             label = " ".join(mask_l)
             return self.codes[index], self.structures[index], new_nls, label
+        elif self.task == "mnp":
+            code_l = self.codes[index].split(" ")
+            func_name = ""
+            for index, code in enumerate(code_l):
+                if code == "(":
+                    func_name = code_l[index-1]
+                    code_l[index-1] = Vocab.MSK_TOKEN
+                    break
+            mask_name_code = " ".join(code_l)
+
+            func_l = self.split_edge_name(func_name)
+            func_l = [x.lower() for x in func_l]
+            func_l_str = " ".join(func_l)
+            old_nls = self.nls[index]
+            new_nls = self.nls[index].replace(func_l_str+",", "")
+
+
+            return mask_name_code, self.structures[index], new_nls, func_name
 
 
 
