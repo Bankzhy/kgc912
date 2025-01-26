@@ -15,7 +15,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default="output/pretrain/models/nlmp",
+        default="output3/pretrain/models/mnp",
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -72,17 +72,17 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output3/pretrain',
+        default='output4/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output3/pretrain/models',
+        default='output4/pretrain/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output3/runs',
+        default='output4/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
@@ -127,7 +127,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=10,
+        default=20,
         metadata={'help': 'Number of data iterations for training'}
     )
 
