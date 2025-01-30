@@ -229,7 +229,9 @@ class KGCodeDataset(Dataset):
 
         for edges in kg:
             if edges["type"] not in self.st_type and edges["type"] != "related_concept":
-                ntc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
+                edge_l = self.split_edge_name(edges["type"])
+                edge_str = self.spliter.join(edge_l).lower()
+                ntc = edges["source"]["label"] + self.spliter + edge_str + self.spliter + edges["target"]["label"]
                 # exist_nl.append(edges["source"]["label"])
                 # exist_nl.append(edges["target"]["label"])
                 # ntc = remove_comments_and_docstrings(ntc, "java")
