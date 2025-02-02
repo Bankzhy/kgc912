@@ -175,12 +175,12 @@ class RuntimeArguments:
     )
 
     learning_rate: float = field(
-        default=5e-5,
+        default=2e-5,
         metadata={'help': 'Learning rate'}
     )
 
     lr_decay_rate: float = field(
-        default=0,
+        default=0.01,
         metadata={'help': 'Decay ratio for learning rate, 0 to disable'}
     )
 
