@@ -44,6 +44,11 @@ class KGCodeDataset(Dataset):
         else:
             self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
 
+    def split_edge_name(self, name):
+            # 处理 CamelCase
+        return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
+
+
     def __len__(self):
         if self.task == "clone":
             return len(self.codes1)
