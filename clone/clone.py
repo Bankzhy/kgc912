@@ -65,7 +65,6 @@ def run_clone():
         logger.info('The size of trimmed train set: {}'.format(len(datasets['train'])))
 
     logger.info('Datasets loaded successfully')
-    datasets['valid'] = datasets['valid'].subset(0.1)
     # --------------------------------------------------
     # vocabs
     # --------------------------------------------------
