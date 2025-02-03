@@ -36,7 +36,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
             torch.nn.Linear(config.d_model, 512),  # 降维
             torch.nn.ReLU(),
             torch.nn.Dropout(0.2),
-            torch.nn.Linear(512, self.num_labels)  # 输出类别数
+            torch.nn.Linear(512, self.config.num_labels)  # 输出类别数
         )
 
         self.model._init_weights(self.classification_head.dense)
