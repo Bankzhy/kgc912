@@ -68,7 +68,7 @@ class KGCodeDataset(Dataset):
         assert 0 < ratio <= 1, f'The subset ratio supposed to be 0 < ratio <= 1, but got ratio={ratio}'
         if ratio == 1:
             return self
-        indices = random.sample(range(self.size), int(self.size * ratio))
+        indices = random.sample(range(len(self.labels)), int(len(self.labels) * ratio))
         return torch.utils.data.Subset(self, indices)
 
     def __getitem__(self, index):
