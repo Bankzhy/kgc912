@@ -16,7 +16,6 @@ from common import enums
 
 logger = logging.getLogger(__name__)
 
-
 class BartForClassificationAndGeneration(BartForConditionalGeneration):
 
     def __init__(self, config: BartConfig, mode=None):
@@ -32,6 +31,14 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
             config.num_labels,
             config.classifier_dropout,
         )
+
+        self.mlp_classifier = torch.nn.Sequential(
+            torch.nn.Linear(self.hidden_size, 512),  # 降维
+            torch.nn.ReLU(),
+            torch.nn.Dropout(0.2),
+            torch.nn.Linear(512, self.num_labels)  # 输出类别数
+        )
+
         self.model._init_weights(self.classification_head.dense)
         self.model._init_weights(self.classification_head.out_proj)
 
@@ -222,7 +229,8 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                                                   hidden_states.size(-1))[
                                   :, -1, :
                                   ]
-        logits = self.classification_head(sentence_representation)
+        # logits = self.classification_head(sentence_representation)
+        logits = self.mlp_classifier(sentence_representation)
 
         loss = None
         if labels is not None:
