@@ -33,7 +33,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
         )
 
         self.mlp_classifier = torch.nn.Sequential(
-            torch.nn.Linear(self.hidden_size, 512),  # 降维
+            torch.nn.Linear(self.d_model, 512),  # 降维
             torch.nn.ReLU(),
             torch.nn.Dropout(0.2),
             torch.nn.Linear(512, self.num_labels)  # 输出类别数
