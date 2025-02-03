@@ -56,6 +56,8 @@ def run_clone():
         datasets[split] = init_dataset(args=args,
                                        task=enums.TASK_CLONE,
                                        split=split)
+        if split == 'valid':
+            datasets[split] = datasets[split].subset(0.1)
         logger.info(f'The size of {split} set: {len(datasets[split])}')
     if args.train_subset_ratio and 'train' in datasets:
         datasets['train'] = datasets['train'].subset(args.train_subset_ratio)
@@ -63,7 +65,7 @@ def run_clone():
         logger.info('The size of trimmed train set: {}'.format(len(datasets['train'])))
 
     logger.info('Datasets loaded successfully')
-
+    datasets['valid'] = datasets['valid'].subset(0.1)
     # --------------------------------------------------
     # vocabs
     # --------------------------------------------------
