@@ -1,4 +1,5 @@
 import argparse
+import gc
 import logging
 import os
 import sys
@@ -177,7 +178,7 @@ def run_clone():
             "eval_precision": float(precision),
             "eval_f1": float(f1),
         }
-
+        gc.collect()
         logger.info("***** Test results *****")
         for key in sorted(result.keys()):
             logger.info("  %s = %s", key, str(round(result[key], 4)))
@@ -213,7 +214,7 @@ def run_clone():
                                              do_eval=True,
                                              do_predict=True,
                                              evaluation_strategy=IntervalStrategy.STEPS,
-                                             eval_steps=2500,
+                                             eval_steps=50,
                                              prediction_loss_only=False,
                                              per_device_train_batch_size=args.batch_size,
                                              per_device_eval_batch_size=args.eval_batch_size,
@@ -226,9 +227,9 @@ def run_clone():
                                              warmup_steps=args.warmup_steps,
                                              logging_dir=os.path.join(args.tensor_board_root, enums.TASK_CLONE),
                                              logging_strategy=IntervalStrategy.STEPS,
-                                             logging_steps=2500,
+                                             logging_steps=50,
                                              save_strategy=IntervalStrategy.STEPS,
-                                             save_steps=2500,
+                                             save_steps=50,
                                              save_total_limit=5,
                                              seed=args.random_seed,
                                              fp16=args.fp16,
@@ -267,10 +268,10 @@ def run_clone():
     if not only_test:
         logger.info('-' * 100)
         # logger.info('loading checkpoint')
-        last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_CLONE),)
+        # last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_CLONE),)
         logger.info('Start training')
-        train_result = trainer.train(resume_from_checkpoint=last_checkpoint)
-        # train_result = trainer.train()
+        # train_result = trainer.train(resume_from_checkpoint=last_checkpoint)
+        train_result = trainer.train()
         logger.info('Training finished')
         trainer.save_model(args.model_root)
         trainer.save_state()

@@ -88,7 +88,7 @@ class RuntimeArguments:
     )
 
     model_root: str = field(
-        default='output/sum/models',
+        default='output/clone/models',
         metadata={'help': 'pretrain model output '}
     )
 
