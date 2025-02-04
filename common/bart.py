@@ -42,6 +42,8 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
         # 分类头
         self.linear_classifier = torch.nn.Linear(config.d_model, self.config.num_labels)
 
+        self.attention = torch.nn.MultiheadAttention(embed_dim=config.d_model, num_heads=8, batch_first=True)
+
         self.model._init_weights(self.classification_head.dense)
         self.model._init_weights(self.classification_head.out_proj)
 
@@ -233,12 +235,12 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                   :, -1, :
                                   ]
         # logits = self.classification_head(sentence_representation)
-        logits = self.mlp_classifier(sentence_representation)
+        # logits = self.mlp_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
-        # attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
-        # cls_representation = attn_output[:, 0, :]  # 取第一个 token
-        # logits = self.linear_classifier(cls_representation)
+        attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
+        cls_representation = attn_output[:, 0, :]  # 取第一个 token
+        logits = self.linear_classifier(cls_representation)
 
         loss = None
         if labels is not None:
