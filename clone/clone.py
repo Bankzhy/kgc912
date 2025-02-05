@@ -52,7 +52,7 @@ def run_clone():
     logger.info('-' * 100)
     logger.info('Loading datasets')
     datasets = dict()
-    splits = ['test'] if only_test else ['train', 'valid', 'test']
+    splits =  ['train', 'valid', 'test']
     for split in splits:
         datasets[split] = init_dataset(args=args,
                                        task=enums.TASK_CLONE,
