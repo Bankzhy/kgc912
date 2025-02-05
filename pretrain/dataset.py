@@ -310,6 +310,19 @@ class KGCodeDataset(Dataset):
                 source = replace_string_literal(source)
                 code = tokenize_source(source=source, lang="java")
 
+                code_l = code.split(" ")
+                func_name = ""
+                for index, code in enumerate(code_l):
+                    if code == "(":
+                        func_name = code_l[index - 1]
+                        break
+                func_name_l = self.split_edge_name(func_name)
+                func_name_nl = ",".join(func_name_l)
+                if func_name_nl.lower() not in nl:
+                    nl += ","
+                    nl += func_name_nl
+
+
                 codes.append(code)
                 structures.append(st)
                 nls.append(nl)
