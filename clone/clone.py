@@ -166,6 +166,7 @@ def run_clone():
     def compute_valid_metrics(eval_preds):
         logits = eval_preds.predictions[0]
         labels = eval_preds.label_ids
+        gc.collect()
         predictions = np.argmax(logits, axis=-1)
         from sklearn.metrics import recall_score
         recall = recall_score(labels, predictions)
@@ -178,7 +179,6 @@ def run_clone():
             "eval_precision": float(precision),
             "eval_f1": float(f1),
         }
-        gc.collect()
         logger.info("***** Test results *****")
         for key in sorted(result.keys()):
             logger.info("  %s = %s", key, str(round(result[key], 4)))
@@ -297,9 +297,7 @@ def run_clone():
     logger.info('Start testing')
     trainer.compute_metrics = compute_test_metrics
     predict_results = trainer.predict(test_dataset=datasets['test'],
-                                      metric_key_prefix='test',
-                                      max_length=args.max_nl_len,
-                                      num_beams=args.beam_width)
+                                      metric_key_prefix='test',)
     predict_metrics = predict_results.metrics
     # references = predict_metrics.pop('test_references')
     # candidates = predict_metrics.pop('test_candidates')
