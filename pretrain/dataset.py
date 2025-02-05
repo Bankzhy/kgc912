@@ -98,6 +98,10 @@ class KGCodeDataset(Dataset):
         elif self.task == "nlp":
             return self.codes[index], self.structures[index], self.nls[index], self.docs[index]
         elif self.task == "cgp":
+
+            if self.structures[index]=="":
+                return self.codes[index], self.structures[index], self.nls[index], 1
+
             is_graph = random.random() < 0.5
             if is_graph:
                 return self.codes[index], self.structures[index], self.nls[index], 1
@@ -241,6 +245,8 @@ class KGCodeDataset(Dataset):
                     nl_l.append(ntc.lower())
 
             if edges["type"] in self.st_type:
+                if edges["source"]["label"]=="" or edges["target"]["label"]=="":
+                    continue
                 stc = edges["source"]["label"] + self.spliter + edges["type"] + self.spliter + edges["target"]["label"]
                 st_l.append(stc)
             else:
@@ -258,7 +264,8 @@ class KGCodeDataset(Dataset):
             # nlm_token = remove_comments_and_docstrings(nlm_token, "java")
             nlm_token = self.remove_punctuation_and_replace_dot(nlm_token)
             nlm_token = replace_string_literal(nlm_token)
-            nl_l.append(nlm_token)
+            if nlm_token.lower() not in nl_l:
+                nl_l.append(nlm_token.lower())
 
 
         st_token = self.KG_SEP_TOKEN.join(st_l)
@@ -317,7 +324,7 @@ class KGCodeDataset(Dataset):
                         func_name = code_l[index - 1]
                         break
                 func_name_l = self.split_edge_name(func_name)
-                func_name_nl = ",".join(func_name_l)
+                func_name_nl = " ".join(func_name_l)
                 if func_name_nl.lower() not in nl:
                     nl += ","
                     nl += func_name_nl
