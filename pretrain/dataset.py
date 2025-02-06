@@ -98,18 +98,42 @@ class KGCodeDataset(Dataset):
         elif self.task == "nlp":
             return self.codes[index], self.structures[index], self.nls[index], self.docs[index]
         elif self.task == "cgp":
+            structure = self.structures[index]
+            st_l = structure.split(self.KG_SEP_TOKEN)
+            is_correct = random.random() < 0.5
+            if structure == "":
+                is_correct = False
 
-            if self.structures[index]=="":
-                return self.codes[index], self.structures[index], self.nls[index], 1
-
-            is_graph = random.random() < 0.5
-            if is_graph:
-                return self.codes[index], self.structures[index], self.nls[index], 1
+            if is_correct:
+                target_st = random.choices(st_l, k=1)[0]
+                st_l.remove(target_st)
+                new_st = self.KG_SEP_TOKEN.join(st_l)
+                return self.codes[index], new_st, self.nls[index], target_st, 1
             else:
                 other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
                 while other_graph == self.structures[index]:
+                    if other_graph == "":
+                        continue
                     other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
-                return self.codes[index], other_graph, self.nls[index], 0
+                other_stl = other_graph.split(self.KG_SEP_TOKEN)
+                target_st = random.choices(other_stl, k=1)[0]
+                return self.codes[index], self.structures[index], self.nls[index], target_st, 0
+
+
+            # if self.structures[index]=="":
+            #     return self.codes[index], self.structures[index], self.nls[index], 1
+            #
+            # is_graph = random.random() < 0.5
+            # if is_graph:
+            #     return self.codes[index], self.structures[index], self.nls[index], 1
+            # else:
+            #     other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
+            #     while other_graph == self.structures[index]:
+            #         other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
+            #     return self.codes[index], other_graph, self.nls[index], 0
+
+
+
         elif self.task == "rrlp":
             label_l = []
             new_st_l = []
@@ -316,6 +340,7 @@ class KGCodeDataset(Dataset):
                 source = remove_comments_and_docstrings(source, "java")
                 source = replace_string_literal(source)
                 code = tokenize_source(source=source, lang="java")
+                codes.append(code)
 
                 code_l = code.split(" ")
                 func_name = ""
@@ -330,7 +355,6 @@ class KGCodeDataset(Dataset):
                     nl += func_name_nl
 
 
-                codes.append(code)
                 structures.append(st)
                 nls.append(nl)
                 docs.append(doc)

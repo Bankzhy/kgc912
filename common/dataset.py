@@ -270,7 +270,7 @@ class KGCodeDataset(Dataset):
                     nl += func_name_nl
 
                 json_data[data["idx"]] = {
-                    "code" : code,
+                    "code" : " ".join(code_l),
                     "st" : st,
                     "nl" : nl,
                 }
