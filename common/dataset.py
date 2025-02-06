@@ -270,7 +270,7 @@ class KGCodeDataset(Dataset):
                     nl += func_name_nl
 
                 json_data[data["idx"]] = {
-                    "code" : data["code"],
+                    "code" : code,
                     "st" : st,
                     "nl" : nl,
                 }
@@ -282,10 +282,9 @@ class KGCodeDataset(Dataset):
                     ll = line.split("\t")
                     if ll[0] not in json_data.keys() or ll[1] not in json_data.keys():
                         continue
-                    code1 = json_data[ll[0]]["code"]
-                    codes_1.append(code1)
-                    code2 = json_data[ll[1]]["code"]
-                    codes_2.append(code2)
+
+                    codes_1.append(json_data[ll[0]]["code"])
+                    codes_2.append(json_data[ll[0]]["code"])
 
                     st1 = json_data[ll[0]]["st"]
                     sts_1.append(st1)
