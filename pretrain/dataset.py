@@ -106,9 +106,7 @@ class KGCodeDataset(Dataset):
 
             if is_correct:
                 target_st = random.choices(st_l, k=1)[0]
-                st_l.remove(target_st)
-                new_st = self.KG_SEP_TOKEN.join(st_l)
-                return self.codes[index], new_st, self.nls[index], target_st, 1
+                return self.codes[index], target_st, self.nls[index], 1
             else:
                 other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
                 while other_graph == self.structures[index]:
@@ -117,7 +115,7 @@ class KGCodeDataset(Dataset):
                     other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
                 other_stl = other_graph.split(self.KG_SEP_TOKEN)
                 target_st = random.choices(other_stl, k=1)[0]
-                return self.codes[index], self.structures[index], self.nls[index], target_st, 0
+                return self.codes[index], target_st, self.nls[index], 0
 
 
             # if self.structures[index]=="":
@@ -132,6 +130,10 @@ class KGCodeDataset(Dataset):
             #         other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
             #     return self.codes[index], other_graph, self.nls[index], 0
 
+        elif self.task == "ngp":
+            concept = self.nls[index]
+            nls_l = concept.split(",")
+            is_correct = random.random() < 0.5
 
 
         elif self.task == "rrlp":
