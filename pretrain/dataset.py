@@ -110,8 +110,6 @@ class KGCodeDataset(Dataset):
             else:
                 other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
                 while other_graph == self.structures[index]:
-                    if other_graph == "":
-                        continue
                     other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
                 other_stl = other_graph.split(self.KG_SEP_TOKEN)
                 target_st = random.choices(other_stl, k=1)[0]
