@@ -21,7 +21,7 @@ class RuntimeArguments:
 
     trained_model: str = field(
         # default=None,
-        default='../pretrain/output/pretrain/models/cgp',
+        default='../pretrain/output5/pretrain/models/mnp',
         # default= r'C:\worksapce\research\kgc912\pretrain\output\pretrain\models\nlp',
         metadata={'help': 'Directory of trained model'}
     )
