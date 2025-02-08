@@ -137,8 +137,8 @@ def pretrain(args):
     #                     num_labels=2)
     #
     # model = BartForClassificationAndGeneration(config)
-    # config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
-    # model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
+    config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
+    model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
 
     # log model statistic
     logger.info('Model trainable parameters: {}'.format(human_format(count_params(model))))
