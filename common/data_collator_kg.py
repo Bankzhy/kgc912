@@ -106,7 +106,7 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
                                                      processor=Vocab.eos_processor,
                                                      max_len=args.max_nl_len)
 
-    elif task == "clone":
+    elif task == "clone2":
         code_1_raw, ast_1_raw, name_1_raw, code_2_raw, ast_2_raw, name_2_raw, labels = map(list, zip(*batch))
 
         model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(
@@ -135,6 +135,41 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
             no_ast=args.no_ast,
             no_nl=args.no_nl
         )
+        model_inputs['labels'] = torch.tensor(labels, dtype=torch.long)
+    elif task == "clone":
+        code_1_raw, ast_1_raw, name_1_raw, code_2_raw, ast_2_raw, name_2_raw, labels = map(list, zip(*batch))
+        code1_ids, code1_attention_mask = get_concat_batch_inputs(
+            code_raw=code_1_raw,
+            code_vocab=code_vocab,
+            max_code_len=args.max_code_len,
+            ast_raw=ast_1_raw,
+            ast_vocab=ast_vocab,
+            max_ast_len=args.max_ast_len,
+            nl_raw=name_1_raw,
+            nl_vocab=nl_vocab,
+            max_nl_len=args.max_nl_len,
+            no_ast=args.no_ast,
+            no_nl=args.no_nl
+        )
+
+        code2_ids, code2_attention_mask = get_concat_batch_inputs(
+            code_raw=code_2_raw,
+            code_vocab=code_vocab,
+            max_code_len=args.max_code_len,
+            ast_raw=ast_2_raw,
+            ast_vocab=ast_vocab,
+            max_ast_len=args.max_ast_len,
+            nl_raw=name_2_raw,
+            nl_vocab=nl_vocab,
+            max_nl_len=args.max_nl_len,
+            no_ast=args.no_ast,
+            no_nl=args.no_nl
+        )
+
+        model_inputs['input_ids'] = torch.cat([inputs for inputs in [code1_ids, code2_ids] if inputs is not None], dim=-1)
+        model_inputs['attention_mask'] = torch.cat([inputs for inputs in [code1_attention_mask, code2_attention_mask] if inputs is not None],
+                                              dim=-1)
+
         model_inputs['labels'] = torch.tensor(labels, dtype=torch.long)
     return model_inputs
 

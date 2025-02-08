@@ -9,13 +9,14 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='mass',
+        default='cgp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
 
     trained_model: str = field(
-        default="output/pretrain/models/cgp",
+        # default="output/pretrain/models/cgp",
+        default=None,
         metadata={'help': 'Directory of trained model'}
     )
 
