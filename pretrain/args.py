@@ -15,7 +15,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default="output/pretrain/models/mass",
+        default="output2/pretrain/models/mass",
         # default=None,
         metadata={'help': 'Directory of trained model'}
     )
@@ -73,17 +73,17 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output2/pretrain',
+        default='output3/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output2/pretrain/models',
+        default='output3/pretrain/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output2/runs',
+        default='output3/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
