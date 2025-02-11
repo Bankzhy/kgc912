@@ -20,7 +20,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default='../pretrain/output2/pretrain/models/mass',
+        default='../pretrain/output/pretrain/models/mnp',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -224,7 +224,7 @@ class RuntimeArguments:
     )
 
     max_ast_len: int = field(
-        default=64,
+        default=32,
         metadata={'help': 'Maximum length of ast sequence'}
     )
 
