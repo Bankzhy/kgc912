@@ -140,13 +140,23 @@ class KGCodeDataset(Dataset):
             label_l = []
             new_st_l = []
             structure = self.structures[index]
+
+            if structure == "":
+                return self.codes[index], structure, self.nls[index], structure
             st_l = structure.split(self.KG_SEP_TOKEN)
             for st in st_l:
                 child_l = st.split(self.spliter)
-                if len(child_l) < 3:
+                if len(child_l) != 3:
                     continue
+
+                if len(st_l) == 1:
+                    new_st = child_l[0] + self.spliter + Vocab.MSK_TOKEN + self.spliter + child_l[2]
+                    label_l.append(child_l[1])
+                    new_st_l.append(new_st)
+                    continue
+
                 random_number = random.random()
-                if random_number < 0.5:
+                if random_number < 0.5 or len(label_l) <= 0:
                     new_st = child_l[0] + self.spliter + Vocab.MSK_TOKEN + self.spliter + child_l[2]
                     label_l.append(child_l[1])
                 else:
