@@ -20,7 +20,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default='../pretrain/output/pretrain/models/rrlp',
+        default='../pretrain/output2/pretrain/models/mnp',
         metadata={'help': 'Directory of trained model'}
     )
 
