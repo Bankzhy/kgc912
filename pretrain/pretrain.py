@@ -27,12 +27,12 @@ def pretrain(args):
     if tasks is None:
         logger.warning("Was specified for pre-training, but got pre-training tasks to None, "
                        "will default to ('mass', 'rlp', 'nlmp')")
-        tasks = ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp']
+        tasks = ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp', 'nlp']
     else:
         supported_tasks = []
         for task in tasks.split(','):
             task = task.strip().lower()
-            if task in ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp']:
+            if task in ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp', 'nlp']:
                 supported_tasks.append(task)
             else:
                 logger.warning(f'Pre-training task {task} is not supported and will be ignored.')
