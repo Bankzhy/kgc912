@@ -4,13 +4,14 @@ from sum.summariztion import run_summarization
 
 
 def run():
-    report_dataset()
+    # report_dataset()
     # merge_dataset()
     # run_mini()
     # create_mini_conceptnet()
     # run_pretrain()
     # run_summarization()
     # run_sample()
+    run_preprocess()
 
 if __name__ == '__main__':
     run()

@@ -184,15 +184,15 @@ def fetch_big_clone(split):
 def run_preprocess():
 
     # load code search net
-    # dataset = load_dataset('code-search-net/code_search_net', 'java', split='train')
+    dataset = load_dataset('code-search-net/code_search_net', 'python', split='train', trust_remote_code=True)
     # load tl
-    dataset = fetch_tl("train")
+    # dataset = fetch_tl("train")
 
     # load bcb
     # dataset = fetch_big_clone("train")
 
 
-    ast = KASTParse("", "java")
+    ast = KASTParse("", "python")
     ast.setup()
     result = []
     exist_id = []
@@ -200,12 +200,12 @@ def run_preprocess():
     error = []
     print("Size:", len(dataset))
 
-    with open("sum/tl_data/train.json", "r", encoding="utf8") as file:
-        lines = file.readlines()
-        for line in lines:
-            data = json.loads(line.strip())
-            id = data["id"]
-            exist_id.append(id)
+    # with open("sum/tl_data/train.json", "r", encoding="utf8") as file:
+    #     lines = file.readlines()
+    #     for line in lines:
+    #         data = json.loads(line.strip())
+    #         id = data["id"]
+    #         exist_id.append(id)
 
     # with open(r"C:\worksapce\research\kgc912\tl_data_train11.json", "r", encoding="utf8") as file:
     #     lines = file.readlines()
@@ -223,10 +223,15 @@ def run_preprocess():
         # try:
         data = dataset[index]
         print(index, data)
-        code_content = "public class Test {\n"
+        # code_content = "public class Test {\n"
+        # code_content += data['func_code_string']
+        # code_content += "}"
+        # sr_project = ast.do_parse_content(code_content)
+
+        code_content = "class Test:\n   "
         code_content += data['func_code_string']
-        code_content += "}"
         sr_project = ast.do_parse_content(code_content)
+
         sr_method = None
 
         for program in sr_project.program_list:
@@ -240,10 +245,11 @@ def run_preprocess():
                     continue
                 sr_method.mkg.parse_method_name(sr_method.method_name)
                 sr_method.mkg.parse_concept()
-                try:
-                    sr_method.rebuild_mkg()
-                except Exception as e:
-                    continue
+                sr_method.rebuild_mkg()
+                # try:
+                #     sr_method.rebuild_mkg()
+                # except Exception as e:
+                #     continue
                 sr_method.mkg.expand_concept_edge()
                 sr_method.mkg.expand_concept_node(sr_method.method_name)
                 kg = sr_method.mkg.to_dict()
@@ -270,7 +276,7 @@ def run_preprocess():
 
         # if count >=100:
             # Write the list of dictionaries to a JSON file
-        with open("tl_data_train.json", "w") as json_file:
+        with open("py_data.json", "w") as json_file:
             for js in result:
                 json_file.write(json.dumps(js))
                 json_file.write("\n")
@@ -281,7 +287,7 @@ def run_preprocess():
 def run_sample():
     sample_path = r"C:\worksapce\research\kgc912\pretrain\sample.java"
     with open(sample_path, 'r', encoding="utf8") as f:
-        ast = KASTParse("", "java")
+        ast = KASTParse("", "python")
         ast.setup()
         sample = f.read()
         code_content = "public class Test {\n"
