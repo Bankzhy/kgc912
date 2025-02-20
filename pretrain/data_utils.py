@@ -9,8 +9,8 @@ from antlr4 import InputStream
 import nltk
 
 # from .asts.ast_parser import generate_single_ast_nl, split_identifier
-from pretrain import enums
-from pretrain.vocab import Vocab
+import enums
+from vocab import Vocab
 from common.antlr_parsers.go.GoLexer import GoLexer
 from common.antlr_parsers.java.Java8Lexer import Java8Lexer
 from common.antlr_parsers.python3.Python3Lexer import Python3Lexer
