@@ -181,10 +181,10 @@ def fetch_big_clone(split):
     return dataset
 
 
-def run_preprocess():
+def run_preprocess(start, end):
 
     # load code search net
-    dataset = load_dataset('code-search-net/code_search_net', 'python', split='train', trust_remote_code=True)
+    dataset = load_dataset('code-search-net/code_search_net', 'python', split='test', trust_remote_code=True)
     # load tl
     # dataset = fetch_tl("train")
 
@@ -215,7 +215,7 @@ def run_preprocess():
     #         exist_id.append(id)
 
     # for i, data in enumerate(dataset):
-    for index in range(0, len(dataset)):
+    for index in range(int(start), int(end)):
         if index in exist_id:
             print("exist:", index)
             continue
@@ -245,11 +245,11 @@ def run_preprocess():
                     continue
                 sr_method.mkg.parse_method_name(sr_method.method_name)
                 sr_method.mkg.parse_concept()
-                sr_method.rebuild_mkg()
-                # try:
-                #     sr_method.rebuild_mkg()
-                # except Exception as e:
-                #     continue
+
+                try:
+                    sr_method.rebuild_mkg()
+                except Exception as e:
+                    continue
                 sr_method.mkg.expand_concept_edge()
                 sr_method.mkg.expand_concept_node(sr_method.method_name)
                 kg = sr_method.mkg.to_dict()
@@ -285,15 +285,15 @@ def run_preprocess():
 
 
 def run_sample():
-    sample_path = r"C:\worksapce\research\kgc912\pretrain\sample.java"
+    sample_path = r"/Users/zhang/Documents/kgc912/pretrain/sample.java"
     with open(sample_path, 'r', encoding="utf8") as f:
         ast = KASTParse("", "python")
         ast.setup()
         sample = f.read()
-        code_content = "public class Test {\n"
+        code_content = "class Test:\n   "
         code_content += sample
-        code_content += "}"
         sr_project = ast.do_parse_content(code_content)
+
         sr_method = None
 
         for program in sr_project.program_list:

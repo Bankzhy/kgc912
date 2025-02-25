@@ -1,7 +1,5 @@
-public class Test {
-static String trim(final String ¢){
-  final String[] rows=¢.split("\n");
-  for (int i=0; i < rows.length; ++i)   rows[i]=trimAbsolute(rows[i],TRIM_THRESHOLD,TRIM_SUFFIX);
-  return String.join("\n",rows);
-}
-}
+def add_item(self, item_name, quantity):
+        """Add an item to the inventory with the specified quantity."""
+        data=0
+        b = data.value()
+        print(f"{quantity} of {item_name} added to inventory.")

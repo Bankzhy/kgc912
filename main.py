@@ -3,15 +3,27 @@ from pretrain.run_preprocess import run_preprocess, run_sample, report_dataset
 from sum.summariztion import run_summarization
 
 
-def run():
-    # report_dataset()
-    # merge_dataset()
-    # run_mini()
-    # create_mini_conceptnet()
-    # run_pretrain()
-    # run_summarization()
-    # run_sample()
-    run_preprocess()
+# def run():
+import argparse
 
-if __name__ == '__main__':
-    run()
+# 创建解析器
+parser = argparse.ArgumentParser(description="A simple script to say hello.")
+
+# 添加命令行参数，包括参数名称
+parser.add_argument("--start", help="")
+parser.add_argument("--end", help="")
+
+# 解析命令行参数
+args = parser.parse_args()
+# report_dataset()
+# merge_dataset()
+# run_mini()
+# create_mini_conceptnet()
+# run_pretrain()
+# run_summarization()
+# run_sample()
+# run_sample()
+run_preprocess(args.start, args.end)
+
+# if __name__ == '__main__':
+#     run()

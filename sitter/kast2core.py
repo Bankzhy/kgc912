@@ -47,6 +47,7 @@ class KASTParse:
         self.IF_STATEMENT = "if_statement"
         self.WHILE_STATEMENT = "while_statement"
         self.ASSIGNMENT_EXPRESSION = "assignment_expression"
+        self.ASSIGNMENT = "assignment"
         self.BINARY_EXPRESSION = "binary_expression"
         self.UPDATE_EXPRESSION = "update_expression"
         self.PARENTHESIZED_EXPRESSION = "parenthesized_expression"
@@ -70,8 +71,9 @@ class KASTParse:
         self.ARGUMENT_LIST = "argument_list"
         self.FIELD_ACCESS = "field_access"
         self.ARRAY_ACCESS = "array_access"
+        self.ATTRIBUTE = "attribute"
         self.symbol = ["[","]","<",">","{","}",",","(",")"]
-
+        self.CALL = "call"
         self.language = language
         self.JAVA_LANGUAGE = None
         self.java_lib_path = None
@@ -584,7 +586,7 @@ class KASTParse:
 
                     statement.type = self.LOCAL_VARIABLE_DECLARATION
         elif statement_node.type == self.EXPRESSION_STATEMENT:
-            if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION:
+            if statement_node.children[0].type == self.ASSIGNMENT_EXPRESSION or statement_node.children[0].type == self.ASSIGNMENT:
                 statement.var, statement.value = self.fetch_var(statement_node.children[0], statement, mkg)
                 if len(statement.var)>0:
                     data_var, created = mkg.get_or_create_node(statement.var[0], VAR_IDENTIFIER)
@@ -613,8 +615,11 @@ class KASTParse:
                             for dr in dominate_vars:
                                 new_cd_edge = mkg.get_or_create_edge(new_assignment_var, dr, CONTROL_DEPENDENCY)
 
-            elif statement_node.children[0].type == self.METHOD_INVOCATION:
+            elif statement_node.children[0].type == self.METHOD_INVOCATION or statement_node.children[0].type == self.CALL:
                 self.parse_method_invocation(statement_node.children[0], statement, mkg)
+        elif statement_node.type == self.IDENTIFIER:
+            pass
+
 
     def fetch_data_type(self, node):
         data_type = []

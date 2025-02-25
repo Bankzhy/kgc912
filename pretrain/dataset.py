@@ -9,8 +9,11 @@ import torch
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
-from data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
 from vocab import Vocab
+from data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
+
+# from pretrain.vocab import Vocab
+# from pretrain.data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
 
 # from pretrain.vocab.vocab import Vocab
 
