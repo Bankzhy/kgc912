@@ -276,7 +276,8 @@ def run_preprocess(start, end):
 
         # if count >=100:
             # Write the list of dictionaries to a JSON file
-        with open("py_data.json", "w") as json_file:
+        file_name = "py_data_"+str(start)+"_"+str(end)+".json"
+        with open(file_name, "w") as json_file:
             for js in result:
                 json_file.write(json.dumps(js))
                 json_file.write("\n")
