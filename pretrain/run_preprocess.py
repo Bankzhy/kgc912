@@ -184,7 +184,7 @@ def fetch_big_clone(split):
 def run_preprocess(start, end):
 
     # load code search net
-    dataset = load_dataset('code-search-net/code_search_net', 'java', split='test', trust_remote_code=True)
+    dataset = load_dataset('code-search-net/code_search_net', 'java', split='validation', trust_remote_code=True)
     # load tl
     # dataset = fetch_tl("train")
 
