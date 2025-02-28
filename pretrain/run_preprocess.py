@@ -184,7 +184,7 @@ def fetch_big_clone(split):
 def run_preprocess(start, end):
 
     # load code search net
-    dataset = load_dataset('code-search-net/code_search_net', 'java', split='validation', trust_remote_code=True)
+    dataset = load_dataset('code-search-net/code_search_net', 'java', split='test', trust_remote_code=True)
     # load tl
     # dataset = fetch_tl("train")
 
@@ -276,7 +276,7 @@ def run_preprocess(start, end):
 
         # if count >=100:
             # Write the list of dictionaries to a JSON file
-        file_name = "java_data_valid_"+str(start)+"_"+str(end)+".json"
+        file_name = "java_data_test_"+str(start)+"_"+str(end)+".json"
         with open(file_name, "w") as json_file:
             for js in result:
                 json_file.write(json.dumps(js))
