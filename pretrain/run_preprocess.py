@@ -223,14 +223,14 @@ def run_preprocess(start, end):
         # try:
         data = dataset[index]
         print(index, data)
-        # code_content = "public class Test {\n"
-        # code_content += data['func_code_string']
-        # code_content += "}"
-        # sr_project = ast.do_parse_content(code_content)
-
-        code_content = "class Test:\n   "
+        code_content = "public class Test {\n"
         code_content += data['func_code_string']
+        code_content += "}"
         sr_project = ast.do_parse_content(code_content)
+
+        # code_content = "class Test:\n   "
+        # code_content += data['func_code_string']
+        # sr_project = ast.do_parse_content(code_content)
 
         sr_method = None
 
