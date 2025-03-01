@@ -184,7 +184,7 @@ def fetch_big_clone(split):
 def run_preprocess(start, end):
 
     # load code search net
-    dataset = load_dataset('code-search-net/code_search_net', 'python', split='train', trust_remote_code=True)
+    dataset = load_dataset('code-search-net/code_search_net', 'java', split='test', trust_remote_code=True)
     # load tl
     # dataset = fetch_tl("train")
 
@@ -192,7 +192,7 @@ def run_preprocess(start, end):
     # dataset = fetch_big_clone("train")
 
 
-    ast = KASTParse("", "python")
+    ast = KASTParse("", "java")
     ast.setup()
     result = []
     exist_id = []
@@ -223,14 +223,14 @@ def run_preprocess(start, end):
         # try:
         data = dataset[index]
         print(index, data)
-        # code_content = "public class Test {\n"
-        # code_content += data['func_code_string']
-        # code_content += "}"
-        # sr_project = ast.do_parse_content(code_content)
-
-        code_content = "class Test:\n   "
+        code_content = "public class Test {\n"
         code_content += data['func_code_string']
+        code_content += "}"
         sr_project = ast.do_parse_content(code_content)
+
+        # code_content = "class Test:\n   "
+        # code_content += data['func_code_string']
+        # sr_project = ast.do_parse_content(code_content)
 
         sr_method = None
 
