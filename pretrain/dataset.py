@@ -348,36 +348,38 @@ class KGCodeDataset(Dataset):
         with open(file, encoding='ISO-8859-1') as f:
             lines = f.readlines()
             print("loading dataset:")
-            print(lang)
             for line in tqdm(lines):
                 # print(line)
-                data = json.loads(line.strip())
-                code = data["code"]
-                doc = data["doc"]
-                st, nl = self.parse_kg(data["kg"])
+                try:
+                    data = json.loads(line.strip())
+                    doc = data["doc"]
+                    st, nl = self.parse_kg(data["kg"])
 
-                source = data['code'].strip()
-                source = remove_comments_and_docstrings(source, lang)
-                source = replace_string_literal(source)
-                code = tokenize_source(source=source, lang=lang)
-                codes.append(code)
+                    source = data['code'].strip()
+                    source = remove_comments_and_docstrings(source, lang)
+                    source = replace_string_literal(source)
+                    code = tokenize_source(source=source, lang=lang)
+                    codes.append(code)
 
-                code_l = code.split(" ")
-                func_name = ""
-                for index, code in enumerate(code_l):
-                    if code == "(":
-                        func_name = code_l[index - 1]
-                        break
-                func_name_l = self.split_edge_name(func_name)
-                func_name_nl = " ".join(func_name_l)
-                if func_name_nl.lower() not in nl:
-                    nl += ","
-                    nl += func_name_nl
+                    code_l = code.split(" ")
+                    func_name = ""
+                    for index, code in enumerate(code_l):
+                        if code == "(":
+                            func_name = code_l[index - 1]
+                            break
+                    func_name_l = self.split_edge_name(func_name)
+                    func_name_nl = " ".join(func_name_l)
+                    if func_name_nl.lower() not in nl:
+                        nl += ","
+                        nl += func_name_nl
 
 
-                structures.append(st)
-                nls.append(nl)
-                docs.append(doc)
+                    structures.append(st)
+                    nls.append(nl)
+                    docs.append(doc)
+                except Exception as e:
+                    print(e)
+                    continue
 
         return codes, structures, nls, docs
 
