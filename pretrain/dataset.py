@@ -260,7 +260,7 @@ class KGCodeDataset(Dataset):
             for file in os.listdir(dataset_dir):
                 path = os.path.join(dataset_dir, file)
                 if path.endswith(".json"):
-                    if path.startswith("py"):
+                    if file.startswith("py"):
                         lang = "python"
                     else:
                         lang = "java"
