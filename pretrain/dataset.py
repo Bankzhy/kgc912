@@ -252,7 +252,7 @@ class KGCodeDataset(Dataset):
 
         if self.task == "summarization":
             path = os.path.join(dataset_dir, (self.split+".json"))
-            codes, structures, nls, docs = self.parse_json_file(path)
+            codes, structures, nls, docs = self.parse_json_file(path, lang="java")
         elif self.task == "clone":
             # path = os.path.join(dataset_dir, (self.split + ".txt"))
             codes, structures, nls, docs = self.parse_clone_file(self.split)
@@ -260,7 +260,11 @@ class KGCodeDataset(Dataset):
             for file in os.listdir(dataset_dir):
                 path = os.path.join(dataset_dir, file)
                 if path.endswith(".json"):
-                    codes, structures, nls, docs = self.parse_json_file(path)
+                    if path.startswith("py"):
+                        lang = "python"
+                    else:
+                        lang = "java"
+                    codes, structures, nls, docs = self.parse_json_file(path, lang=lang)
 
         return codes, structures, nls, docs
 
@@ -318,7 +322,7 @@ class KGCodeDataset(Dataset):
         text = text.replace('.', ' ')
         return text
 
-    def parse_json_file(self, file):
+    def parse_json_file(self, file, lang):
         """
         Parse a dataset file where each line is a json string representing a sample.
 
@@ -352,9 +356,9 @@ class KGCodeDataset(Dataset):
                 st, nl = self.parse_kg(data["kg"])
 
                 source = data['code'].strip()
-                source = remove_comments_and_docstrings(source, "java")
+                source = remove_comments_and_docstrings(source, lang)
                 source = replace_string_literal(source)
-                code = tokenize_source(source=source, lang="java")
+                code = tokenize_source(source=source, lang=lang)
                 codes.append(code)
 
                 code_l = code.split(" ")
