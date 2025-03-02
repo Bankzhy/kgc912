@@ -348,6 +348,7 @@ class KGCodeDataset(Dataset):
         with open(file, encoding='ISO-8859-1') as f:
             lines = f.readlines()
             print("loading dataset:")
+            print(lang)
             for line in tqdm(lines):
                 # print(line)
                 data = json.loads(line.strip())
