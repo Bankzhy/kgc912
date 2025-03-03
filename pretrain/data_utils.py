@@ -151,8 +151,8 @@ def remove_comments_and_docstrings(source, lang):
                 # l_text = tok[4]
                 if start_line > last_lineno:
                     last_col = 0
-                # if start_col > last_col:
-                #     out += (" " * (start_col - last_col))
+                if start_col > last_col:
+                    out += (" " * (start_col - last_col))
                 # Remove comments:
                 if token_type == tokenize.COMMENT:
                     pass
