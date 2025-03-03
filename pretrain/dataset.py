@@ -264,7 +264,11 @@ class KGCodeDataset(Dataset):
                         lang = "python"
                     else:
                         lang = "java"
-                    codes, structures, nls, docs = self.parse_json_file(path, lang=lang)
+                    fcodes, fstructures, fnls, fdocs = self.parse_json_file(path, lang=lang)
+                    codes.extend(fcodes)
+                    structures.extend(fstructures)
+                    nls.extend(fnls)
+                    docs.extend(fdocs)
 
         return codes, structures, nls, docs
 
