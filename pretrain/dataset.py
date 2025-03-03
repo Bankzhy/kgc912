@@ -322,6 +322,11 @@ class KGCodeDataset(Dataset):
         text = text.replace('.', ' ')
         return text
 
+    def convert_python_source_classical_summarization(self, source: str):
+        source = re.sub(r' *DCNL *', '\n', source)
+        source = re.sub(r' *DCSP *', '\t', source)
+        return source
+
     def parse_json_file(self, file, lang):
         """
         Parse a dataset file where each line is a json string representing a sample.
@@ -355,6 +360,7 @@ class KGCodeDataset(Dataset):
                 st, nl = self.parse_kg(data["kg"])
 
                 source = data['code'].strip()
+                source = source.replace("\t", " ")
                 print(source)
                 source = remove_comments_and_docstrings(source, lang)
                 print(source)
