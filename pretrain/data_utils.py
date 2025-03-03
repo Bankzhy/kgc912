@@ -495,6 +495,8 @@ def tokenize_source(source, lang, use_regular=False):
         return trim_spaces(code)
     if lang == enums.LANG_PYTHON:
         fsource = convert_python_source_classical_summarization(source)
+        print("fs")
+        print(fsource)
         tokens = tokenize.generate_tokens(StringIO(fsource).readline)
         code = ' '.join([token.string for token in tokens])
         code = replace_string_literal(code)
