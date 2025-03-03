@@ -349,7 +349,7 @@ class KGCodeDataset(Dataset):
             lines = f.readlines()
             print("loading dataset:")
             for line in tqdm(lines):
-                # print(line)
+                print(line)
                 data = json.loads(line.strip())
                 doc = data["doc"]
                 st, nl = self.parse_kg(data["kg"])
