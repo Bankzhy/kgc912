@@ -386,7 +386,8 @@ class KGCodeDataset(Dataset):
                     nls.append(nl)
                     docs.append(doc)
                 except Exception as e:
-                    print(e)
+                    # print(e)
+                    continue
 
         return codes, structures, nls, docs
 
