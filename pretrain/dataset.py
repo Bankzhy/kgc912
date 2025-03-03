@@ -355,6 +355,7 @@ class KGCodeDataset(Dataset):
                 st, nl = self.parse_kg(data["kg"])
 
                 source = data['code'].strip()
+                print(source)
                 source = remove_comments_and_docstrings(source, lang)
                 source = replace_string_literal(source)
                 code = tokenize_source(source=source, lang=lang)
