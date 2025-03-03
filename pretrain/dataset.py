@@ -358,7 +358,7 @@ class KGCodeDataset(Dataset):
                     source = data['code'].strip()
                     source = remove_comments_and_docstrings(source, lang)
                     source = replace_string_literal(source)
-                    code = tokenize_source(source=source, lang=lang, use_regular=True)
+                    code = tokenize_source(source=source, lang=lang)
                     codes.append(code)
 
                     code_l = code.split(" ")
