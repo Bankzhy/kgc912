@@ -72,17 +72,17 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output2/pretrain',
+        default='output/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     output_root: str = field(
-        default='output2',
+        default='output',
         metadata={'help': 'pretrain model output '}
     )
 
     checkpoint_root: str = field(
-        default='output2/checkpoints',
+        default='output/checkpoints',
         metadata={'help': 'pretrain model output '}
     )
 
