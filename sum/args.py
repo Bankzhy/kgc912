@@ -87,12 +87,12 @@ class RuntimeArguments:
     )
 
     model_root: str = field(
-        default='output2/sum/models',
+        default='output/sum/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output2/runs',
+        default='output/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
