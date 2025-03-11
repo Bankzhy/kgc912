@@ -53,7 +53,13 @@ class KGCodeDataset(Dataset):
 
     def split_edge_name(self, name):
             # 处理 CamelCase
-        return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
+        # return re.sub('([a-z])([A-Z])', r'\1 \2', name).split()
+
+        # Split camel case (e.g., "camelCaseExample" -> ["camel", "Case", "Example"])
+        camel_split = re.sub(r'([a-z])([A-Z])', r'\1 \2', name)
+        # Split snake case (e.g., "under_case_example" -> ["under", "case", "example"])
+        result = re.split(r'[_\s]+', camel_split)
+        return result
 
     def __len__(self):
         return len(self.codes)
@@ -380,6 +386,7 @@ class KGCodeDataset(Dataset):
                             func_name = code_l[index - 1]
                             break
                     func_name_l = self.split_edge_name(func_name)
+                    func_name_l.remove("")
                     func_name_nl = " ".join(func_name_l)
                     if func_name_nl.lower() not in nl:
                         nl += ","
