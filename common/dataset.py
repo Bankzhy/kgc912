@@ -39,7 +39,7 @@ class KGCodeDataset(Dataset):
             "assignment"
         ]
         self.dataset_name = "KGCode"
-        if self.task == "clone":
+        if self.task == "clone" or self.task == "clone2":
             self.codes1, self.sts1, self.docs1, self.codes2, self.sts2, self.docs2, self.labels = self.load_clone_dataset()
         else:
             self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
