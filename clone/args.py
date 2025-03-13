@@ -235,6 +235,11 @@ class RuntimeArguments:
         metadata={'help': 'Maximum length of the nl sequence'}
     )
 
+    weight_decay: float = field(
+        default=0.0,
+        metadata={'help': 'Maximum length of the nl sequence'}
+    )
+
     no_ast: bool = field(
         default=False,
         metadata={'action': 'store_true',
