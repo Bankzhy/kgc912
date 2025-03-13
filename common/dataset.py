@@ -50,7 +50,7 @@ class KGCodeDataset(Dataset):
 
 
     def __len__(self):
-        if self.task == "clone":
+        if self.task == "clone" or self.task == "clone2":
             return len(self.codes1)
         return len(self.codes)
 
