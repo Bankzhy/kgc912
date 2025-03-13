@@ -3,8 +3,6 @@ import torch
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from common.data_collator_kg import collate_fn
-from common.dataset import init_dataset
 import argparse
 import logging
 import os
@@ -15,6 +13,7 @@ sys.path.append(curPath)
 sys.path.append('../..')
 print("当前的工作目录：",os.getcwd())
 print("python搜索模块的路径集合",sys.path)
+from common.data_collator_kg import collate_fn
 from common.bart import BartForClassificationAndGeneration
 from common.callbacks import LogStateCallBack
 from common.dataset import init_dataset
