@@ -6,7 +6,6 @@ from tqdm import tqdm
 import argparse
 import logging
 import os
-from common import enums
 import sys
 curPath = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(curPath)
