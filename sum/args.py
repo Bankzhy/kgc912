@@ -137,7 +137,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=35,
+        default=50,
         metadata={'help': 'Number of data iterations for training'}
     )
 
