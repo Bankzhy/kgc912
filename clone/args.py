@@ -20,8 +20,8 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default=None,
-        # default='../pretrain/output2/pretrain/models/nlp',
+        # default=None,
+        default='../pretrain/output2/pretrain/models/nlp',
         # default= r'C:\worksapce\research\kgc912\pretrain\output\pretrain\models\nlp',
         metadata={'help': 'Directory of trained model'}
     )
@@ -144,12 +144,12 @@ class RuntimeArguments:
     )
 
     batch_size: int = field(
-        default=16,
+        default=128,
         metadata={'help': 'Batch size for training on each device'}
     )
 
     eval_batch_size: int = field(
-        default=16,
+        default=128,
         metadata={'help': 'Batch size for evaluation on each device'}
     )
 
