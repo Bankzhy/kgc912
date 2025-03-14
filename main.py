@@ -23,7 +23,8 @@ args = parser.parse_args()
 # run_summarization()
 # run_sample()
 # run_sample()
-run_preprocess(args.start, args.end)
+# run_preprocess(args.start, args.end)
+run_preprocess(0, 25000)
 
 # if __name__ == '__main__':
 #     run()

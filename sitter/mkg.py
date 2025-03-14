@@ -20,7 +20,7 @@ class MKG:
         ]
         # Connect to the MySQL database
         self.conn = pymysql.connect(
-            host="47.113.220.80",
+            host="localhost",
             user="root",
             password="Apple3328823%",
             database="kgc",

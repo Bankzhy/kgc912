@@ -181,18 +181,62 @@ def fetch_big_clone(split):
     return dataset
 
 
+def fetch_pcsd(split):
+    root= r"C:\worksapce\research\kgc912\pcsd"
+    declaration_path = os.path.join(root, "data_ps.declarations." + split)
+    body_path = os.path.join(root, "data_ps.bodies."+split)
+    doc_path = os.path.join(root, "data_ps.descriptions."+split)
+    declarations = []
+    bodies = []
+    docs = []
+    dataset = []
+
+    with open(declaration_path, encoding='ISO-8859-1') as f:
+        lines = f.readlines()
+        for line in lines:
+            content = line.replace("DCNL", "\n")
+            content = content.replace("DCSP", " ")
+            declarations.append(content)
+
+    with open(body_path, encoding='ISO-8859-1') as f:
+        lines = f.readlines()
+        for line in lines:
+            content = line.replace("DCNL", "\n")
+            content = content.replace("DCSP", " ")
+            bodies.append(content)
+
+    with open(doc_path, encoding='ISO-8859-1') as f:
+        lines = f.readlines()
+        for line in lines:
+            content = line.replace("DCNL", "\n")
+            content = content.replace("DCSP", " ")
+            docs.append(content)
+
+    for index, code in enumerate(declarations):
+        new_data = {
+            "func_documentation_string": docs[index],
+            "func_code_string": declarations[index]+bodies[index],
+            "idx": index
+        }
+        dataset.append(new_data)
+
+    return dataset
+
 def run_preprocess(start, end):
 
     # load code search net
-    dataset = load_dataset('code-search-net/code_search_net', 'java', split='test', trust_remote_code=True)
+    # dataset = load_dataset('code-search-net/code_search_net', 'java', split='test', trust_remote_code=True)
     # load tl
     # dataset = fetch_tl("train")
 
     # load bcb
     # dataset = fetch_big_clone("train")
 
+    # load pcsd
+    dataset = fetch_pcsd("train")
 
-    ast = KASTParse("", "java")
+
+    ast = KASTParse("", "python")
     ast.setup()
     result = []
     exist_id = []
@@ -223,14 +267,14 @@ def run_preprocess(start, end):
         # try:
         data = dataset[index]
         print(index, data)
-        code_content = "public class Test {\n"
-        code_content += data['func_code_string']
-        code_content += "}"
-        sr_project = ast.do_parse_content(code_content)
-
-        # code_content = "class Test:\n   "
+        # code_content = "public class Test {\n"
         # code_content += data['func_code_string']
+        # code_content += "}"
         # sr_project = ast.do_parse_content(code_content)
+
+        code_content = "class Test:\n   "
+        code_content += data['func_code_string']
+        sr_project = ast.do_parse_content(code_content)
 
         sr_method = None
 
@@ -276,7 +320,7 @@ def run_preprocess(start, end):
 
         # if count >=100:
             # Write the list of dictionaries to a JSON file
-        file_name = "jt_data_"+str(start)+"_"+str(end)+".json"
+        file_name = "pcsd_data_train_"+str(start)+"_"+str(end)+".json"
         with open(file_name, "w") as json_file:
             for js in result:
                 json_file.write(json.dumps(js))
