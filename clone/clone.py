@@ -16,7 +16,7 @@ sys.path.append('../..')
 print("当前的工作目录：",os.getcwd())
 print("python搜索模块的路径集合",sys.path)
 
-from common.bart import BartForClassificationAndGeneration
+from pretrain.bart import BartForClassificationAndGeneration
 from common.callbacks import LogStateCallBack
 from common.dataset import init_dataset
 from common.general import human_format, count_params, layer_wise_parameters
