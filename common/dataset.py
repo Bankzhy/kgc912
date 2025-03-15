@@ -99,7 +99,9 @@ class KGCodeDataset(Dataset):
         elif self.task == "summarization":
             return self.codes[index], self.structures[index], self.nls[index], self.docs[index]
         elif self.task == "clone":
-            return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], self.docs2[index], self.labels[index]
+            # return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], self.docs2[index], self.labels[index]
+            return self.codes1[index], "", "", self.codes2[index], "", \
+            "", self.labels[index]
         elif self.task == "clone2":
             return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], \
             self.docs2[index], self.labels[index]
