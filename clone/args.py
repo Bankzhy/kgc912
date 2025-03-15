@@ -21,7 +21,7 @@ class RuntimeArguments:
 
     trained_model: str = field(
         # default=None,
-        default='../pretrain/output/pretrain/models/mass',
+        default='../pretrain/output/pretrain/models/nlp',
         # default= r'C:\worksapce\research\kgc912\pretrain\output\pretrain\models\nlp',
         metadata={'help': 'Directory of trained model'}
     )
@@ -236,7 +236,7 @@ class RuntimeArguments:
     )
 
     weight_decay: float = field(
-        default=0.0,
+        default=0.01,
         metadata={'help': 'Maximum length of the nl sequence'}
     )
 
