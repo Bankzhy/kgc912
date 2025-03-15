@@ -231,7 +231,7 @@ class RuntimeArguments:
     )
 
     max_nl_len: int = field(
-        default=32,
+        default=64,
         metadata={'help': 'Maximum length of the nl sequence'}
     )
 
