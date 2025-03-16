@@ -7,6 +7,7 @@ from pathlib import Path
 import pymysql
 import requests
 from datasets import load_dataset
+from openai import OpenAI
 from tqdm import tqdm
 
 from pretrain.dataset import KGCodeDataset
@@ -467,17 +468,19 @@ def report_dataset():
 
 def expand_triples(start, end):
     expand_result = []
-    headers = {
-        'x-rapidapi-key': "c231564601mshf9ebdbfb9bf8045p14bc3ajsn58b3138b1e56",
-        'x-rapidapi-host': "meta-llama-3-70b1.p.rapidapi.com",
-        'Content-Type': "application/json"
-    }
+    # headers = {
+    #     'x-rapidapi-key': "c231564601mshf9ebdbfb9bf8045p14bc3ajsn58b3138b1e56",
+    #     'x-rapidapi-host': "meta-llama-3-70b1.p.rapidapi.com",
+    #     'Content-Type': "application/json"
+    # }
+    key = "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"
+    client = OpenAI(api_key=key)
     file = r"C:\worksapce\research\kgc912\clone\bc_data\data.json"
     with open(file, encoding='ISO-8859-1') as f:
         lines = f.readlines()
         print("loading dataset:")
-        for i in range(start, end):
-            line = lines[i]
+        for line in tqdm(lines):
+            # line = lines[i]
             # print(line)
             try:
                 data = json.loads(line.strip())
@@ -490,19 +493,29 @@ def expand_triples(start, end):
                     "content": msg
                 }
 
-                sdata = {
-                    "model": "meta-llama/Llama-3-70b-chat-hf",
-                    "temperature": 0,
-                    "messages": [msg]
-                }
-                response = requests.post("https://meta-llama-3-70b1.p.rapidapi.com/", json=sdata, headers=headers)
+                completion = client.chat.completions.create(
+                    model="gpt-4o-mini",
+                    messages=[msg]
+                )
+
+                result = completion.choices[0].message.content
+
+                # sdata = {
+                #     "model": "meta-llama/Llama-3-70b-chat-hf",
+                #     "temperature": 0,
+                #     "messages": [msg]
+                # }
+                # response = requests.post("https://meta-llama-3-70b1.p.rapidapi.com/", json=sdata, headers=headers)
 
                 # api = APIMaster.objects.get(api_name="llama3")
                 # api.api_current_count += len(ques)
                 # api.save()
 
-                result = response.json()
-                result = result["choices"][0]["message"]["content"]
+                # result = response.json()
+                # result = result["choices"][0]["message"]["content"]
+
+
+
                 result = filter_response(result)
 
                 expand_result.append(
@@ -550,11 +563,11 @@ def filter_response(response):
     inCode = False
 
     for line in lines:
-        if line.startswith("**Structure Information"):
+        if line.startswith("### Structure Information"):
             current = "title"
-        elif line.startswith("**Syntax Information"):
+        elif line.startswith("### Syntax Information"):
             current = "text"
-        elif line.startswith("**Natural Language Information"):
+        elif line.startswith("### Natural Language Information"):
             current = "code"
             continue
         elif line.startswith("**"):
