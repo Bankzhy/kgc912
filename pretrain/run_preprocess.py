@@ -5,6 +5,7 @@ import re
 from pathlib import Path
 
 import pymysql
+import requests
 from datasets import load_dataset
 from tqdm import tqdm
 
@@ -230,13 +231,13 @@ def run_preprocess(start, end):
     # dataset = fetch_tl("train")
 
     # load bcb
-    # dataset = fetch_big_clone("train")
+    dataset = fetch_big_clone("train")
 
     # load pcsd
-    dataset = fetch_pcsd("train")
+    # dataset = fetch_pcsd("train")
 
 
-    ast = KASTParse("", "python")
+    ast = KASTParse("", "java")
     ast.setup()
     result = []
     exist_id = []
@@ -267,14 +268,14 @@ def run_preprocess(start, end):
         # try:
         data = dataset[index]
         print(index, data)
-        # code_content = "public class Test {\n"
-        # code_content += data['func_code_string']
-        # code_content += "}"
-        # sr_project = ast.do_parse_content(code_content)
-
-        code_content = "class Test:\n   "
+        code_content = "public class Test {\n"
         code_content += data['func_code_string']
+        code_content += "}"
         sr_project = ast.do_parse_content(code_content)
+
+        # code_content = "class Test:\n   "
+        # code_content += data['func_code_string']
+        # sr_project = ast.do_parse_content(code_content)
 
         sr_method = None
 
@@ -320,7 +321,7 @@ def run_preprocess(start, end):
 
         # if count >=100:
             # Write the list of dictionaries to a JSON file
-        file_name = "pcsd_data_train_"+str(start)+"_"+str(end)+".json"
+        file_name = "bigclone_data_train_"+str(start)+"_"+str(end)+".json"
         with open(file_name, "w") as json_file:
             for js in result:
                 json_file.write(json.dumps(js))
@@ -462,6 +463,168 @@ def report_dataset():
     print("syntax num:", str(syntax_num))
     print("basic concept num:", str(basic_concept_num))
     print("expand concept num:", str(expand_concept_num))
+
+
+def expand_triples(start, end):
+    expand_result = []
+    headers = {
+        'x-rapidapi-key': "c231564601mshf9ebdbfb9bf8045p14bc3ajsn58b3138b1e56",
+        'x-rapidapi-host': "meta-llama-3-70b1.p.rapidapi.com",
+        'Content-Type': "application/json"
+    }
+    file = r"C:\worksapce\research\kgc912\clone\bc_data\data.json"
+    with open(file, encoding='ISO-8859-1') as f:
+        lines = f.readlines()
+        print("loading dataset:")
+        for i in range(start, end):
+            line = lines[i]
+            # print(line)
+            try:
+                data = json.loads(line.strip())
+                code = data['code']
+
+                msg = "Please summarize the structure information and syntax information and nature language information as triples from following code (at least 10 for each information).\n"
+                msg += code
+                msg = {
+                    "role": "user",
+                    "content": msg
+                }
+
+                sdata = {
+                    "model": "meta-llama/Llama-3-70b-chat-hf",
+                    "temperature": 0,
+                    "messages": [msg]
+                }
+                response = requests.post("https://meta-llama-3-70b1.p.rapidapi.com/", json=sdata, headers=headers)
+
+                # api = APIMaster.objects.get(api_name="llama3")
+                # api.api_current_count += len(ques)
+                # api.save()
+
+                result = response.json()
+                result = result["choices"][0]["message"]["content"]
+                result = filter_response(result)
+
+                expand_result.append(
+                    {
+                        "id": data["idx"],
+                        # "idx": data["idx"],
+                        "code": data['code'],
+                        "doc": data['doc'],
+                        # "code_token": data["func_code_token"],
+                        "kg": data["kg"],
+                        "expand_structure": result["structure"],
+                        "expand_nlp": result["nlp"]
+                    }
+                )
+
+                file_name = "bigclone_data_expand_" + str(start) + "_" + str(end) + ".json"
+                with open(file_name, "w") as json_file:
+                    for js in expand_result:
+                        json_file.write(json.dumps(js))
+                        json_file.write("\n")
+                    json_file.close()
+
+                print(data)
+            except Exception as e:
+                print(e)
+                continue
+
+
+def filter_triples(text):
+    match = re.search(r"\((.*?)\)", text)
+
+    if match:
+        result = match.group(1)
+        return result
+    else:
+        return ""
+
+def filter_response(response):
+    title = ""
+    text = ""
+    code = ""
+    code_lang = ""
+    current = ""
+    lines = response.split("\n")
+    inCode = False
+
+    for line in lines:
+        if line.startswith("**Structure Information"):
+            current = "title"
+        elif line.startswith("**Syntax Information"):
+            current = "text"
+        elif line.startswith("**Natural Language Information"):
+            current = "code"
+            continue
+        elif line.startswith("**"):
+            current = ""
+
+        if line == "":
+            continue
+
+        if current == "title":
+            title += line
+            title += "\n"
+        elif current == "text":
+            text += line
+            text += "\n"
+        elif current == "code":
+            if line.startswith("```"):
+                ll = line.split("```")
+                if len(ll) > 1:
+                    if ll[1] != "":
+                        code_lang = ll[1]
+                if inCode:
+                    current = ""
+                else:
+                    inCode = True
+            else:
+                code += line
+                code += "\n"
+    title_l = title.split("**")
+    title = title_l[len(title_l) - 1]
+    if title.endswith("\n"):
+        title = title[:-1]
+    text_l = text.split("**")
+    text = text_l[len(text_l) - 1]
+    if text.endswith("\n"):
+        text = text[:-1]
+
+    if code.endswith("\n"):
+        code = code[:-1]
+
+
+    title_l = title.split("\n")
+    structures = []
+    for tl in title_l:
+        st = filter_triples(tl)
+        if st != "":
+            st = st.replace(",", "")
+            structures.append(st)
+
+    text_l = text.split("\n")
+    syntax = []
+    for t in text_l:
+        stn = filter_triples(t)
+        if stn != "":
+            stn = stn.replace(",", "")
+            syntax.append(stn)
+
+    code_l = code.split("\n")
+    nlp = []
+    for c in code_l:
+        n = filter_triples(c)
+        if n != "":
+            n = n.replace(",", "")
+            nlp.append(n)
+
+    return {
+        "structure": structures,
+        "syntax": syntax,
+        "nlp": nlp,
+        "code_lang": code_lang
+    }
 
 # if __name__ == '__main__':
 #     # run()

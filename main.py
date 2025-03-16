@@ -1,5 +1,5 @@
 # from pretrain.pretrain import run_pretrain
-from pretrain.run_preprocess import run_preprocess, run_sample, report_dataset
+from pretrain.run_preprocess import run_preprocess, run_sample, report_dataset, expand_triples
 from sum.summariztion import run_summarization
 
 
@@ -24,7 +24,9 @@ args = parser.parse_args()
 # run_sample()
 # run_sample()
 # run_preprocess(args.start, args.end)
-run_preprocess(0, 25000)
+# run_preprocess(0, 2500)
+
+expand_triples(0, 100)
 
 # if __name__ == '__main__':
 #     run()
