@@ -473,9 +473,19 @@ def expand_triples(start, end):
     #     'x-rapidapi-host': "meta-llama-3-70b1.p.rapidapi.com",
     #     'Content-Type': "application/json"
     # }
-    key = "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"
+    key = ""
     client = OpenAI(api_key=key)
     file = r"C:\worksapce\research\kgc912\clone\bc_data\data.json"
+    out_file_name = "bigclone_data_expand_" + str(start) + "_" + str(end) + ".json"
+    exist_ids = []
+
+    with open(out_file_name, encoding='ISO-8859-1') as f:
+        lines = f.readlines()
+        print("loading dataset:")
+        for line in lines:
+            data = json.loads(line.strip())
+            exist_ids.append(data["id"])
+
     with open(file, encoding='ISO-8859-1') as f:
         lines = f.readlines()
         print("loading dataset:")
@@ -485,6 +495,11 @@ def expand_triples(start, end):
             try:
                 data = json.loads(line.strip())
                 code = data['code']
+                if data["idx"] in exist_ids:
+                    print("exist: ")
+                    print(data)
+                    expand_result.append(data)
+                    continue
 
                 msg = "Please summarize the structure information and syntax information and nature language information as triples from following code (at least 10 for each information).\n"
                 msg += code
@@ -531,8 +546,8 @@ def expand_triples(start, end):
                     }
                 )
 
-                file_name = "bigclone_data_expand_" + str(start) + "_" + str(end) + ".json"
-                with open(file_name, "w") as json_file:
+
+                with open(out_file_name, "w") as json_file:
                     for js in expand_result:
                         json_file.write(json.dumps(js))
                         json_file.write("\n")
