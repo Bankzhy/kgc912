@@ -126,12 +126,12 @@ class KGCodeDataset(Dataset):
 
         if self.task == "summarization":
             path = os.path.join(dataset_dir, (self.split+".json"))
-            codes, structures, nls, docs = self.parse_json_file(path)
+            codes, structures, nls, docs = self.parse_json_file(path, lang=self.args.code_lang)
         else:
             for file in os.listdir(dataset_dir):
                 path = os.path.join(dataset_dir, file)
                 if path.endswith(".json"):
-                    codes, structures, nls, docs = self.parse_json_file(path)
+                    codes, structures, nls, docs = self.parse_json_file(path, lang=self.args.code_lang)
 
         return codes, structures, nls, docs
 
@@ -191,7 +191,7 @@ class KGCodeDataset(Dataset):
         nl_token = ",".join(nl_l)
         return st_token, nl_token
 
-    def parse_json_file(self, file):
+    def parse_json_file(self, file, lang):
         """
         Parse a dataset file where each line is a json string representing a sample.
 
@@ -219,34 +219,39 @@ class KGCodeDataset(Dataset):
             print("loading dataset:")
             for line in tqdm(lines):
                 # print(line)
-                data = json.loads(line.strip())
-                code = data["code"]
-                doc = data["doc"]
-                st, nl = self.parse_kg(data["kg"])
+                try:
+                    data = json.loads(line.strip())
+                    doc = data["doc"]
+                    st, nl = self.parse_kg(data["kg"])
 
-                source = data['code'].strip()
-                source = source.replace("\t", " ")
-                source = remove_comments_and_docstrings(source, "java")
-                source = replace_string_literal(source)
-                code = tokenize_source(source=source, lang="java")
-                codes.append(code)
+                    source = data['code'].strip()
+                    source = source.replace("\t", " ")
+                    # print(source)
+                    source = remove_comments_and_docstrings(source, lang)
+                    # print(source)
+                    source = replace_string_literal(source)
+                    code = tokenize_source(source=source, lang=lang)
+                    codes.append(code)
 
-                code_l = code.split(" ")
-                func_name = ""
-                for index, code in enumerate(code_l):
-                    if code == "(":
-                        func_name = code_l[index - 1]
-                        break
-                func_name_l = self.split_edge_name(func_name)
-                func_name_nl = " ".join(func_name_l)
-                if func_name_nl.lower() not in nl:
-                    nl += ","
-                    nl += func_name_nl
+                    code_l = code.split(" ")
+                    func_name = ""
+                    for index, code in enumerate(code_l):
+                        if code == "(":
+                            func_name = code_l[index - 1]
+                            break
+                    func_name_l = self.split_edge_name(func_name)
+                    func_name_l.remove("")
+                    func_name_nl = " ".join(func_name_l)
+                    if func_name_nl.lower() not in nl:
+                        nl += ","
+                        nl += func_name_nl
 
-
-                structures.append(st)
-                nls.append(nl)
-                docs.append(doc)
+                    structures.append(st)
+                    nls.append(nl)
+                    docs.append(doc)
+                except Exception as e:
+                    # print(e)
+                    continue
 
         return codes, structures, nls, docs
 
