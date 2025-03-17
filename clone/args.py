@@ -20,8 +20,8 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default=None,
-        # default='../pretrain/output2/pretrain/models/nlp',
+        # default=None,
+        default='../pretrain/output2/pretrain/models/nlp',
         # default= r'C:\worksapce\research\kgc912\pretrain\output\pretrain\models\nlp',
         metadata={'help': 'Directory of trained model'}
     )
@@ -221,17 +221,17 @@ class RuntimeArguments:
     )
 
     max_code_len: int = field(
-        default=256,
+        default=128,
         metadata={'help': 'Maximum length of code sequence'}
     )
 
     max_ast_len: int = field(
-        default=64,
+        default=16,
         metadata={'help': 'Maximum length of ast sequence'}
     )
 
     max_nl_len: int = field(
-        default=64,
+        default=32,
         metadata={'help': 'Maximum length of the nl sequence'}
     )
 
