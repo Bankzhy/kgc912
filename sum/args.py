@@ -25,7 +25,7 @@ class RuntimeArguments:
     )
 
     code_lang: str = field(
-        default='java',
+        default='python',
         metadata={'help': 'Directory of trained model'}
     )
 
