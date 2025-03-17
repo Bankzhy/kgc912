@@ -201,7 +201,7 @@ def run_summarization():
                                              logging_steps=2500,
                                              save_strategy=IntervalStrategy.STEPS,
                                              save_steps=2500,
-                                             save_total_limit=5,
+                                             save_total_limit=3,
                                              seed=args.random_seed,
                                              fp16=args.fp16,
                                              dataloader_drop_last=False,
