@@ -219,7 +219,7 @@ class KGCodeDataset(Dataset):
             print("loading dataset:")
             for line in tqdm(lines):
                 # print(line)
-                try:
+                # try:
                     data = json.loads(line.strip())
                     doc = data["doc"]
                     st, nl = self.parse_kg(data["kg"])
@@ -249,9 +249,9 @@ class KGCodeDataset(Dataset):
                     structures.append(st)
                     nls.append(nl)
                     docs.append(doc)
-                except Exception as e:
-                    # print(e)
-                    continue
+                # except Exception as e:
+                #     print(e)
+                #     continue
 
         return codes, structures, nls, docs
 
