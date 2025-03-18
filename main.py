@@ -24,9 +24,9 @@ args = parser.parse_args()
 # run_sample()
 # run_sample()
 # run_preprocess(args.start, args.end)
-# run_preprocess(0, 2500)
+run_preprocess(0, 2500)
 
-expand_triples(0, 100)
+# expand_triples(0, 100)
 
 # if __name__ == '__main__':
 #     run()

@@ -224,6 +224,27 @@ def fetch_pcsd(split):
 
     return dataset
 
+
+def fetch_poold():
+    ds = load_dataset("PoolC/5-fold-clone-detection-600k-5fold", split="train")
+    all_code = []
+    all_pair = []
+
+    for i in range(0, 100000):
+        data = ds[i]
+        code1_index = str(i) + "_1"
+        new_data1 = {
+            "func_documentation_string": "",
+            "func_code_string": data["code1"],
+            "idx": code1_index
+        }
+
+
+
+    return ds
+
+
+
 def run_preprocess(start, end):
 
     # load code search net
@@ -232,11 +253,13 @@ def run_preprocess(start, end):
     # dataset = fetch_tl("train")
 
     # load bcb
-    dataset = fetch_big_clone("train")
+    # dataset = fetch_big_clone("train")
 
     # load pcsd
     # dataset = fetch_pcsd("train")
 
+    #  load poold
+    dataset = fetch_poold()
 
     ast = KASTParse("", "java")
     ast.setup()
