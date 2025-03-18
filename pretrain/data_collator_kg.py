@@ -132,7 +132,7 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
         model_inputs['decoder_attention_mask'] = torch.cat([model_inputs['decoder_attention_mask']], dim=-1)
 
         model_inputs['labels'] = torch.tensor(is_graph, dtype=torch.long)
-    elif task == "clone":
+    elif task == "clone" or task == "clp":
         code_1_raw, ast_1_raw, name_1_raw, code_2_raw, ast_2_raw, name_2_raw, labels = map(list, zip(*batch))
 
         model_inputs['input_ids'], model_inputs['attention_mask'] = get_concat_batch_inputs(

@@ -27,12 +27,12 @@ def pretrain(args):
     if tasks is None:
         logger.warning("Was specified for pre-training, but got pre-training tasks to None, "
                        "will default to ('mass', 'rlp', 'nlmp')")
-        tasks = ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp', 'nlp']
+        tasks = ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp', 'nlp', "clp"]
     else:
         supported_tasks = []
         for task in tasks.split(','):
             task = task.strip().lower()
-            if task in ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp', 'nlp']:
+            if task in ['mass', 'rlp', 'nlmp', 'mnp', 'cgp', 'rrlp', 'nlp', "clp"]:
                 supported_tasks.append(task)
             else:
                 logger.warning(f'Pre-training task {task} is not supported and will be ignored.')
@@ -344,7 +344,7 @@ def pretrain(args):
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
 
-        elif task == enums.TASK_CGP:
+        elif task == enums.TASK_CLP:
             # set model mode
             logger.info('-' * 100)
             model.set_model_mode(enums.MODEL_MODE_CLS)
@@ -463,6 +463,8 @@ def pretrain(args):
 
             logger.info(f'Pre-training task {task} finished')
             trainer.save_model(os.path.join(args.model_root, task))
+
+
 
     logger.info('Pre-training finished')
 

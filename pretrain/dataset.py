@@ -9,11 +9,11 @@ import torch
 from torch.utils.data.dataset import Dataset
 from tqdm import tqdm
 
-# from vocab import Vocab
-# from data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
+from vocab import Vocab
+from data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
 
-from pretrain.vocab import Vocab
-from pretrain.data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
+# from pretrain.vocab import Vocab
+# from pretrain.data_utils import remove_comments_and_docstrings, replace_string_literal, tokenize_source
 
 # from pretrain.vocab.vocab import Vocab
 
@@ -232,6 +232,52 @@ class KGCodeDataset(Dataset):
 
 
             return mask_name_code, self.structures[index], new_nls, func_name
+        elif self.task == "clp":
+            is_correct = random.random() < 0.5
+            concept = self.nls[index]
+            structure = self.structures[index]
+
+            if concept == "" and structure != "":
+                use_nl = False
+            elif structure == "" and concept != "":
+                use_nl = True
+            elif structure == "" and concept == "":
+                is_correct = False
+                use_nl = False
+            else:
+                use_nl = False
+
+            if is_correct:
+                if use_nl:
+                    nls_l = concept.split(",")
+                    random_nl = random.choice(nls_l)
+                    nls_l.remove(random_nl)
+                    new_nls = ",".join(nls_l)
+                    return (self.codes[index], self.structures[index], new_nls,
+                            self.codes[index], "", random_nl, 1)
+                else:
+                    st_l = structure.split(self.KG_SEP_TOKEN)
+                    random_st = random.choice(st_l)
+                    st_l.remove(random_st)
+                    new_stl_l = self.KG_SEP_TOKEN.join(st_l)
+                    return (self.codes[index], new_stl_l, self.nls[index],
+                            self.codes[index], random_st, "", 1)
+            else:
+                if use_nl:
+                    other_nls = self.nls[random.randint(0, len(self.nls) - 1)]
+                    while other_nls == self.nls[index]:
+                        other_nls = self.nls[random.randint(0, len(self.nls) - 1)]
+                    other_nl = random.choice(other_nls.split(","))
+                    return (self.codes[index], self.structures[index], self.nls[index],
+                            self.codes[index], "", other_nl, 0)
+                else:
+                    other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
+                    while other_graph == self.structures[index]:
+                        other_graph = self.structures[random.randint(0, len(self.structures) - 1)]
+                    other_st = random.choice(other_graph.split(self.KG_SEP_TOKEN))
+                    return (self.codes[index], self.structures[index], self.nls[index],
+                            self.codes[index], other_st, "", 0)
+
 
 
 
@@ -386,7 +432,8 @@ class KGCodeDataset(Dataset):
                             func_name = code_l[index - 1]
                             break
                     func_name_l = self.split_edge_name(func_name)
-                    func_name_l.remove("")
+                    if "" in func_name_l:
+                        func_name_l.remove("")
                     func_name_nl = " ".join(func_name_l)
                     if func_name_nl.lower() not in nl:
                         nl += ","
@@ -397,7 +444,7 @@ class KGCodeDataset(Dataset):
                     nls.append(nl)
                     docs.append(doc)
                 except Exception as e:
-                    # print(e)
+                    print(e)
                     continue
 
         return codes, structures, nls, docs
