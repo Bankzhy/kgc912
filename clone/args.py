@@ -129,7 +129,7 @@ class RuntimeArguments:
     )
 
     dropout: float = field(
-        default=0.1,
+        default=0.3,
         metadata={'help': 'Dropout probability'}
     )
 
@@ -176,7 +176,7 @@ class RuntimeArguments:
     )
 
     learning_rate: float = field(
-        default=2e-5,
+        default=3e-5,
         metadata={'help': 'Learning rate'}
     )
 
