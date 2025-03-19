@@ -230,18 +230,18 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
 
         if len(torch.unique(eos_mask.sum(1))) > 1:
             raise ValueError("All examples must have the same number of <eos> tokens.")
-        sentence_representation = hidden_states[eos_mask, :].view(hidden_states.size(0), -1,
-                                                                  hidden_states.size(-1))[
-                                  :, -1, :
-                                  ]
+        # sentence_representation = hidden_states[eos_mask, :].view(hidden_states.size(0), -1,
+        #                                                           hidden_states.size(-1))[
+        #                           :, -1, :
+        #                           ]
         # logits = self.classification_head(sentence_representation)
         # logits = self.mlp_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
-        # attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
-        # cls_representation = attn_output[:, 0, :]  # 取第一个 token
+        attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
+        cls_representation = attn_output[:, 0, :]  # 取第一个 token
 
-        logits = self.linear_classifier(sentence_representation)
+        logits = self.linear_classifier(cls_representation)
 
         loss = None
         if labels is not None:
