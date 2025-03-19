@@ -718,7 +718,8 @@ class KASTParse:
                 new_sr_method.return_type = node.text.decode()
             elif node.type == self.IDENTIFIER:
                 new_sr_method.method_name = node.text.decode()
-                new_mkg.get_or_create_node(node.text.decode(), METHOD_IDENTIFIER)
+                if new_sr_method.method_name != "test":
+                    new_mkg.get_or_create_node(node.text.decode(), METHOD_IDENTIFIER)
             elif node.type == self.FORMAL_PARAMETERS:
                 new_sr_method.param_list = self.parse_param(node)
                 param_l = self.parse_param(node)

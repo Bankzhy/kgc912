@@ -8,11 +8,11 @@ from tqdm import tqdm
 from antlr4 import InputStream
 import nltk
 
-import enums
-from vocab import Vocab
+# import enums
+# from vocab import Vocab
 
-# from pretrain import enums
-# from pretrain.vocab import Vocab
+from pretrain import enums
+from pretrain.vocab import Vocab
 
 from common.antlr_parsers.go.GoLexer import GoLexer
 from common.antlr_parsers.java.Java8Lexer import Java8Lexer

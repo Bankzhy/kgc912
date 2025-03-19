@@ -238,17 +238,30 @@ def fetch_poold():
             "func_code_string": data["code1"],
             "idx": code1_index
         }
+        all_code.append(new_data1)
+
+        code2_index = str(i) + "_2"
+        new_data2 = {
+            "func_documentation_string": "",
+            "func_code_string": data["code2"],
+            "idx": code2_index
+        }
+        all_code.append(new_data2)
+
+        all_pair.append((code1_index, code2_index, data["similar"]))
 
 
 
-    return ds
+
+
+    return all_code
 
 
 
 def run_preprocess(start, end):
 
     # load code search net
-    # dataset = load_dataset('code-search-net/code_search_net', 'java', split='test', trust_remote_code=True)
+    # dataset = load_dataset('code-search-net/code_search_net', 'python', split='test', trust_remote_code=True)
     # load tl
     # dataset = fetch_tl("train")
 
@@ -261,7 +274,7 @@ def run_preprocess(start, end):
     #  load poold
     dataset = fetch_poold()
 
-    ast = KASTParse("", "java")
+    ast = KASTParse("", "python")
     ast.setup()
     result = []
     exist_id = []
@@ -292,14 +305,22 @@ def run_preprocess(start, end):
         # try:
         data = dataset[index]
         print(index, data)
-        code_content = "public class Test {\n"
-        code_content += data['func_code_string']
-        code_content += "}"
-        sr_project = ast.do_parse_content(code_content)
-
-        # code_content = "class Test:\n   "
+        # code_content = "public class Test {\n"
         # code_content += data['func_code_string']
+        # code_content += "}"
         # sr_project = ast.do_parse_content(code_content)
+
+        code_content = "class Test:\n   "
+        if "def " not in data["func_code_string"]:
+            code_content += "   def test():\n"
+            for line in data['func_code_string'].split("\n"):
+                code_content += "        "
+                code_content += line
+                code_content += "\n"
+        else:
+            code_content += data['func_code_string']
+
+        sr_project = ast.do_parse_content(code_content)
 
         sr_method = None
 
@@ -312,7 +333,8 @@ def run_preprocess(start, end):
                 else:
                     print("class error")
                     continue
-                sr_method.mkg.parse_method_name(sr_method.method_name)
+                if sr_method.method_name != "test":
+                    sr_method.mkg.parse_method_name(sr_method.method_name)
                 sr_method.mkg.parse_concept()
 
                 try:
@@ -345,7 +367,7 @@ def run_preprocess(start, end):
 
         # if count >=100:
             # Write the list of dictionaries to a JSON file
-        file_name = "bigclone_data_train_"+str(start)+"_"+str(end)+".json"
+        file_name = "poold_data_train_"+str(start)+"_"+str(end)+".json"
         with open(file_name, "w") as json_file:
             for js in result:
                 json_file.write(json.dumps(js))
