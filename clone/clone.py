@@ -177,6 +177,8 @@ def run_clone():
         labels = eval_preds.label_ids
         gc.collect()
         predictions = np.argmax(logits, axis=-1)
+        threshold = 0.7  # 您设定的阈值
+        predictions = (predictions[:, 1] > threshold).int()
         from sklearn.metrics import recall_score
         recall = recall_score(labels, predictions)
         from sklearn.metrics import precision_score
@@ -223,7 +225,7 @@ def run_clone():
                                              do_eval=True,
                                              do_predict=True,
                                              evaluation_strategy=IntervalStrategy.STEPS,
-                                             eval_steps=25,
+                                             eval_steps=2500,
                                              prediction_loss_only=False,
                                              per_device_train_batch_size=args.batch_size,
                                              per_device_eval_batch_size=args.eval_batch_size,
@@ -236,9 +238,9 @@ def run_clone():
                                              warmup_steps=args.warmup_steps,
                                              logging_dir=os.path.join(args.tensor_board_root, enums.TASK_CLONE),
                                              logging_strategy=IntervalStrategy.STEPS,
-                                             logging_steps=25,
+                                             logging_steps=2500,
                                              save_strategy=IntervalStrategy.STEPS,
-                                             save_steps=25,
+                                             save_steps=2500,
                                              save_total_limit=5,
                                              seed=args.random_seed,
                                              fp16=args.fp16,
@@ -249,7 +251,7 @@ def run_clone():
                                              greater_is_better=True,
                                              ignore_data_skip=False,
                                              label_smoothing_factor=args.label_smoothing,
-                                             eval_accumulation_steps=400,
+                                             eval_accumulation_steps=200,
                                              report_to=['tensorboard'],
                                              dataloader_pin_memory=True,
                                              predict_with_generate=True)
