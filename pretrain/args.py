@@ -9,13 +9,13 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='clp',
+        default='nlp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
 
     trained_model: str = field(
-        default="output2/pretrain/models/nlp",
+        default="output/pretrain/models/clp",
         # default=None,
         metadata={'help': 'Directory of trained model'}
     )
@@ -26,7 +26,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default='kg_data',
+        default='kj_data',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
@@ -73,17 +73,17 @@ class RuntimeArguments:
     )
 
     pre_train_output_root: str = field(
-        default='output/pretrain',
+        default='output3/pretrain',
         metadata={'help': 'pretrain model output '}
     )
 
     model_root: str = field(
-        default='output/pretrain/models',
+        default='output3/pretrain/models',
         metadata={'help': 'pretrain model output '}
     )
 
     tensor_board_root: str = field(
-        default='output/runs',
+        default='output3/runs',
         metadata={'help': 'pretrain model run output '}
     )
 
