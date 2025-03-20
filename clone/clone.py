@@ -180,8 +180,8 @@ def run_clone():
         gc.collect()
 
         threshold = 0.7
-        predictions = (logits >= threshold).astype(int).flatten()
-
+        # predictions = (logits >= threshold).astype(int).flatten()
+        predictions = logits[:, 1] > threshold
         # predictions = np.argmax(logits, axis=-1)
 
         from sklearn.metrics import recall_score
