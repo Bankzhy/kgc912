@@ -57,12 +57,12 @@ def run_clone():
         datasets[split] = init_dataset(args=args,
                                        task=enums.TASK_CLONE,
                                        split=split)
-        if split == 'train':
-            datasets[split] = datasets[split].subset(0.0008)
+        # if split == 'train':
+        #     datasets[split] = datasets[split].subset(0.0008)
         if split == 'valid':
-            datasets[split] = datasets[split].subset(0.0008)
+            datasets[split] = datasets[split].subset(0.08)
         if split == 'test':
-            datasets[split] = datasets[split].subset(0.0008)
+            datasets[split] = datasets[split].subset(0.08)
 
         logger.info(f'The size of {split} set: {len(datasets[split])}')
     if args.train_subset_ratio and 'train' in datasets:
