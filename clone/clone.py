@@ -179,10 +179,10 @@ def run_clone():
         labels = eval_preds.label_ids
         gc.collect()
 
-        # threshold = 0.7
-        # predictions = (logits >= threshold).astype(int).flatten()
+        threshold = 0.7
+        predictions = (logits >= threshold).astype(int).flatten()
 
-        predictions = np.argmax(logits, axis=-1)
+        # predictions = np.argmax(logits, axis=-1)
 
         from sklearn.metrics import recall_score
         recall = recall_score(labels, predictions)
