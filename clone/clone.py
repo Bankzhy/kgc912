@@ -60,9 +60,9 @@ def run_clone():
         # if split == 'train':
         #     datasets[split] = datasets[split].subset(0.0008)
         if split == 'valid':
-            datasets[split] = datasets[split].subset(0.08)
+            datasets[split] = datasets[split].subset(0.008)
         if split == 'test':
-            datasets[split] = datasets[split].subset(0.08)
+            datasets[split] = datasets[split].subset(0.008)
 
         logger.info(f'The size of {split} set: {len(datasets[split])}')
     if args.train_subset_ratio and 'train' in datasets:
@@ -230,7 +230,7 @@ def run_clone():
                                              do_eval=True,
                                              do_predict=True,
                                              evaluation_strategy=IntervalStrategy.STEPS,
-                                             eval_steps=2500,
+                                             eval_steps=25,
                                              prediction_loss_only=False,
                                              per_device_train_batch_size=args.batch_size,
                                              per_device_eval_batch_size=args.eval_batch_size,
@@ -243,9 +243,9 @@ def run_clone():
                                              warmup_steps=args.warmup_steps,
                                              logging_dir=os.path.join(args.tensor_board_root, enums.TASK_CLONE),
                                              logging_strategy=IntervalStrategy.STEPS,
-                                             logging_steps=2500,
+                                             logging_steps=25,
                                              save_strategy=IntervalStrategy.STEPS,
-                                             save_steps=2500,
+                                             save_steps=25,
                                              save_total_limit=5,
                                              seed=args.random_seed,
                                              fp16=args.fp16,
