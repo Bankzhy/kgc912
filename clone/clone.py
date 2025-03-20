@@ -177,8 +177,6 @@ def run_clone():
         labels = eval_preds.label_ids
         gc.collect()
         predictions = np.argmax(logits, axis=-1)
-        threshold = 0.7  # 您设定的阈值
-        predictions = (predictions[:, 1] > threshold).int()
         from sklearn.metrics import recall_score
         recall = recall_score(labels, predictions)
         from sklearn.metrics import precision_score
