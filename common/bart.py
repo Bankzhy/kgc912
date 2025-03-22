@@ -235,7 +235,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                   :, -1, :
                                   ]
         # 1. 使用 [CLS] 标记的隐藏状态
-        cls_embedding = sentence_representation[:, 0, :]
+        # cls_embedding = sentence_representation[:, 0, :]
 
         # 2. 全局平均池化
         avg_pool = sentence_representation.mean(dim=1)
@@ -244,9 +244,9 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
         max_pool, _ = sentence_representation.max(dim=1)
 
         # 组合策略
-        concat = torch.cat((cls_embedding, avg_pool, max_pool), dim=-1)
+        concat = torch.cat((sentence_representation, avg_pool, max_pool), dim=-1)
 
-        logits = self.classification_head(sentence_representation)
+        logits = self.classification_head(concat)
         # logits = self.mlp_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
