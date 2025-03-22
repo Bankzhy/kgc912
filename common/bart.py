@@ -35,7 +35,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
         self.mlp_classifier = torch.nn.Sequential(
             torch.nn.Linear(config.d_model, 512),  # 降维
             torch.nn.ReLU(),
-            torch.nn.Dropout(0.2),
+            torch.nn.Dropout(0.3),
             torch.nn.Linear(512, self.config.num_labels)  # 输出类别数
         )
 
@@ -234,8 +234,20 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                                                   hidden_states.size(-1))[
                                   :, -1, :
                                   ]
-        logits = self.classification_head(sentence_representation)
-        # logits = self.mlp_classifier(sentence_representation)
+        # # 1. 使用 [CLS] 标记的隐藏状态
+        # cls_embedding = sentence_representation[:, 0, :]
+        #
+        # # 2. 全局平均池化
+        # avg_pool = sentence_representation.mean(dim=1)
+        #
+        # # 3. 最大池化
+        # max_pool, _ = sentence_representation.max(dim=1)
+        #
+        # # 组合策略
+        # concat = torch.cat((cls_embedding, avg_pool, max_pool), dim=-1)
+
+        # logits = self.classification_head(sentence_representation)
+        logits = self.mlp_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
         # attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
