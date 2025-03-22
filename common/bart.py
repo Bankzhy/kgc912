@@ -249,9 +249,9 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                   ]
 
 
-        # logits = self.classification_head(sentence_representation)
+        logits = self.classification_head(sentence_representation)
         # logits = self.mlp_classifier(sentence_representation)
-        logits = self.gelu_classifier(sentence_representation)
+        # logits = self.gelu_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
         # attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
@@ -266,7 +266,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                 loss_fct = MSELoss()
                 loss = loss_fct(logits.view(-1), labels.view(-1))
             else:
-                loss_fct = CrossEntropyLoss()
+                loss_fct = CrossEntropyLoss(label_smoothing=0.1)
                 loss = loss_fct(logits.view(-1, self.config.num_labels), labels.view(-1))
 
         if not return_dict:
