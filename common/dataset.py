@@ -233,9 +233,7 @@ class KGCodeDataset(Dataset):
 
                     source = data['code'].strip()
                     source = source.replace("\t", " ")
-                    # print(source)
                     source = remove_comments_and_docstrings(source, lang)
-                    # print(source)
                     source = replace_string_literal(source)
                     code = tokenize_source(source=source, lang=lang)
                     codes.append(code)
@@ -286,9 +284,11 @@ class KGCodeDataset(Dataset):
                 st, nl = self.parse_kg(data["kg"])
 
                 source = data['code'].strip()
+                source = source.replace("\t", " ")
                 source = remove_comments_and_docstrings(source, "java")
                 source = replace_string_literal(source)
                 code = tokenize_source(source=source, lang="java")
+
                 code_l = code.split(" ")
                 func_name = ""
                 for index, code in enumerate(code_l):
@@ -302,7 +302,7 @@ class KGCodeDataset(Dataset):
                     nl += func_name_nl
 
                 json_data[data["idx"]] = {
-                    "code" : " ".join(code_l),
+                    "code" : code,
                     "st" : st,
                     "nl" : nl,
                 }
@@ -331,7 +331,7 @@ class KGCodeDataset(Dataset):
                     label = ll[2].replace("\n", "")
                     labels.append(int(label))
                 except Exception as e:
-                    # print(e)
+                    print(e)
                     continue
                 # codes_1.append(ll[0])
                 # codes_2.append(ll[1])

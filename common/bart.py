@@ -266,7 +266,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                 loss_fct = MSELoss()
                 loss = loss_fct(logits.view(-1), labels.view(-1))
             else:
-                loss_fct = CrossEntropyLoss(label_smoothing=0.1)
+                loss_fct = CrossEntropyLoss()
                 loss = loss_fct(logits.view(-1, self.config.num_labels), labels.view(-1))
 
         if not return_dict:
