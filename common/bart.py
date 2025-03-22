@@ -1,5 +1,6 @@
 
 import torch
+from torch import nn
 from torch.nn import CrossEntropyLoss, MSELoss
 import torch.nn.functional as f
 
@@ -37,6 +38,16 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
             torch.nn.ReLU(),
             torch.nn.Dropout(0.3),
             torch.nn.Linear(512, self.config.num_labels)  # 输出类别数
+        )
+
+        self.gelu_classifier = nn.Sequential(
+            nn.Linear(config.d_model, 512),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, self.config.num_labels)
         )
 
         # 分类头
