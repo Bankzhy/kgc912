@@ -249,8 +249,9 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                   ]
 
 
-        logits = self.classification_head(sentence_representation)
+        # logits = self.classification_head(sentence_representation)
         # logits = self.mlp_classifier(sentence_representation)
+        logits = self.gelu_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
         # attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
