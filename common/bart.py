@@ -232,7 +232,7 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
             raise ValueError("All examples must have the same number of <eos> tokens.")
         sentence_representation = hidden_states[eos_mask, :].view(hidden_states.size(0), -1,
                                                                   hidden_states.size(-1))[
-                                  :, -1, :
+                                  :, 0, :
                                   ]
         # 1. 使用 [CLS] 标记的隐藏状态
         # cls_embedding = sentence_representation[:, 0, :]
