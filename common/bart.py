@@ -224,8 +224,10 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
             output_hidden_states=output_hidden_states,
             return_dict=return_dict,
         )
-        hidden_states = outputs[0]  # last hidden state
+        # hidden_states = outputs[0]  # last hidden state
         # hidden_states = outputs.encoder_last_hidden_state  # encoder last hidden state
+        hidden_states = torch.cat((outputs.encoder_last_hidden_state, outputs.last_hidden_state), dim=-1)
+
         eos_mask = input_ids.eq(self.config.eos_token_id)
 
         if len(torch.unique(eos_mask.sum(1))) > 1:
