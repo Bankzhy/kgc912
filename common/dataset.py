@@ -283,26 +283,26 @@ class KGCodeDataset(Dataset):
                 data = json.loads(line.strip())
                 st, nl = self.parse_kg(data["kg"])
 
-                source = data['code'].strip()
-                source = source.replace("\t", " ")
-                source = remove_comments_and_docstrings(source, "java")
-                source = replace_string_literal(source)
-                code = tokenize_source(source=source, lang="java")
-
-                code_l = code.split(" ")
-                func_name = ""
-                for index, code in enumerate(code_l):
-                    if code == "(":
-                        func_name = code_l[index - 1]
-                        break
-                func_name_l = self.split_edge_name(func_name)
-                func_name_nl = " ".join(func_name_l)
-                if func_name_nl.lower() not in nl:
-                    nl += ","
-                    nl += func_name_nl
+                # source = data['code'].strip()
+                # source = remove_comments_and_docstrings(source, "java")
+                # source = replace_string_literal(source)
+                # code = tokenize_source(source=source, lang="java")
+                # code_l = code.split(" ")
+                # func_name = ""
+                # for index, code in enumerate(code_l):
+                #     if code == "(":
+                #         func_name = code_l[index - 1]
+                #         break
+                # func_name_l = self.split_edge_name(func_name)
+                # if "" in func_name_l:
+                #     func_name_l.remove("")
+                # func_name_nl = " ".join(func_name_l)
+                # if func_name_nl.lower() not in nl:
+                #     nl += ","
+                #     nl += func_name_nl
 
                 json_data[data["idx"]] = {
-                    "code" : code,
+                    "code" : data["code"],
                     "st" : st,
                     "nl" : nl,
                 }
@@ -331,7 +331,7 @@ class KGCodeDataset(Dataset):
                     label = ll[2].replace("\n", "")
                     labels.append(int(label))
                 except Exception as e:
-                    print(e)
+                    # print(e)
                     continue
                 # codes_1.append(ll[0])
                 # codes_2.append(ll[1])
