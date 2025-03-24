@@ -176,7 +176,7 @@ class RuntimeArguments:
     )
 
     learning_rate: float = field(
-        default=3e-5,
+        default=2e-5,
         metadata={'help': 'Learning rate'}
     )
 

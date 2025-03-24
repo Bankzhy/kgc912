@@ -1,5 +1,6 @@
 
 import torch
+from torch import nn
 from torch.nn import CrossEntropyLoss, MSELoss
 import torch.nn.functional as f
 
@@ -35,8 +36,18 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
         self.mlp_classifier = torch.nn.Sequential(
             torch.nn.Linear(config.d_model, 512),  # 降维
             torch.nn.ReLU(),
-            torch.nn.Dropout(0.2),
+            torch.nn.Dropout(0.3),
             torch.nn.Linear(512, self.config.num_labels)  # 输出类别数
+        )
+
+        self.gelu_classifier = nn.Sequential(
+            nn.Linear(config.d_model, 512),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(512, 256),
+            nn.GELU(),
+            nn.Dropout(0.2),
+            nn.Linear(256, self.config.num_labels)
         )
 
         # 分类头
@@ -226,6 +237,8 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
         )
         hidden_states = outputs[0]  # last hidden state
         # hidden_states = outputs.encoder_last_hidden_state  # encoder last hidden state
+        # hidden_states = torch.cat((outputs.encoder_last_hidden_state, outputs.last_hidden_state), dim=-1)
+
         eos_mask = input_ids.eq(self.config.eos_token_id)
 
         if len(torch.unique(eos_mask.sum(1))) > 1:
@@ -234,8 +247,11 @@ class BartForClassificationAndGeneration(BartForConditionalGeneration):
                                                                   hidden_states.size(-1))[
                                   :, -1, :
                                   ]
+
+
         logits = self.classification_head(sentence_representation)
         # logits = self.mlp_classifier(sentence_representation)
+        # logits = self.gelu_classifier(sentence_representation)
 
         # 使用自注意力提取关键 token 信息
         # attn_output, _ = self.attention(hidden_states, hidden_states, hidden_states)
