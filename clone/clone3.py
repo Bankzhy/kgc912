@@ -1,14 +1,14 @@
 import sys
 import os
 
-from model import BartCloneModel
-from common.bart import BartForClassificationAndGeneration
 
 curPath = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(curPath)
 sys.path.append('../..')
 print("当前的工作目录：",os.getcwd())
 print("python搜索模块的路径集合",sys.path)
+from model import BartCloneModel
+from common.bart import BartForClassificationAndGeneration
 import argparse
 import logging
 import os
