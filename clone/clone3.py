@@ -365,7 +365,7 @@ def run():
     args.beam_width = 5
 
     trained_vocab = "../pretrain/vocabs"
-    trained_model = None
+    trained_model = "../pretrain/output2/pretrain/models/nlp"
 
     # config = RobertaConfig.from_pretrained(args.config_name if args.config_name else args.model_name_or_path)
     #
