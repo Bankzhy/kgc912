@@ -335,7 +335,7 @@ def run():
     args.nl_vocab_name = "nl"
     args.no_ast = False
     args.no_nl = False
-
+    args.dataset_root = "bc_data"
 
     # Setup logging
     logging.basicConfig(format='%(asctime)s - %(levelname)s - %(name)s -   %(message)s', datefmt='%m/%d/%Y %H:%M:%S',
