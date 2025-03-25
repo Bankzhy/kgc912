@@ -83,7 +83,7 @@ def train(args, train_dataloader, eval_dataloader,model):
         tr_num = 0
         train_loss = 0
         for step, batch in enumerate(bar):
-            (source_ids, attention_mask, decoder_input_ids, decoder_attention_mask, labels) = [x.to(args.device) for x in batch.values()]
+            # (source_ids, attention_mask, decoder_input_ids, decoder_attention_mask, labels) = [x.to(args.device) for x in batch.values()]
             # Move all tensors in the batch to the GPU
             tbatch = {key: value.to(args.device) for key, value in batch.items()}
 
