@@ -156,7 +156,8 @@ def evaluate(args, model, eval_dataloader, eval_when_training=False):
     model.eval()
     logits = []
     y_trues = []
-    for batch in eval_dataloader:
+    bar = tqdm(eval_dataloader, total=len(eval_dataloader))
+    for batch in bar:
         # (source_ids, attention_mask, labels) = [x.to(args.device) for x in batch]
         tbatch = {key: value.to(args.device) for key, value in batch.items()}
         labels = batch["labels"]
