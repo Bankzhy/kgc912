@@ -296,9 +296,9 @@ def run():
                         help="Optional Code input sequence length after tokenization.")
     parser.add_argument("--data_flow_length", default=64, type=int,
                         help="Optional Data Flow input sequence length after tokenization.")
-    parser.add_argument("--do_train", default=False,
+    parser.add_argument("--do_train", default=True,
                         help="Whether to run training.")
-    parser.add_argument("--do_eval", default=False,
+    parser.add_argument("--do_eval", default=True,
                         help="Whether to run eval on the dev set.")
     parser.add_argument("--do_test", default=True,
                         help="Whether to run eval on the dev set.")
