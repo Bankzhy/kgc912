@@ -36,7 +36,7 @@ def set_seed(args):
         torch.cuda.manual_seed_all(args.seed)
 
 
-def train(args, train_dataloader, model):
+def train(args, train_dataloader, eval_dataloader,model):
     """ Train the model """
 
     # build dataloader
@@ -117,7 +117,7 @@ def train(args, train_dataloader, model):
                 avg_loss = round(np.exp((tr_loss - logging_loss) / (global_step - tr_nb)), 4)
 
                 if global_step % args.save_steps == 0:
-                    results = evaluate(args, model, eval_when_training=True)
+                    results = evaluate(args, model, eval_dataloader, eval_when_training=True)
 
                     # Save model checkpoint
                     if results['eval_f1'] > best_f1:
@@ -469,6 +469,15 @@ def run():
 
     # Training
     if args.do_train:
+        eval_dataloader = DataLoader(dataset=datasets["valid"],
+                                     batch_size=args.train_batch_size,
+                                     shuffle=True,
+                                     collate_fn=lambda batch: collate_fn(batch,
+                                                                         args=args,
+                                                                         task=enums.TASK_CLONE,
+                                                                         code_vocab=code_vocab,
+                                                                         nl_vocab=nl_vocab,
+                                                                         ast_vocab=st_vocab))
         train_dataloader = DataLoader(dataset=datasets["train"],
                                       batch_size=args.train_batch_size,
                                       shuffle=True,
@@ -478,7 +487,7 @@ def run():
                                                                           code_vocab=code_vocab,
                                                                           nl_vocab=nl_vocab,
                                                                           ast_vocab=st_vocab))
-        train(args, train_dataloader, model)
+        train(args, train_dataloader, eval_dataloader, model)
 
 
     # Evaluation
