@@ -1,5 +1,7 @@
 import sys
 import os
+
+from model import BartCloneModel
 from common.bart import BartForClassificationAndGeneration
 
 curPath = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
@@ -82,8 +84,11 @@ def train(args, train_dataloader, model):
         train_loss = 0
         for step, batch in enumerate(bar):
             (source_ids, attention_mask, decoder_input_ids, decoder_attention_mask, labels) = [x.to(args.device) for x in batch.values()]
+            # Move all tensors in the batch to the GPU
+            tbatch = {key: value.to(args.device) for key, value in batch.items()}
+
             model.train()
-            loss, logits = model(source_ids, labels)
+            loss, logits = model(tbatch)
 
             if args.n_gpu > 1:
                 loss = loss.mean()
@@ -340,9 +345,9 @@ def run():
     # Set seed
     set_seed(args)
 
-    args.config_name = r"H:\research\clone\examples\codet5-base"
-    args.tokenizer_name = r"H:\research\clone\examples\codet5-base"
-    args.model_name_or_path = r"H:\research\clone\examples\codet5-base"
+    # args.config_name = r"H:\research\clone\examples\codet5-base"
+    # args.tokenizer_name = r"H:\research\clone\examples\codet5-base"
+    # args.model_name_or_path = r"H:\research\clone\examples\codet5-base"
     args.n_layer = 12
     args.d_ff = 3072
     args.n_head = 12
@@ -414,11 +419,11 @@ def run():
     if trained_model:
         if isinstance(trained_model, BartForClassificationAndGeneration):
             logger.info('Model is passed through parameter')
-            model = trained_model
+            bart_model = trained_model
         else:
             logger.info('Loading the model from file')
             config = BartConfig.from_json_file(os.path.join(trained_model, 'config.json'))
-            model = BartForClassificationAndGeneration.from_pretrained(trained_model,config=config, use_safetensors=True)
+            bart_model = BartForClassificationAndGeneration.from_pretrained(trained_model,config=config, use_safetensors=True)
     else:
         logger.info('Building the model')
         config = BartConfig(vocab_size=len(code_vocab) + len(nl_vocab) + len(st_vocab),
@@ -443,13 +448,24 @@ def run():
                             min_length=1,
                             num_beams=args.beam_width,
                             num_labels=2)
-        model = BartForClassificationAndGeneration(config)
-    model.set_model_mode(enums.MODEL_MODE_CLS)
+        bart_model = BartForClassificationAndGeneration(config)
+    bart_model.set_model_mode(enums.MODEL_MODE_CLS)
+
+
+
+
+
     # log model statistics
-    logger.info('Trainable parameters: {}'.format(human_format(count_params(model))))
-    table = layer_wise_parameters(model)
+    logger.info('Trainable parameters: {}'.format(human_format(count_params(bart_model))))
+    table = layer_wise_parameters(bart_model)
     logger.debug('Layer-wised trainable parameters:\n{}'.format(table))
     logger.info('Model built successfully')
+
+    model = BartCloneModel(
+        encoder=bart_model,
+        config=config,
+        args=args,
+    )
 
     # Training
     if args.do_train:
