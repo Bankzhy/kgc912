@@ -359,9 +359,9 @@ def run():
     args.n_head = 12
     args.d_model = 768
     args.dropout = 0.3
-    args.max_nl_len = 64
-    args.max_ast_len = 32
-    args.max_code_len = 256
+    args.max_nl_len = 32
+    args.max_ast_len = 16
+    args.max_code_len = 128
     args.beam_width = 5
 
     trained_vocab = "../pretrain/vocabs"
