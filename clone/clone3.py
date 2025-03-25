@@ -215,10 +215,13 @@ def test(args, model, eval_dataloader, best_threshold=0):
     model.eval()
     logits = []
     y_trues = []
-    for batch in eval_dataloader:
-        (source_ids, attention_mask, labels) = [x.to(args.device) for x in batch]
+    bar = tqdm(eval_dataloader, total=len(eval_dataloader))
+    for batch in bar:
+        # (source_ids, attention_mask, labels) = [x.to(args.device) for x in batch]
+        tbatch = {key: value.to(args.device) for key, value in batch.items()}
+        labels = batch["labels"]
         with torch.no_grad():
-            lm_loss, logit = model(source_ids, labels)
+            lm_loss, logit = model(tbatch)
             eval_loss += lm_loss.mean().item()
             logits.append(logit.cpu().numpy())
             y_trues.append(labels.cpu().numpy())
@@ -293,9 +296,9 @@ def run():
                         help="Optional Code input sequence length after tokenization.")
     parser.add_argument("--data_flow_length", default=64, type=int,
                         help="Optional Data Flow input sequence length after tokenization.")
-    parser.add_argument("--do_train", default=True,
+    parser.add_argument("--do_train", default=False,
                         help="Whether to run training.")
-    parser.add_argument("--do_eval", default=True,
+    parser.add_argument("--do_eval", default=False,
                         help="Whether to run eval on the dev set.")
     parser.add_argument("--do_test", default=True,
                         help="Whether to run eval on the dev set.")
