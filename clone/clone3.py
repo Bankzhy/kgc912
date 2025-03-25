@@ -44,7 +44,7 @@ def train(args, train_dataloader, eval_dataloader,model):
     # train_dataloader = DataLoader(train_dataset, sampler=train_sampler, batch_size=args.train_batch_size, num_workers=4)
 
     args.max_steps = args.epochs * len(train_dataloader)
-    args.save_steps = len(train_dataloader) // 10
+    args.save_steps = len(train_dataloader) // 1000
     args.warmup_steps = args.max_steps // 5
     model.to(args.device)
 
@@ -157,9 +157,11 @@ def evaluate(args, model, eval_dataloader, eval_when_training=False):
     logits = []
     y_trues = []
     for batch in eval_dataloader:
-        (source_ids, attention_mask, labels) = [x.to(args.device) for x in batch]
+        # (source_ids, attention_mask, labels) = [x.to(args.device) for x in batch]
+        tbatch = {key: value.to(args.device) for key, value in batch.items()}
+        labels = batch["labels"]
         with torch.no_grad():
-            lm_loss, logit = model(source_ids, labels)
+            lm_loss, logit = model(tbatch)
             eval_loss += lm_loss.mean().item()
             logits.append(logit.cpu().numpy())
             y_trues.append(labels.cpu().numpy())
