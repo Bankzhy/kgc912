@@ -122,8 +122,6 @@ def run_clone():
         else:
             logger.info('Loading the model from file')
             config = BartConfig.from_json_file(os.path.join(trained_model, 'config.json'))
-            config.encoder_layers=6
-            config.decoder_layers=6
             model = BartForClassificationAndGeneration.from_pretrained(trained_model,config=config, use_safetensors=True)
     else:
         logger.info('Building the model')
