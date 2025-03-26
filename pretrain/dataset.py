@@ -313,7 +313,8 @@ class KGCodeDataset(Dataset):
                 path = os.path.join(dataset_dir, file)
                 if path.endswith(".json"):
                     if file.startswith("py"):
-                        lang = "python"
+                        # lang = "python"
+                        continue
                     else:
                         lang = "java"
                     fcodes, fstructures, fnls, fdocs = self.parse_json_file(path, lang=lang)
