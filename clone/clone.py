@@ -271,7 +271,7 @@ def run_clone():
                           args=training_args,
                           data_collator=None,
                           train_dataset=datasets['train'] if 'train' in datasets else None,
-                          eval_dataset=datasets['valid'] if 'valid' in datasets else None,
+                          eval_dataset=datasets['test'] if 'test' in datasets else None,
                           tokenizer=nl_vocab,
                           model_init=None,
                           compute_metrics=compute_valid_metrics,
