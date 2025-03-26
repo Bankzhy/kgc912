@@ -60,7 +60,7 @@ def run_clone():
         # if split == 'train':
         #     datasets[split] = datasets[split].subset(0.0008)
         if split == 'valid':
-            datasets[split] = datasets[split].subset(0.065)
+            datasets[split] = datasets[split].subset(0.1)
         if split == 'test':
             datasets[split] = datasets[split].subset(0.08)
 
