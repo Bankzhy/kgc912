@@ -93,9 +93,13 @@ class KGCodeDataset(Dataset):
              label_l = []
              new_st_l = []
              structure = self.structures[index]
+             if structure == "":
+                 return self.codes[index], structure, self.nls[index], structure
              st_l = structure.split(self.KG_SEP_TOKEN)
              for st in st_l:
                 child_l = st.split(self.spliter)
+                if len(child_l) != 3:
+                    continue
                 if len(child_l) < 3:
                     continue
                 label_l.append(child_l[1])
