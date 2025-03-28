@@ -25,7 +25,7 @@ class RuntimeArguments:
     )
 
     code_lang: str = field(
-        default='python',
+        default='java',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -35,7 +35,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default='pcsd',
+        default='tl_data',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
