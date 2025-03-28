@@ -20,7 +20,7 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default='../pretrain/output2/pretrain/models/nlp',
+        default='../pretrain/output/pretrain/models/nlp',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -142,7 +142,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=35,
+        default=50,
         metadata={'help': 'Number of data iterations for training'}
     )
 
