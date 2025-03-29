@@ -153,6 +153,7 @@ def run_clone():
         os.path.join('/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', 'config.json'))
     model = BartForClassificationAndGeneration.from_pretrained(
         '/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', config=config, use_safetensors=True)
+    model.to("cpu")
 
     model.set_model_mode(enums.MODEL_MODE_CLS)
     # log model statistics
@@ -231,8 +232,8 @@ def run_clone():
     # 尽量不要用IntervalStrategy.EPOCH， 太过频繁影响训练效果，还会曾家训练时间
     training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.checkpoint_root, enums.TASK_CLONE),
                                              overwrite_output_dir=True,
-                                             do_train=False,
-                                             do_eval=False,
+                                             do_train=True,
+                                             do_eval=True,
                                              do_predict=True,
                                              evaluation_strategy=IntervalStrategy.STEPS,
                                              eval_steps=2500,
