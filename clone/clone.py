@@ -343,10 +343,12 @@ def run_clone():
         predict_metrics = predict_results.metrics
         for name, score in predict_metrics.items():
             print(f'{name}: {score}')
-            if name == 'predictions':
+            if name == 'test_predictions':
                 predictions.extend(score)
-            if name == 'labels':
+            if name == 'test_labels':
                 labels.extend(score)
+            print(predictions)
+            print(labels)
         # predictions.extend(predict_results.metrics['predictions'])
         # labels.extend(predict_results.metrics['labels'])
     from sklearn.metrics import recall_score
