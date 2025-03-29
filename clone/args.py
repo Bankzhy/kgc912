@@ -226,12 +226,12 @@ class RuntimeArguments:
     )
 
     max_ast_len: int = field(
-        default=32,
+        default=64,
         metadata={'help': 'Maximum length of ast sequence'}
     )
 
     max_nl_len: int = field(
-        default=64,
+        default=32,
         metadata={'help': 'Maximum length of the nl sequence'}
     )
 
