@@ -333,6 +333,34 @@ class KGCodeDataset(Dataset):
                 except Exception as e:
                     # print(e)
                     continue
+        if self.split == "train":
+            file = os.path.join(self.dataset_dir, ("valid" + ".txt"))
+            with open(file, encoding='ISO-8859-1') as f:
+                lines = f.readlines()
+                for line in tqdm(lines):
+                    try:
+                        ll = line.split("\t")
+                        if ll[0] not in json_data.keys() or ll[1] not in json_data.keys():
+                            continue
+
+                        codes_1.append(json_data[ll[0]]["code"])
+                        codes_2.append(json_data[ll[0]]["code"])
+
+                        st1 = json_data[ll[0]]["st"]
+                        sts_1.append(st1)
+                        st2 = json_data[ll[1]]["st"]
+                        sts_2.append(st2)
+
+                        doc1 = json_data[ll[0]]["nl"]
+                        docs_1.append(doc1)
+                        doc2 = json_data[ll[1]]["nl"]
+                        docs_2.append(doc2)
+
+                        label = ll[2].replace("\n", "")
+                        labels.append(int(label))
+                    except Exception as e:
+                        # print(e)
+                        continue
                 # codes_1.append(ll[0])
                 # codes_2.append(ll[1])
                 # labels.append(ll[2])
