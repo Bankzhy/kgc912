@@ -61,8 +61,8 @@ def run_clone():
         #     datasets[split] = datasets[split].subset(0.0008)
         if split == 'valid':
             datasets[split] = datasets[split].subset(0.08)
-        if split == 'test':
-            datasets[split] = datasets[split].subset(0.08)
+        # if split == 'test':
+        #     datasets[split] = datasets[split].subset(0.08)
 
         logger.info(f'The size of {split} set: {len(datasets[split])}')
     if args.train_subset_ratio and 'train' in datasets:
@@ -206,7 +206,7 @@ def run_clone():
         labels = eval_preds.label_ids
 
         # predictions = np.argmax(logits, axis=-1)
-        threshold = 0.5
+        threshold = 0.7
         # predictions = (logits >= threshold).astype(int).flatten()
         predictions = logits[:, 1] > threshold
 
