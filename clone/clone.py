@@ -5,6 +5,7 @@ import os
 import sys
 
 import numpy as np
+from torch.utils.data import random_split
 from transformers import BartConfig, IntervalStrategy, SchedulerType, Seq2SeqTrainingArguments, EarlyStoppingCallback
 from transformers.trainer_utils import get_last_checkpoint
 
@@ -220,6 +221,8 @@ def run_clone():
             "eval_recall": float(recall),
             "eval_precision": float(precision),
             "eval_f1": float(f1),
+            "predictions": predictions,
+            "labels": labels,
         }
 
         logger.info("***** Eval results *****")
@@ -316,14 +319,50 @@ def run_clone():
     # --------------------------------------------------
     logger.info('-' * 100)
     logger.info('Start testing')
-    trainer.compute_metrics = compute_test_metrics
-    predict_results = trainer.predict(test_dataset=datasets['test'],
-                                      metric_key_prefix='test',)
-    predict_metrics = predict_results.metrics
+
+    # 计算每个子集大小
+    total_size = len(datasets['test'])
+    split_sizes = [total_size // 10] * 10  # 10 份
+    split_sizes[-1] += total_size % 10  # 处理余数
+
+    # 随机划分数据集
+    subsets = random_split(datasets['test'], split_sizes)
+    predictions = []
+    labels = []
+    # 打印各子集大小
+    for i, subset in enumerate(subsets):
+        print(f"Subset {i}: {len(subset)} samples")
+        trainer.compute_metrics = compute_test_metrics
+        predict_results = trainer.predict(test_dataset=subset,
+                                          metric_key_prefix='test', )
+        predictions.extend(predict_results.predictions)
+        labels.extend(predict_results.labels)
+    from sklearn.metrics import recall_score
+    recall = recall_score(labels, predictions)
+    from sklearn.metrics import precision_score
+    precision = precision_score(labels, predictions)
+    from sklearn.metrics import f1_score
+    f1 = f1_score(labels, predictions)
+    result = {
+        "eval_recall": float(recall),
+        "eval_precision": float(precision),
+        "eval_f1": float(f1),
+        "predictions": predictions,
+        "labels": labels,
+    }
+
+    logger.info("***** Eval results *****")
+    for key in sorted(result.keys()):
+        logger.info("  %s = %s", key, str(round(result[key], 4)))
+
+    # trainer.compute_metrics = compute_test_metrics
+    # predict_results = trainer.predict(test_dataset=datasets['test'],
+    #                                   metric_key_prefix='test',)
+    # predict_metrics = predict_results.metrics
     # references = predict_metrics.pop('test_references')
     # candidates = predict_metrics.pop('test_candidates')
-    trainer.log_metrics(split='test', metrics=predict_metrics)
-    trainer.save_metrics(split='test', metrics=predict_metrics)
+    # trainer.log_metrics(split='test', metrics=predict_metrics)
+    # trainer.save_metrics(split='test', metrics=predict_metrics)
     # save testing results
     # with open(os.path.join(args.output_root, f'{enums.TASK_SUMMARIZATION}_test_results.txt'),
     #           mode='w', encoding='utf-8') as result_f, \
@@ -342,9 +381,9 @@ def run_clone():
     #         cans_f.write(candidate + '\n')
     #     for name, score in predict_metrics.items():
     #         result_f.write(f'{name}: {score}\n')
-    logger.info('Testing finished')
-    for name, score in predict_metrics.items():
-        logger.info(f'{name}: {score}')
+    # logger.info('Testing finished')
+    # for name, score in predict_metrics.items():
+    #     logger.info(f'{name}: {score}')
 
 
 
