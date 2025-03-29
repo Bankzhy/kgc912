@@ -342,7 +342,7 @@ def run_clone():
                                           metric_key_prefix='test', )
         predict_metrics = predict_results.metrics
         for name, score in predict_metrics.items():
-            logger.info(f'{name}: {score}')
+            print(f'{name}: {score}')
             if name == 'predictions':
                 predictions.extend(score)
             if name == 'labels':
