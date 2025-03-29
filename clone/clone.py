@@ -206,7 +206,7 @@ def run_clone():
         labels = eval_preds.label_ids
 
         # predictions = np.argmax(logits, axis=-1)
-        threshold = 0.7
+        threshold = 0.95
         # predictions = (logits >= threshold).astype(int).flatten()
         predictions = logits[:, 1] > threshold
 
