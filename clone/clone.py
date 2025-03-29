@@ -211,23 +211,28 @@ def run_clone():
         # predictions = (logits >= threshold).astype(int).flatten()
         predictions = logits[:, 1] > threshold
 
-        from sklearn.metrics import recall_score
-        recall = recall_score(labels, predictions)
-        from sklearn.metrics import precision_score
-        precision = precision_score(labels, predictions)
-        from sklearn.metrics import f1_score
-        f1 = f1_score(labels, predictions)
+        # from sklearn.metrics import recall_score
+        # recall = recall_score(labels, predictions)
+        # from sklearn.metrics import precision_score
+        # precision = precision_score(labels, predictions)
+        # from sklearn.metrics import f1_score
+        # f1 = f1_score(labels, predictions)
+        # result = {
+        #     "eval_recall": float(recall),
+        #     "eval_precision": float(precision),
+        #     "eval_f1": float(f1),
+        #     "predictions": predictions,
+        #     "labels": labels,
+        # }
+        #
+        # logger.info("***** Eval results *****")
+        # for key in sorted(result.keys()):
+        #     logger.info("  %s = %s", key, str(round(result[key], 4)))
+
         result = {
-            "eval_recall": float(recall),
-            "eval_precision": float(precision),
-            "eval_f1": float(f1),
             "predictions": predictions,
             "labels": labels,
         }
-
-        logger.info("***** Eval results *****")
-        for key in sorted(result.keys()):
-            logger.info("  %s = %s", key, str(round(result[key], 4)))
 
         return result
 
