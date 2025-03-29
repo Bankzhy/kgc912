@@ -20,12 +20,12 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        default='../pretrain/output2/pretrain/models/nlp',
+        default='../pretrain/output/pretrain/models/nlp',
         metadata={'help': 'Directory of trained model'}
     )
 
     code_lang: str = field(
-        default='python',
+        default='java',
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -35,7 +35,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default='pcsd',
+        default='tl_data',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
@@ -142,7 +142,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=35,
+        default=50,
         metadata={'help': 'Number of data iterations for training'}
     )
 
