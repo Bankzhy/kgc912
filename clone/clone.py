@@ -48,7 +48,7 @@ def run_clone():
     # --------------------------------------------------
     # datasets
     # --------------------------------------------------
-    only_test = False
+    only_test = True
     logger.info('-' * 100)
     logger.info('Loading datasets')
     datasets = dict()
@@ -204,7 +204,12 @@ def run_clone():
         # decoded_preds, decoded_labels = eval_preds
         logits = eval_preds.predictions[0]
         labels = eval_preds.label_ids
-        predictions = np.argmax(logits, axis=-1)
+
+        # predictions = np.argmax(logits, axis=-1)
+        threshold = 0.5
+        # predictions = (logits >= threshold).astype(int).flatten()
+        predictions = logits[:, 1] > threshold
+
         from sklearn.metrics import recall_score
         recall = recall_score(labels, predictions)
         from sklearn.metrics import precision_score
