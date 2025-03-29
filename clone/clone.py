@@ -153,7 +153,6 @@ def run_clone():
         os.path.join('/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', 'config.json'))
     model = BartForClassificationAndGeneration.from_pretrained(
         '/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', config=config, use_safetensors=True)
-    model.to("cpu")
 
     model.set_model_mode(enums.MODEL_MODE_CLS)
     # log model statistics
