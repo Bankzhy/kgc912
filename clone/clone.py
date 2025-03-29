@@ -48,7 +48,7 @@ def run_clone():
     # --------------------------------------------------
     # datasets
     # --------------------------------------------------
-    only_test = False
+    only_test = True
     logger.info('-' * 100)
     logger.info('Loading datasets')
     datasets = dict()
@@ -149,10 +149,10 @@ def run_clone():
                             num_labels=2)
         model = BartForClassificationAndGeneration(config)
 
-    # config = BartConfig.from_json_file(
-    #     os.path.join('/root/autodl-tmp/kgc912/clone/output/clone/models', 'config.json'))
-    # model = BartForClassificationAndGeneration.from_pretrained(
-    #     '/root/autodl-tmp/kgc912/clone/output/clone/models', config=config, use_safetensors=True)
+    config = BartConfig.from_json_file(
+        os.path.join('/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', 'config.json'))
+    model = BartForClassificationAndGeneration.from_pretrained(
+        '/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', config=config, use_safetensors=True)
 
     model.set_model_mode(enums.MODEL_MODE_CLS)
     # log model statistics
@@ -206,7 +206,7 @@ def run_clone():
         labels = eval_preds.label_ids
 
         # predictions = np.argmax(logits, axis=-1)
-        threshold = 0.5
+        threshold = 0.9
         # predictions = (logits >= threshold).astype(int).flatten()
         predictions = logits[:, 1] > threshold
 
