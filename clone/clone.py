@@ -340,8 +340,8 @@ def run_clone():
         trainer.compute_metrics = compute_test_metrics
         predict_results = trainer.predict(test_dataset=subset,
                                           metric_key_prefix='test', )
-        predictions.extend(predict_results.predictions)
-        labels.extend(predict_results.labels)
+        predictions.extend(predict_results.metrics['predictions'])
+        labels.extend(predict_results.metrics['labels'])
     from sklearn.metrics import recall_score
     recall = recall_score(labels, predictions)
     from sklearn.metrics import precision_score
