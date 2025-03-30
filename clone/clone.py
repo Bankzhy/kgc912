@@ -124,6 +124,8 @@ def run_clone():
             logger.info('Loading the model from file')
             config = BartConfig.from_json_file(os.path.join(trained_model, 'config.json'))
             model = BartForClassificationAndGeneration.from_pretrained(trained_model,config=config, use_safetensors=True)
+            config.encoder_layers = 12
+            config.decoder_layers = 6
     else:
         logger.info('Building the model')
         config = BartConfig(vocab_size=len(code_vocab) + len(nl_vocab) + len(st_vocab),
