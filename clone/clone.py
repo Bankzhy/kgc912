@@ -349,6 +349,7 @@ def run_clone():
                 labels.extend(score)
         # predictions.extend(predict_results.metrics['predictions'])
         # labels.extend(predict_results.metrics['labels'])
+        gc.collect()
     from sklearn.metrics import recall_score
     recall = recall_score(labels, predictions)
     from sklearn.metrics import precision_score
