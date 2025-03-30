@@ -144,12 +144,12 @@ class RuntimeArguments:
     )
 
     batch_size: int = field(
-        default=16,
+        default=32,
         metadata={'help': 'Batch size for training on each device'}
     )
 
     eval_batch_size: int = field(
-        default=16,
+        default=32,
         metadata={'help': 'Batch size for evaluation on each device'}
     )
 
@@ -221,17 +221,17 @@ class RuntimeArguments:
     )
 
     max_code_len: int = field(
-        default=256,
+        default=288,
         metadata={'help': 'Maximum length of code sequence'}
     )
 
     max_ast_len: int = field(
-        default=80,
+        default=32,
         metadata={'help': 'Maximum length of ast sequence'}
     )
 
     max_nl_len: int = field(
-        default=16,
+        default=32,
         metadata={'help': 'Maximum length of the nl sequence'}
     )
 
