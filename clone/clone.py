@@ -362,9 +362,9 @@ def run_clone():
         "eval_f1": float(f1),
     }
 
-    logger.info("***** Eval results *****")
+    print("***** Test results *****")
     for key in sorted(result.keys()):
-        logger.info("  %s = %s", key, str(round(result[key], 4)))
+        print("  %s = %s", key, str(round(result[key], 4)))
 
     # trainer.compute_metrics = compute_test_metrics
     # predict_results = trainer.predict(test_dataset=datasets['test'],
