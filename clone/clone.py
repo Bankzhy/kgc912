@@ -360,8 +360,6 @@ def run_clone():
         "eval_recall": float(recall),
         "eval_precision": float(precision),
         "eval_f1": float(f1),
-        "predictions": predictions,
-        "labels": labels,
     }
 
     logger.info("***** Eval results *****")
