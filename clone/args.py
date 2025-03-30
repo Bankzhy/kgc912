@@ -221,12 +221,12 @@ class RuntimeArguments:
     )
 
     max_code_len: int = field(
-        default=288,
+        default=256,
         metadata={'help': 'Maximum length of code sequence'}
     )
 
     max_ast_len: int = field(
-        default=32,
+        default=64,
         metadata={'help': 'Maximum length of ast sequence'}
     )
 
