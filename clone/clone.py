@@ -327,8 +327,8 @@ def run_clone():
 
     # 计算每个子集大小
     total_size = len(datasets['test'])
-    split_sizes = [total_size // 10] * 10  # 10 份
-    split_sizes[-1] += total_size % 10  # 处理余数
+    split_sizes = [total_size // 100] * 100  # 10 份
+    split_sizes[-1] += total_size % 100  # 处理余数
 
     # 随机划分数据集
     subsets = random_split(datasets['test'], split_sizes)
