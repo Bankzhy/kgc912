@@ -49,7 +49,7 @@ def run_clone():
     # --------------------------------------------------
     # datasets
     # --------------------------------------------------
-    only_test = True
+    only_test = False
     logger.info('-' * 100)
     logger.info('Loading datasets')
     datasets = dict()
@@ -152,10 +152,10 @@ def run_clone():
                             num_labels=2)
         model = BartForClassificationAndGeneration(config)
 
-    config = BartConfig.from_json_file(
-        os.path.join('/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', 'config.json'))
-    model = BartForClassificationAndGeneration.from_pretrained(
-        '/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', config=config, use_safetensors=True)
+    # config = BartConfig.from_json_file(
+    #     os.path.join('/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', 'config.json'))
+    # model = BartForClassificationAndGeneration.from_pretrained(
+    #     '/root/autodl-tmp/kgc912/clone/output/checkpoints/clone/checkpoint-25000', config=config, use_safetensors=True)
 
     model.set_model_mode(enums.MODEL_MODE_CLS)
     # log model statistics
