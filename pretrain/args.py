@@ -9,13 +9,13 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='rlp',
+        default='nlp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
 
     trained_model: str = field(
-        default="output/pretrain/models/mass",
+        default="output/pretrain/models/rlp",
         # default=None,
         metadata={'help': 'Directory of trained model'}
     )
@@ -128,7 +128,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=10,
+        default=30,
         metadata={'help': 'Number of data iterations for training'}
     )
 
