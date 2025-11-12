@@ -111,34 +111,34 @@ def pretrain(args):
     # --------------------------------------------------
     # Model
     # --------------------------------------------------
-    logger.info('-' * 100)
-    logger.info('Building model')
-    config = BartConfig(vocab_size=len(code_vocab) + len(st_vocab) + len(nl_vocab),
-                        max_position_embeddings=512,
-                        encoder_layers=args.n_layer,
-                        encoder_ffn_dim=args.d_ff,
-                        encoder_attention_heads=args.n_head,
-                        decoder_layers=args.n_layer,
-                        decoder_ffn_dim=args.d_ff,
-                        decoder_attention_heads=args.n_head,
-                        activation_function='gelu',
-                        d_model=args.d_model,
-                        dropout=args.dropout,
-                        use_cache=True,
-                        pad_token_id=Vocab.START_VOCAB.index(Vocab.PAD_TOKEN),
-                        bos_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
-                        eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
-                        is_encoder_decoder=True,
-                        decoder_start_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
-                        forced_eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
-                        max_length=100,
-                        min_length=1,
-                        num_beams=args.beam_width,
-                        num_labels=2)
-
-    model = BartForClassificationAndGeneration(config)
-    # config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
-    # model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
+    # logger.info('-' * 100)
+    # logger.info('Building model')
+    # config = BartConfig(vocab_size=len(code_vocab) + len(st_vocab) + len(nl_vocab),
+    #                     max_position_embeddings=512,
+    #                     encoder_layers=args.n_layer,
+    #                     encoder_ffn_dim=args.d_ff,
+    #                     encoder_attention_heads=args.n_head,
+    #                     decoder_layers=args.n_layer,
+    #                     decoder_ffn_dim=args.d_ff,
+    #                     decoder_attention_heads=args.n_head,
+    #                     activation_function='gelu',
+    #                     d_model=args.d_model,
+    #                     dropout=args.dropout,
+    #                     use_cache=True,
+    #                     pad_token_id=Vocab.START_VOCAB.index(Vocab.PAD_TOKEN),
+    #                     bos_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
+    #                     eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
+    #                     is_encoder_decoder=True,
+    #                     decoder_start_token_id=Vocab.START_VOCAB.index(Vocab.SOS_TOKEN),
+    #                     forced_eos_token_id=Vocab.START_VOCAB.index(Vocab.EOS_TOKEN),
+    #                     max_length=100,
+    #                     min_length=1,
+    #                     num_beams=args.beam_width,
+    #                     num_labels=2)
+    #
+    # model = BartForClassificationAndGeneration(config)
+    config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
+    model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
 
     # log model statistic
     logger.info('Model trainable parameters: {}'.format(human_format(count_params(model))))

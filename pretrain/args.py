@@ -9,14 +9,14 @@ class RuntimeArguments:
     )
 
     pre_train_tasks: str = field(
-        default='mass',
+        default='rlp,nlp',
         metadata={'help': 'Pre-training tasks in order, split by commas, '
                           'for example (mass,rlp,nlp)}'}
     )
 
     trained_model: str = field(
-        # default="output/pretrain/models/mass",
-        default=None,
+        default="output/pretrain/models/mass",
+        # default=None,
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -26,7 +26,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default='kg_data',
+        default='kj_data',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
