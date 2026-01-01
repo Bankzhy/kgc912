@@ -55,6 +55,8 @@ def run_mnp():
 
     def decode_preds(preds):
         preds, labels = preds
+        print(preds)
+        print(labels)
         decoded_preds = nl_vocab.decode_batch(preds)
         decoded_labels = nl_vocab.decode_batch(labels)
         return decoded_labels, decoded_preds
