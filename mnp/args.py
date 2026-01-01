@@ -16,7 +16,7 @@ class RuntimeArguments:
 
     trained_model: str = field(
         # default="output/pretrain/models/mass",
-        default="C:\worksapce\sce\sces\output\mnp",
+        default="../pretrain/output/pretrain/mnp",
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -26,7 +26,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default=r'C:\worksapce\research\kgc912\oh_.json',
+        default=r'../oh_.json',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
