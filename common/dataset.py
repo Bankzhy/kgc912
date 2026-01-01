@@ -208,44 +208,54 @@ class KGCodeDataset(Dataset):
         structures = []
         nls = []
         method_names = []
-        with open(self.dataset_dir, encoding='ISO-8859-1') as f:
+        if self.split == "train":
+            path = "mnp_data_train.json"
+        else:
+            path = "mnp_data_test.json"
+        with open(path, encoding='ISO-8859-1') as f:
             lines = f.readlines()
             print("loading dataset:")
             for line in tqdm(lines):
                 # print(line)
                 try:
                     data = json.loads(line.strip())
+
                     method_name = data["method_name"]
+                    code = data["code"]
                     st, nl = self.parse_kg(data["kg"])
-
-                    source = data['code'].strip()
-                    source = source.replace("\t", " ")
-                    # print(source)
-                    source = remove_comments_and_docstrings(source, "java")
-                    # print(source)
-                    source = replace_string_literal(source)
-                    code = tokenize_source(source=source, lang="java")
-                    codes.append(code)
-
-                    code_l = code.split(" ")
-                    func_name = ""
-                    for index, code in enumerate(code_l):
-                        if code == "(":
-                            func_name = code_l[index - 1]
-                            break
-                    func_name_l = self.split_edge_name(func_name)
-                    if "" in func_name_l:
-                        func_name_l.remove("")
-                    func_name_nl = " ".join(func_name_l)
-                    if func_name_nl.lower() not in nl:
-                        nl += ","
-                        nl += func_name_nl
-
-
-                    structures.append(st)
-                    nls.append(nl)
-                    # docs.append(doc)
                     method_names.append(method_name)
+                    codes.append(code)
+                    nls.append(nl)
+                    structures.append(st)
+                    #
+                    # source = data['code'].strip()
+                    # source = source.replace("\t", " ")
+                    # # print(source)
+                    # source = remove_comments_and_docstrings(source, "java")
+                    # # print(source)
+                    # source = replace_string_literal(source)
+                    # code = tokenize_source(source=source, lang="java")
+                    # codes.append(code)
+                    #
+                    # code_l = code.split(" ")
+                    # func_name = ""
+                    # for index, code in enumerate(code_l):
+                    #     if code == "(":
+                    #         func_name = code_l[index - 1]
+                    #         break
+                    # func_name_l = self.split_edge_name(func_name)
+                    # if "" in func_name_l:
+                    #     func_name_l.remove("")
+                    # func_name_nl = " ".join(func_name_l)
+                    # if func_name_nl.lower() not in nl:
+                    #     nl += ","
+                    #     nl += func_name_nl
+                    #
+                    #
+                    # structures.append(st)
+                    # nls.append(nl)
+                    # # docs.append(doc)
+                    # method_names.append(method_name)
                 except Exception as e:
                     print(e)
                     continue

@@ -3,7 +3,7 @@ import logging
 import os
 import sys
 
-from transformers import BartConfig, IntervalStrategy, SchedulerType, Seq2SeqTrainingArguments
+from transformers import BartConfig, IntervalStrategy, SchedulerType, Seq2SeqTrainingArguments, EarlyStoppingCallback
 
 curPath = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(curPath)
@@ -51,14 +51,11 @@ def run_mnp():
     logger.info('-' * 100)
     model.set_model_mode(enums.MODEL_MODE_GEN)
 
-    dataset = KGCodeDataset(args=args, task=enums.TASK_MNP, split="test")
+    train_dataset = KGCodeDataset(args=args, task=enums.TASK_MNP, split="train")
+    test_dataset = KGCodeDataset(args=args, task=enums.TASK_MNP, split="test")
 
     def decode_preds(preds):
         preds, labels = preds
-        print("preds")
-        print(preds)
-        print("labels")
-        print(labels)
         decoded_preds = nl_vocab.decode_batch(preds)
         decoded_labels = nl_vocab.decode_batch(labels)
         return decoded_labels, decoded_preds
@@ -74,51 +71,90 @@ def run_mnp():
         result.update(accuracy_for_sequence(references=refs, candidates=cans))
         return result
 
+    def compute_valid_metrics(eval_preds):
+        decoded_labels, decoded_preds = decode_preds(eval_preds)
+        refs = [ref.strip().split() for ref in decoded_labels]
+        cans = [can.strip().split() for can in decoded_preds]
+        result = {}
+        result.update(bleu(references=refs, candidates=cans))
+        return result
+
     # --------------------------------------------------
     # trainer
     # --------------------------------------------------
     logger.info('-' * 100)
     logger.info('Initializing the running configurations')
-    training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.pre_train_output_root, enums.TASK_MNP),
+    # 尽量不要用IntervalStrategy.EPOCH， 太过频繁影响训练效果，还会曾家训练时间
+    training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),
                                              overwrite_output_dir=True,
                                              do_train=True,
-                                             # auto_find_batch_size=True,
+                                             do_eval=True,
+                                             do_predict=True,
+                                             evaluation_strategy=IntervalStrategy.STEPS,
+                                             eval_steps=2500,
+                                             prediction_loss_only=False,
                                              per_device_train_batch_size=args.batch_size,
-                                             gradient_accumulation_steps=1,
+                                             per_device_eval_batch_size=args.eval_batch_size,
+                                             gradient_accumulation_steps=args.gradient_accumulation_steps,
                                              learning_rate=args.learning_rate,
                                              weight_decay=args.lr_decay_rate,
                                              max_grad_norm=args.grad_clipping_norm,
                                              num_train_epochs=args.n_epoch,
                                              lr_scheduler_type=SchedulerType.LINEAR,
                                              warmup_steps=args.warmup_steps,
-                                             logging_dir=os.path.join(args.tensor_board_root, enums.TASK_MNP),
+                                             logging_dir=os.path.join(args.tensor_board_root, enums.TASK_SUMMARIZATION),
                                              logging_strategy=IntervalStrategy.STEPS,
-                                             logging_steps=args.logging_steps,
-                                             save_strategy=IntervalStrategy.NO,
+                                             logging_steps=2500,
+                                             save_strategy=IntervalStrategy.STEPS,
+                                             save_steps=2500,
+                                             save_total_limit=3,
                                              seed=args.random_seed,
                                              fp16=args.fp16,
                                              dataloader_drop_last=False,
                                              run_name=args.model_name,
                                              load_best_model_at_end=True,
+                                             metric_for_best_model='bleu',
+                                             greater_is_better=True,
                                              ignore_data_skip=False,
                                              label_smoothing_factor=args.label_smoothing,
                                              report_to=['tensorboard'],
-                                             dataloader_pin_memory=True)
-    print("Current batch size:", training_args.per_device_train_batch_size)
+                                             dataloader_pin_memory=True,
+                                             predict_with_generate=True)
     trainer = CodeTrainer(main_args=args,
                           code_vocab=code_vocab,
                           st_vocab=st_vocab,
                           nl_vocab=nl_vocab,
-                          task=enums.TASK_MNP,
+                          task=enums.TASK_SUMMARIZATION,
                           model=model,
                           args=training_args,
                           data_collator=None,
-                          train_dataset=dataset,
+                          train_dataset=train_dataset,
+                          eval_dataset=test_dataset,
                           tokenizer=nl_vocab,
                           model_init=None,
-                          compute_metrics=None,
-                          callbacks=[LogStateCallBack()])
+                          compute_metrics=compute_valid_metrics,
+                          callbacks=[
+                              EarlyStoppingCallback(early_stopping_patience=args.early_stop_patience),
+                              LogStateCallBack()])
     logger.info('Running configurations initialized successfully')
+
+    only_test = False
+    # --------------------------------------------------
+    # train
+    # --------------------------------------------------
+    if not only_test:
+        logger.info('-' * 100)
+        # logger.info('loading checkpoint')
+        # last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),)
+        logger.info('Start training')
+        # train_result = trainer.train(resume_from_checkpoint=last_checkpoint)
+        train_result = trainer.train()
+        logger.info('Training finished')
+        trainer.save_model(args.model_root)
+        trainer.save_state()
+        metrics = train_result.metrics
+        trainer.log_metrics(split='train', metrics=metrics)
+        trainer.save_metrics(split='train', metrics=metrics)
 
     # --------------------------------------------------
     # predict
@@ -126,7 +162,7 @@ def run_mnp():
     logger.info('-' * 100)
     logger.info('Start testing')
     trainer.compute_metrics = compute_test_metrics
-    predict_results = trainer.predict(test_dataset=dataset,
+    predict_results = trainer.predict(test_dataset=test_dataset,
                                       metric_key_prefix='test',
                                       max_length=args.max_nl_len,
                                       num_beams=args.beam_width)

@@ -26,7 +26,7 @@ class RuntimeArguments:
     )
 
     dataset_root: str = field(
-        default=r'../oh_.json',
+        default=r'mnp_data_train.json',
         metadata={'help': 'Directory to save and load dataset pickle instance'}
     )
 
