@@ -114,6 +114,8 @@ class KGCodeDataset(Dataset):
             return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], \
             self.docs2[index], self.labels[index]
         elif self.task == "mnp":
+            print(self.codes[index])
+            print(self.method_names[index])
             return self.codes[index], self.structures[index], self.nls[index], self.method_names[index]
 
     def set_task(self, task):
