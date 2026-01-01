@@ -10,6 +10,7 @@ TASK_CLONE = "clone"
 
 TRAINING_MODE_FINE_TUNE = 'fine_tune'
 TASK_SUMMARIZATION = 'summarization'
+TASK_MNP = 'mnp'
 
 # programming language
 LANG_JAVA = 'java'

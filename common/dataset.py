@@ -30,6 +30,7 @@ class KGCodeDataset(Dataset):
         self.structures = []
         self.nls = []
         self.docs = []
+        self.method_names = []
         self.st_type = [
             'type_of',
             "control_dependency",
@@ -41,6 +42,8 @@ class KGCodeDataset(Dataset):
         self.dataset_name = "KGCode"
         if self.task == "clone" or self.task == "clone2":
             self.codes1, self.sts1, self.docs1, self.codes2, self.sts2, self.docs2, self.labels = self.load_clone_dataset()
+        elif self.task == "mnp":
+            self.codes, self.structures, self.nls, self.method_names = self.load_dataset_mnp()
         else:
             self.codes, self.structures, self.nls, self.docs = self.load_dataset_from_dir(dataset_dir=self.dataset_dir)
 
@@ -110,6 +113,8 @@ class KGCodeDataset(Dataset):
         elif self.task == "clone2":
             return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], \
             self.docs2[index], self.labels[index]
+        elif self.task == "mnp":
+            return self.codes[index], self.structures[index], self.nls[index], self.method_names[index]
 
     def set_task(self, task):
         self.task = task
@@ -197,6 +202,54 @@ class KGCodeDataset(Dataset):
         st_token = self.KG_SEP_TOKEN.join(st_l)
         nl_token = ",".join(nl_l)
         return st_token, nl_token
+
+    def load_dataset_mnp(self):
+        codes = []
+        structures = []
+        nls = []
+        method_names = []
+        with open(self.dataset_dir, encoding='ISO-8859-1') as f:
+            lines = f.readlines()
+            print("loading dataset:")
+            for line in tqdm(lines):
+                # print(line)
+                try:
+                    data = json.loads(line.strip())
+                    method_name = data["method_name"]
+                    st, nl = self.parse_kg(data["kg"])
+
+                    source = data['code'].strip()
+                    source = source.replace("\t", " ")
+                    # print(source)
+                    source = remove_comments_and_docstrings(source, "java")
+                    # print(source)
+                    source = replace_string_literal(source)
+                    code = tokenize_source(source=source, lang="java")
+                    codes.append(code)
+
+                    code_l = code.split(" ")
+                    func_name = ""
+                    for index, code in enumerate(code_l):
+                        if code == "(":
+                            func_name = code_l[index - 1]
+                            break
+                    func_name_l = self.split_edge_name(func_name)
+                    if "" in func_name_l:
+                        func_name_l.remove("")
+                    func_name_nl = " ".join(func_name_l)
+                    if func_name_nl.lower() not in nl:
+                        nl += ","
+                        nl += func_name_nl
+
+
+                    structures.append(st)
+                    nls.append(nl)
+                    # docs.append(doc)
+                    method_names.append(method_name)
+                except Exception as e:
+                    print(e)
+                    continue
+        return codes, structures, nls, method_names
 
     def parse_json_file(self, file, lang):
         """
