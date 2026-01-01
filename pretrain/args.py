@@ -15,8 +15,8 @@ class RuntimeArguments:
     )
 
     trained_model: str = field(
-        # default="output/pretrain/models/mass",
-        default=None,
+        default="output/pretrain/models/mass",
+        # default=None,
         metadata={'help': 'Directory of trained model'}
     )
 
@@ -128,7 +128,7 @@ class RuntimeArguments:
     )
 
     n_epoch: int = field(
-        default=10,
+        default=20,
         metadata={'help': 'Number of data iterations for training'}
     )
 
