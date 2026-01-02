@@ -85,12 +85,12 @@ def run_mnp():
     logger.info('-' * 100)
     logger.info('Initializing the running configurations')
     # 尽量不要用IntervalStrategy.EPOCH， 太过频繁影响训练效果，还会曾家训练时间
-    training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),
+    training_args = Seq2SeqTrainingArguments(output_dir=os.path.join(args.checkpoint_root, enums.TASK_MNP),
                                              overwrite_output_dir=True,
                                              do_train=True,
                                              do_eval=True,
                                              do_predict=True,
-                                             evaluation_strategy=IntervalStrategy.STEPS,
+                                             # evaluation_strategy=IntervalStrategy.STEPS,
                                              eval_steps=2500,
                                              prediction_loss_only=False,
                                              per_device_train_batch_size=args.batch_size,
@@ -102,7 +102,7 @@ def run_mnp():
                                              num_train_epochs=args.n_epoch,
                                              lr_scheduler_type=SchedulerType.LINEAR,
                                              warmup_steps=args.warmup_steps,
-                                             logging_dir=os.path.join(args.tensor_board_root, enums.TASK_SUMMARIZATION),
+                                             # logging_dir=os.path.join(args.tensor_board_root, enums.TASK_MNP),
                                              logging_strategy=IntervalStrategy.STEPS,
                                              logging_steps=2500,
                                              save_strategy=IntervalStrategy.STEPS,
