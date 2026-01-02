@@ -171,6 +171,8 @@ def collate_fn(batch, args, task, code_vocab, nl_vocab, ast_vocab):
                                               dim=-1)
 
         model_inputs['labels'] = torch.tensor(labels, dtype=torch.long)
+
+    print(model_inputs)
     return model_inputs
 
 def get_batch_inputs(batch: List[str], vocab: Vocab, processor=None, max_len=None):
