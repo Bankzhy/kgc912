@@ -90,7 +90,7 @@ def run_mnp():
                                              do_train=True,
                                              do_eval=True,
                                              do_predict=True,
-                                             eval_strategy=IntervalStrategy.STEPS,
+                                             evaluation_strategy=IntervalStrategy.STEPS,
                                              eval_steps=500,
                                              prediction_loss_only=False,
                                              per_device_train_batch_size=args.batch_size,
