@@ -122,9 +122,9 @@ class KGCodeDataset(Dataset):
             label = self.split_edge_name(method_name)
             label = " ".join(label)
 
-            print(code)
-            print(nl)
-            print(label)
+            # print(code)
+            # print(nl)
+            # print(label)
 
             return code, self.structures[index], nl, label
 
