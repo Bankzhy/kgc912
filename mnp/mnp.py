@@ -38,14 +38,17 @@ def run_mnp():
     args = main_args
     trained_model = args.trained_model
     trained_vocab = args.trained_vocab
+    trained_vocab = args.trained_vocab
+    if len(os.listdir(trained_vocab)) < 3:
+        trained_vocab = None
 
     logger.info('Loading vocabularies from files')
     code_vocab = load_vocab(vocab_root=trained_vocab, name=args.code_vocab_name)
     st_vocab = load_vocab(vocab_root=trained_vocab, name=args.st_vocab_name)
     nl_vocab = load_vocab(vocab_root=trained_vocab, name=args.nl_vocab_name)
 
-    config = BartConfig.from_json_file(os.path.join(args.trained_model, 'config.json'))
-    model = BartForClassificationAndGeneration.from_pretrained(args.trained_model, config=config, use_safetensors=True)
+    config = BartConfig.from_json_file(os.path.join(trained_model, 'config.json'))
+    model = BartForClassificationAndGeneration.from_pretrained(trained_model, config=config, use_safetensors=True)
 
     # set model mode
     logger.info('-' * 100)
