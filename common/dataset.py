@@ -114,7 +114,13 @@ class KGCodeDataset(Dataset):
             return self.codes1[index], self.sts1[index], self.docs1[index], self.codes2[index], self.sts2[index], \
             self.docs2[index], self.labels[index]
         elif self.task == "mnp":
-            return self.codes[index], self.structures[index], self.nls[index], self.method_names[index]
+            code = self.codes[index]
+            method_name = self.method_names[index]
+
+            code = code.replace(method_name, Vocab.MSK_TOKEN)
+            label = self.split_edge_name(method_name)
+            label = " ".join(label)
+            return code, self.structures[index], self.nls[index], label
 
     def set_task(self, task):
         self.task = task
