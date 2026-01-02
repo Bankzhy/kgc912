@@ -236,6 +236,11 @@ class RuntimeArguments:
                   'help': 'Whether to eliminate natural language from input'}
     )
 
+    checkpoint_root: str = field(
+        default='output/checkpoints',
+        metadata={'help': 'pretrain model output '}
+    )
+
 
 
 def transfer_arg_name(name):
