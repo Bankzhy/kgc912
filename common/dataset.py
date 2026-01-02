@@ -123,9 +123,9 @@ class KGCodeDataset(Dataset):
             label = [x.lower() for x in label]
             label = " ".join(label)
 
-            # print(code)
-            # print(nl)
-            # print(label)
+            print(code)
+            print(nl)
+            print(label)
 
             return code, self.structures[index], nl, label
 
