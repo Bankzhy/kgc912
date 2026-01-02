@@ -118,10 +118,15 @@ class KGCodeDataset(Dataset):
             method_name = self.method_names[index]
 
             code = code.replace(method_name, Vocab.MSK_TOKEN)
+            nl = self.nls[index].replace(method_name, Vocab.MSK_TOKEN)
             label = self.split_edge_name(method_name)
             label = " ".join(label)
 
-            return code, self.structures[index], self.nls[index], label
+            print(code)
+            print(nl)
+            print(label)
+
+            return code, self.structures[index], nl, label
 
     def set_task(self, task):
         self.task = task
