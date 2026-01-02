@@ -223,6 +223,10 @@ class KGCodeDataset(Dataset):
             lines = f.readlines()
             print("loading dataset:")
             for line in tqdm(lines):
+
+                if self.split == "test":
+                    if len(codes) > 5000:
+                        break
                 # print(line)
                 try:
                     data = json.loads(line.strip())
