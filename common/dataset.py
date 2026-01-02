@@ -118,8 +118,9 @@ class KGCodeDataset(Dataset):
             method_name = self.method_names[index]
 
             code = code.replace(method_name, Vocab.MSK_TOKEN)
-            nl = self.nls[index].replace(method_name, Vocab.MSK_TOKEN)
+            nl = Vocab.MSK_TOKEN
             label = self.split_edge_name(method_name)
+            label = [x.lower() for x in label]
             label = " ".join(label)
 
             # print(code)
