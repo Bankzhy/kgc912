@@ -124,7 +124,7 @@ def run_mnp():
                           code_vocab=code_vocab,
                           st_vocab=st_vocab,
                           nl_vocab=nl_vocab,
-                          task=enums.TASK_SUMMARIZATION,
+                          task=enums.TASK_MNP,
                           model=model,
                           args=training_args,
                           data_collator=None,
@@ -172,11 +172,11 @@ def run_mnp():
     trainer.log_metrics(split='test', metrics=predict_metrics)
     trainer.save_metrics(split='test', metrics=predict_metrics)
     # save testing results
-    with open(os.path.join(args.output_root, f'{enums.TASK_SUMMARIZATION}_test_results.txt'),
+    with open(os.path.join(args.output_root, f'{enums.TASK_MNP}_test_results.txt'),
               mode='w', encoding='utf-8') as result_f, \
-            open(os.path.join(args.output_root, f'{enums.TASK_SUMMARIZATION}_test_refs.txt'),
+            open(os.path.join(args.output_root, f'{enums.TASK_MNP}_test_refs.txt'),
                  mode='w', encoding='utf-8') as refs_f, \
-            open(os.path.join(args.output_root, f'{enums.TASK_SUMMARIZATION}_test_cans.txt'),
+            open(os.path.join(args.output_root, f'{enums.TASK_MNP}_test_cans.txt'),
                  mode='w', encoding='utf-8') as cans_f:
         sample_id = 0
         for reference, candidate in zip(references, candidates):
