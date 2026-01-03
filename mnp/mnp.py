@@ -76,8 +76,8 @@ def run_mnp():
 
     def compute_valid_metrics(eval_preds):
         decoded_labels, decoded_preds = decode_preds(eval_preds)
-        print(decoded_labels)
-        print(decoded_preds)
+        # print(decoded_labels)
+        # print(decoded_preds)
         refs = [ref.strip().split() for ref in decoded_labels]
         cans = [can.strip().split() for can in decoded_preds]
         result = {}
