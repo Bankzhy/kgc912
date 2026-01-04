@@ -77,6 +77,11 @@ class RuntimeArguments:
         metadata={'help': 'pretrain model output '}
     )
 
+    output_root: str = field(
+        default='output',
+        metadata={'help': 'pretrain model output '}
+    )
+
     model_root: str = field(
         default='output/pretrain/models',
         metadata={'help': 'pretrain model output '}
