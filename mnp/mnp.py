@@ -151,7 +151,7 @@ def run_mnp():
     if not only_test:
         logger.info('-' * 100)
         # logger.info('loading checkpoint')
-        last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),)
+        last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_MNP),)
         logger.info('Start training')
         train_result = trainer.train(resume_from_checkpoint=last_checkpoint)
         # train_result = trainer.train()
