@@ -4,6 +4,7 @@ import os
 import sys
 
 from transformers import BartConfig, IntervalStrategy, SchedulerType, Seq2SeqTrainingArguments, EarlyStoppingCallback
+from transformers.trainer_utils import get_last_checkpoint
 
 curPath = os.path.dirname(os.path.abspath(os.path.dirname(__file__)))
 sys.path.append(curPath)
@@ -150,10 +151,10 @@ def run_mnp():
     if not only_test:
         logger.info('-' * 100)
         # logger.info('loading checkpoint')
-        # last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),)
+        last_checkpoint = get_last_checkpoint(os.path.join(args.checkpoint_root, enums.TASK_SUMMARIZATION),)
         logger.info('Start training')
-        # train_result = trainer.train(resume_from_checkpoint=last_checkpoint)
-        train_result = trainer.train()
+        train_result = trainer.train(resume_from_checkpoint=last_checkpoint)
+        # train_result = trainer.train()
         logger.info('Training finished')
         trainer.save_model(args.model_root)
         trainer.save_state()
